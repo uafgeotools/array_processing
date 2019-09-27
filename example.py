@@ -16,6 +16,7 @@ sys.path.append('/Users/dfee/repos/array_processing')
 
 from waveform_collection import gather_waveforms
 from array_tools import wlsqva_proc
+from getrij import getrij
 
 #%% user-defined parameters
 SOURCE = 'IRIS'
@@ -40,23 +41,15 @@ st=gather_waveforms(SOURCE, NETWORK, STATION, START, END,
                      time_buffer=0, remove_response=True,
                      return_failed_stations=False, watc_username=None,
                      watc_password=None)
-
-
 stf = st.copy()
 stf.filter("bandpass", freqmin=FMIN, freqmax=FMAX, corners=2, zerophase=True)
 
-#get inventory and lat/lon info (if available). Need solution for avo winston!
-inv = client.get_stations(network=net,station=sta,channel=chan,location=loc,starttime=t1,endtime=t2)#, level='response')  #get station information
 
-latlist=[]
-lonlist=[]
-staname=[]
-for network in inv:
-    for station in network:
-        latlist.append(station.latitude)
-        lonlist.append(station.longitude)
-        staname.append(station.code)
-        
+
+latlist = []
+lonlist = []
+[latlist.append(st[i].stats.latitude) for i in range(len(st))] 
+[lonlist.append(st[i].stats.longitude) for i in range(len(st))] 
 
 rij=getrij(latlist,lonlist) #get element rijs
 
