@@ -1,13 +1,14 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-'''
-Modules for array processing using least-squares and 
-
-
-Date Last Modified: 7/11/2018
-Version: 1.0
-'''
+import numpy as np
+import sys
+import matplotlib.pyplot as plt
+from matplotlib import dates
+from WATCtools import wlsqva
+from obspy.geodetics.base import calc_vincenty_inverse
+from functools import reduce
+from itertools import groupby
+from operator import itemgetter
     
+
 def wlsqva_proc(stf,rij,tvec,windur,winover):
     '''
     Module to run wlsqva array processing 
@@ -31,12 +32,6 @@ def wlsqva_proc(stf,rij,tvec,windur,winover):
     Version: 1.0
     '''
     
-    #import relevant modules
-    import numpy as np
-    import sys
-    #from datetime import datetime,timedelta
-    from WATCtools import wlsqva
-
     nchans=len(stf)
     npts=len(stf[0].data)
     Fs=stf[0].stats.sampling_rate
@@ -86,9 +81,6 @@ def array_plot(tvec,data,t,mdccm,vel,az,mcthresh):
     Date Last Modified: 5/2019
     Version: 1.0
     '''
-    #import numpy as np
-    import matplotlib.pyplot as plt
-    from matplotlib import dates
     
     cm='RdYlBu_r'   #colormap
     cax=0.2,1       #colorbar/y-axis for mccm
@@ -137,13 +129,9 @@ def array_plot(tvec,data,t,mdccm,vel,az,mcthresh):
 
     return fig1,axs1
     
+
 def array_thresh(mcthresh,azvolc,azdiff,mdccm,az,vel):
     
-    from functools import reduce
-    from itertools import groupby
-    from operator import itemgetter
-    import numpy as np
-
     #find values above threshold...using numpy for now
     mcgood=np.where(mdccm>mcthresh)[0]
     azgood=np.where((az>=azvolc-azdiff) & (az<=azvolc+azdiff))[0]
@@ -187,9 +175,6 @@ def getrij(latlist, lonlist):
     Date Last Modified: 7/11/2018
     Version: 1.0
     '''
-
-    import numpy as np
-    from obspy.geodetics.base import calc_vincenty_inverse
 
     getrij.__version__ = '1.0'
 
