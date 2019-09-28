@@ -22,8 +22,6 @@ processing with robust estimators, Geophysical Journal International, p. In prep
 Dependencies
 ------------
 
-* [Python](https://www.python.org/) >= 3.2
-
 _uafgeotools_ repositories:
 
 * [_waveform_collection_](https://github.com/uafgeotools/waveform_collection)
@@ -38,7 +36,7 @@ you're using [conda](https://docs.conda.io/projects/conda/en/latest/index.html)!
 It's recommended that you create a new conda environment to use with this
 repository:
 ```
-conda create -n array_processing -c conda-forge obspy "python>=3.2"
+conda create -n array_processing -c conda-forge obspy
 ```
 
 Usage
