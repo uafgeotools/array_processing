@@ -1,11 +1,13 @@
 from matplotlib import dates
 from obspy.core import UTCDateTime
 import sys
-from waveform_collection import gather_waveforms
-from array_tools import wlsqva_proc, array_plot, getrij
+
 
 sys.path.append('/Users/dfee/repos/waveform_collection')
 sys.path.append('/Users/dfee/repos/array_processing')
+
+from waveform_collection import gather_waveforms
+from array_tools import array_plot, getrij, wlsqva_proc
 
 #%% user-defined parameters
 SOURCE = 'IRIS'
