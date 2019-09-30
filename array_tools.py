@@ -358,6 +358,127 @@ def psf(x, p=2, w=3, n=3, window=None):
     return x_psf, P
 
 
+def ft(x, n=None, axis=0, norm=None):
+    """
+    Sentman-like normalization of numpy's fft
+
+    This function calculates the fast Fourier transform of a time series.
+
+    Parameters
+    ~~~~~~~~~~
+    x : array
+        Array of data, can be complex
+    n : int, optional
+        Length of the transformed axis of the output.
+        If `n` is smaller than the length of the input, the input is cropped.
+        If it is larger, the input is padded with zeros.  If `n` is not given,
+        the length of the input along the axis specified by `axis` is used.
+    axis : int, optional
+        Axis over which to compute the FFT.  Default is 0.
+    norm : {None, "ortho"}, optional
+        Normalization mode (see `numpy.fft`). Default is None.
+
+    Returns
+    ~~~~~~~
+    out : complex array
+        The truncated or zero-padded input, transformed along the
+        indicated axis.
+
+    See Also
+    ~~~~~~~~
+    ift : Sentman-like normalization of ifft
+    numpy.fft : master fft functions
+
+    Notes
+    ~~~~~
+    This function is just `numpy.fft.fft` with Dr. Davis Sentman
+    normalization such that the DC components of the transform are the
+    mean of the each column/row in the input time series.
+
+    Version
+    ~~~~~~~
+    1.0.1 -- 3 Oct 2016
+
+    """
+    ft.__version__ = '1.0.1'
+    # (c) 2016 Curt A. L. Szuberla
+    # University of Alaska Fairbanks, all rights reserved
+    #
+    from numpy.fft import fft
+    # get normalization constant
+    N = x.shape
+    return fft(x, n, axis, norm)/N[axis]
+
+
+def ift(X, n=None, axis=0, norm=None, allowComplex=False):
+    r"""
+    Sentman-like normalization of numpy's ifft
+
+    This function calculates the fast Fourier inverse transform of a
+    frequency series.
+
+    Parameters
+    ~~~~~~~~~~
+    X : array
+        Array of data, can be complex
+    n : int, optional
+        Length of the transformed axis of the output.
+        If `n` is smaller than the length of the input, the input is cropped.
+        If it is larger, the input is padded with zeros.  If `n` is not given,
+        the length of the input along the axis specified by `axis` is used.
+    axis : int, optional
+        Axis over which to compute the FFT.  Default is 0.
+    norm : {None, "ortho"}, optional
+        Normalization mode (see `numpy.fft`).  Default is None.
+    allowComplex : boolean
+        If False, will force real output.  This is useful for suppressing
+        cases of spurious (machine precision) imaginary parts where the
+        time series are known to be real.  Default is False.
+
+    Returns
+    ~~~~~~~
+    out : complex array
+        The truncated or zero-padded input, transformed along the
+        indicated axis.
+
+    See Also
+    ~~~~~~~~
+    ft : Sentman-like normalization of fft
+    numpy.fft : master fft functions
+
+    Notes
+    ~~~~~
+    This function is just `numpy.fft.ifft` with Dr. Davis Sentman
+    normalization such that the DC components of the input are the
+    mean of the each column/row in the output time series.
+
+    To check on the small imaginary parts of an inverse transform
+    one could insert the code below. ::
+
+        from numpy.linalg import norm as Norm
+        print(Norm(x.imag))}``
+
+    Version
+    ~~~~~~~
+    1.0.1 -- 7 Oct 2016
+
+    """
+    ift.__version__ = '1.0.1'
+    # (c) 2016 Curt A. L. Szuberla
+    # University of Alaska Fairbanks, all rights reserved
+    #
+    from numpy import real
+    from numpy.fft import ifft
+    # get normalization constant
+    N = X.shape
+    x = ifft(X, n, axis, norm)*N[axis]
+    # force real output, if requested
+    if allowComplex:
+        return x
+    else:
+        return real(x)
+
+
 def fstatbland(dtmp, rij,fs,tau):
     """
     calculates the F-statistic based on Blandford's method.
