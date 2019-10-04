@@ -38,20 +38,12 @@ Available methods
 ~~~~~~~~~~~~~~~~~
 bpf
     Fourier bandpass-filter data matrix or vector
-co_array
-    Form co-array coordinates for given array coordinates
-ft
-    Fourier transform such that DC component is mean of data
-ift
-    Inverse Fourier transform complement to `ft`
 MCCMcalc
     Weighted mean (and median) of the cross-correlation maxima from wlsqva
 psf
     Pure state filter data matrix
 randc
     Colored noise generator (e.g., 1/f "pink" noise)
-wlsqva
-    Weighted least squares solution for slowness
 
 Notes
 ~~~~~
