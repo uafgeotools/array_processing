@@ -1,0 +1,17 @@
+# PyCharm project settings folder
+.idea/
+
+# macOS Finder things
+**/.DS_Store
+**/._.DS_Store
+
+# Python setup and runtime things
+**/__pycache__
+build/
+dist/
+*egg-info
+
+# Temporary/swap files from text editors
+**/*~
+**/*.swp
+**/._*

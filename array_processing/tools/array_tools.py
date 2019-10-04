@@ -2,7 +2,7 @@ import numpy as np
 import sys
 import matplotlib.pyplot as plt
 from matplotlib import dates
-from array_algorithms import wlsqva
+from ..algorithms.array_algorithms import wlsqva
 from obspy.geodetics.base import calc_vincenty_inverse
 from functools import reduce
 from itertools import groupby
