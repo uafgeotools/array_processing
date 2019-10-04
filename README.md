@@ -75,7 +75,7 @@ Authors
 
 Jordan Bishop  
 David Fee  
-Curt Szuberla
+Curt Szuberla  
 Andrew Winkelman
 
 
