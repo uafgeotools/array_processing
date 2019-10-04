@@ -1,17 +1,13 @@
-from matplotlib import dates
-from obspy.core import UTCDateTime
-import sys
-
-
-
-
 #%% user-defined parameters
-sys.path.append('/Users/dfee/repos/waveform_collection')
 from waveform_collection import gather_waveforms
+from obspy.core import UTCDateTime
+from matplotlib import dates
 
 SOURCE = 'IRIS'
 NETWORK = 'AV'
 STATION = 'DLL'
+LOCATION = '*'
+CHANNEL = '*' 
 
 START = UTCDateTime("2019-07-15T16:50:00")
 END = START + 10*60
@@ -24,7 +20,7 @@ WINLEN = 30
 WINOVER = 0.50
 
 #%% grab and filter waveforms
-st = gather_waveforms(SOURCE, NETWORK, STATION, START, END,
+st = gather_waveforms(SOURCE, NETWORK, STATION, LOCATION, CHANNEL, START, END,
                      time_buffer=0, remove_response=True,
                      return_failed_stations=False, watc_username=None,
                      watc_password=None)
@@ -36,8 +32,7 @@ tvec=dates.date2num(stf[0].stats.starttime.datetime)+stf[0].times()/86400   #dat
 
 
 #%% get element rijs
-sys.path.append('/Users/dfee/repos/array_processing')
-from array_tools import array_plot, getrij, wlsqva_proc
+from array_processing.tools import array_plot, getrij, wlsqva_proc
 
 latlist = []
 lonlist = []
@@ -47,8 +42,7 @@ lonlist = []
 rij=getrij(latlist,lonlist) 
 
 
-#%% array processing and plotting
-
+#%% array processing and plotting using least squares
 vel,az,mdccm,t,data=wlsqva_proc(stf,rij,tvec,WINLEN,WINOVER)
 
 fig1,axs1=array_plot(tvec,data,t,mdccm,vel,az,.6)
@@ -56,10 +50,10 @@ fig1,axs1=array_plot(tvec,data,t,mdccm,vel,az,.6)
 
 
 #%% delay and sum beam
-from array_tools import beamForm 
+from array_processing.tools import beamForm 
 beam = beamForm(data, rij, stf[0].stats.sampling_rate, 50) 
 
 
 #%% pure state filter 
-from array_tools import psf 
+from array_processing.tools import psf 
 x_psf, P = psf(data, p=2, w=3, n=3, window=None)
