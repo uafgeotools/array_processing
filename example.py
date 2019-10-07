@@ -50,11 +50,12 @@ fig1,axs1=array_plot(tvec,data,t,mdccm,vel,az,.6)
 
 #%% array uncertainty
 from array_processing.tools import arraySig, arraySigPlt, arraySigContourPlt
-SIGLEVEL = 1/fs
+SIGLEVEL = 1/st[0].stats.sampling_rate
 KMAX = 400
 TRACE_V = 0.33
 
 sigV, sigTh, impResp, vel, th, kvec = arraySig(rij, kmax=KMAX, sigLevel=SIGLEVEL)
+
 arraySigPlt(rij, SIGLEVEL, sigV, sigTh, impResp, vel, th, kvec)
 
 fig = arraySigContourPlt(sigV, sigTh, vel, th, trace_v=TRACE_V)

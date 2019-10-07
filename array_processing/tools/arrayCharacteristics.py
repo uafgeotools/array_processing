@@ -258,15 +258,15 @@ def rthEllipse(a, b, x0, y0):
         
     Version
     ~~~~~~~
-    1.1 -- 23 Sep 2019
+    1.1.1 -- 7 Oct 2019
     
     """
-    rthEllipse.__version__ = '1.1'
+    rthEllipse.__version__ = '1.1.1'
     # (c) 2019 Curt A. L. Szuberla
     # University of Alaska Fairbanks, all rights reserved
     
     from numpy import (zeros, abs, finfo, float64, array, sqrt, where, real,
-                       vstack, max, min, hstack, sort, arctan2, pi)
+                       vstack, max, hstack, sort, arctan2, pi)
     
     # set constants
     A = 2/a**2
@@ -330,9 +330,11 @@ def rthEllipse(a, b, x0, y0):
             coords = hstack(((x, yx), (xy, y))).T
             coords = coords[distEidx,:][0]
             distE = distE[distEidx]
-            eExtrm[0:2] = [min(distE),  max(distE)]
-            eVec[0:2, :] = vstack((coords[where(distE == min(distE)), :][0],
-                coords[where(distE == max(distE)), :][0]))
+            eExtrm[0:2] = [distE.min(),  distE.max()]
+            eVec[0:2, :] = vstack(
+                    (coords[where(distE == distE.min()), :][0][0],
+                     coords[where(distE == distE.max()), :][0][0])
+                    )
     # angles subtended
     if x0 < 0:
         x0 = -x0
