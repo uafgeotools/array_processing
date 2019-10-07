@@ -48,6 +48,12 @@ vel,az,mdccm,t,data=wlsqva_proc(stf,rij,tvec,WINLEN,WINOVER)
 fig1,axs1=array_plot(tvec,data,t,mdccm,vel,az,.6)
 
 
+#%% array uncertainty
+from array_processing.tools import arraySig, arraySigPlt
+SIGLEVEL = 1/100
+
+sigV, sigTh, impResp, vel, th, kvec = arraySig(rij, kmax=400, sigLevel=SIGLEVEL)
+arraySigPlt(rij, SIGLEVEL, sigV, sigTh, impResp, vel, th, kvec)
 
 #%% delay and sum beam
 from array_processing.tools import beamForm 
