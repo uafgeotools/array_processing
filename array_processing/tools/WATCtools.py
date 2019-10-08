@@ -23,16 +23,16 @@ Code snippets are indicated by three greater-than signs::
 
 Use the built-in ``help`` function to view a function's docstring::
 
-    >>> help(watc.wlsqva)
+    >>> help(watc.bpf)
 
 Each of the module's methods may be called as::
 
-    >>> watc.wlsqva(data, rij, Hz)
+    >>> watc.bpf(data, filt_band)
 
 or imported individually and called as::
 
-    >>> from WATCtools import wlsqva
-    >>> wlsqva(data, rij, Hz)
+    >>> from WATCtools import bpf
+    >>> bpf(data, filt_band)
 
 Available methods
 ~~~~~~~~~~~~~~~~~
@@ -44,6 +44,8 @@ psf
     Pure state filter data matrix
 randc
     Colored noise generator (e.g., 1/f "pink" noise)
+ srcLoc
+    Estimate source location and trace velocity
 
 Notes
 ~~~~~
@@ -443,5 +445,65 @@ def randc(N, beta=0.0):
     # renormalize r such that mean = 0 & std = 1 (MATLAB dof default used)
     # and return it in its original shape (i.e., a 1D vector, if req'd)
     return r.reshape(N)/std(r, ddof=1)
+
+
+def srcLoc(rij, tau, nord=2, seedXY_size=0.05, seedV_size=0.3):
+    r"""
+    Estimate a geopgraphical source location and propagation velocity for an
+    event recorded on an array of sensors
+    
+    Parameters
+    ~~~~~~~~~~
+    rij : list|array
+        (d, n) `n` array coordinates as [easting, northing, {elevation}]
+        column vectors in `d` dimensions
+    tau : array
+        (n*(n-1)/2, ) unique intersensor TDOA information (delays)
+    nord : positive int|inf
+        Order of the norm to calculate the cost function (optional, default 
+        is 2 for the usual Euclidean L2 norm)
+    seedXY_size : float
+        Geographic seed value (optional, default is 0.05)
+    seedXY_size : float
+        Propagation velocity seed value (optional, default is 0.3)
+        
+    Returns
+    ~~~~~~~
+    Sxyc : array
+        (d+1, ) optimized source location as geographic coordinates (same as 
+        the columns of `rij`) and propagation speed
+    Srtc : array
+        (d+1, ) optimized source location as [range, azimuth, {elevation}, 
+        propagation speed]
+
+    Notes
+    ~~~~~
+    This is a Pythonic method for srcLoc that might've been dubbed srcLocLite.
+    It takes a naive approach to the seed, ignoring Dr. Arnoult's spacetime
+    approach, but takes into account the quirks of the Nelder-Mead optimization
+    and prduces a fairly good (if not great) facsimilie of the MATLAB version.
+
+    Version
+    ~~~~~~~
+    1.0.2 -- 19 Mar 2018
+    """
+    srcLoc.__version__ = '1.0.2'
+    # (c) 2018 Curt A. L. Szuberla
+    # University of Alaska Fairbanks, all rights reserved
+    #
+    from scipy.optimize import minimize as nmOpt
+    from numpy.linalg import norm
+    # cost function
+    def minTau(xyv_trial, tau_o, rij):
+        tau_trial = tauCalcSWxy(xyv_trial[-1], xyv_trial[:-1], rij)
+        return norm(tau_o - tau_trial, nord)
+    # copnstruct naive seed
+    xyv_seed = [seedXY_size] * len(rij) + [seedV_size]
+    for k in range(0, len(xyv_seed)-1, 2):
+        xyv_seed[k] = -xyv_seed[k]
+    # perform optimization
+    costFn = lambda xyv_trial: minTau(xyv_trial, tau, rij)
+    xyv_opt = nmOpt(costFn, xyv_seed, method='Nelder-Mead')
+    return xyv_opt.x, rij2rTh(xyv_opt.x[:len(rij)])
 
 
