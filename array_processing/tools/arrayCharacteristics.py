@@ -127,7 +127,7 @@ def arraySig(rij, kmax, sigLevel, p=0.9, velLims=(0.27, 0.36), NgridV=100,
             
     Version
     -------
-    1.0 -- 20 Sep 2019
+    2.4 -- 20 Sep 2019
 
     """
     arraySig.__version__ = '2.4'
@@ -371,7 +371,7 @@ def co_array(rij):
     1.0 -- 13 Feb 2017
     
     """
-    co_array.__version__ = '1.0.0'
+    co_array.__version__ = '1.0'
     # (c) 2017 Curt A. L. Szuberla
     # University of Alaska Fairbanks, all rights reserved
     #
@@ -381,13 +381,43 @@ def co_array(rij):
 
 
 def chi2(nu, alpha, funcTol=1e-10):
+    r"""
+    Calculate value of a :math:`\chi^2` such that a :math:`\nu`-dimensional
+    confidence ellipsoid encloses a fraction :math:`1 - \alpha` of normally
+    distributed variable
+    
+    Parameters
+    ~~~~~~~~~~
+    nu : int 
+        degrees of freedom (typically embedding dimension of variable)
+    alpha : float
+        confidence interval such that :math:`\alpha \in [0, 1]`
+    funcTol : float (optional)
+        optimzation function evaluation tolerance for :math:`\nu \ne 2`,
+        defaults to 1e-10
+    
+    Returns
+    ~~~~~~~
+    chi2val : float
+        value of a :math:`\chi^2` enclosing :math:`1 - \alpha` confidence 
+        region
+        
+    Version
+    ~~~~~~~
+    1.0 -- 7 Oct 2019
+
+    """
     
     chi2.__version__ = '1.0'
+    # (c) 2019 Curt A. L. Szuberla
+    # University of Alaska Fairbanks, all rights reserved
 
     if nu == 2:
         from numpy import log
+        # this shorthand owing to Ken Arnoult
         return -2 * log(alpha) 
     else:
+        # but just in case we end up with a nu != 2 situation
         from scipy import optimize
         from scipy.special import gammainc 
         from numpy import abs
@@ -644,6 +674,8 @@ def arraySigPlt(rij, sig, sigV, sigTh, impResp, vel, th, kvec, figName=None):
         Name of output file, will be written as figName.png (optional)
   
     """
+    
+    # this is just a sanity check, so no real docstring
     arraySigPlt.__version__ = '1.0'
     
     # std. (if inefficient) plotting import block
@@ -750,3 +782,4 @@ def arraySigContourPlt(sigV, sigTh, vel, th, trace_v):
     ax2.set_title('Back-Azimuth Uncertainty, V=%.2f' % trace_v, va='bottom', pad=20)
 
     return fig
+
