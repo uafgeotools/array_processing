@@ -7,7 +7,7 @@ SOURCE = 'IRIS'
 NETWORK = 'AV'
 STATION = 'DLL'
 LOCATION = '*'
-CHANNEL = '*' 
+CHANNEL = '*'
 
 START = UTCDateTime("2019-07-15T16:50:00")
 END = START + 10*60
@@ -34,19 +34,15 @@ tvec=dates.date2num(stf[0].stats.starttime.datetime)+stf[0].times()/86400   #dat
 #%% get element rijs
 from array_processing.tools import array_plot, getrij, wlsqva_proc
 
-latlist = []
-lonlist = []
-[latlist.append(st[i].stats.latitude) for i in range(len(st))] 
-[lonlist.append(st[i].stats.longitude) for i in range(len(st))] 
+latlist = [tr.stats.latitude for tr in st]
+lonlist = [tr.stats.longitude for tr in st]
 
-rij=getrij(latlist,lonlist) 
-
+rij = getrij(latlist, lonlist)
 
 #%% array processing and plotting using least squares
-vel,az,mdccm,t,data=wlsqva_proc(stf,rij,tvec,WINLEN,WINOVER)
+vel, az, mdccm, t, data = wlsqva_proc(stf, rij, tvec, WINLEN, WINOVER)
 
-fig1,axs1=array_plot(tvec,data,t,mdccm,vel,az,.6)
-
+fig1, axs1 = array_plot(tvec,data,t,mdccm,vel,az,.6)
 
 #%% array uncertainty
 from array_processing.tools import arraySig, arraySigPlt, arraySigContourPlt
@@ -59,12 +55,12 @@ sigV, sigTh, impResp, vel, th, kvec = arraySig(rij, kmax=KMAX, sigLevel=SIGLEVEL
 arraySigPlt(rij, SIGLEVEL, sigV, sigTh, impResp, vel, th, kvec)
 
 fig = arraySigContourPlt(sigV, sigTh, vel, th, trace_v=TRACE_V)
-    
+
 #%% delay and sum beam
-from array_processing.tools import beamForm 
-beam = beamForm(data, rij, stf[0].stats.sampling_rate, 50) 
+from array_processing.tools import beamForm
+beam = beamForm(data, rij, stf[0].stats.sampling_rate, 50)
 
 
-#%% pure state filter 
-from array_processing.tools import psf 
+#%% pure state filter
+from array_processing.tools import psf
 x_psf, P = psf(data, p=2, w=3, n=3, window=None)
