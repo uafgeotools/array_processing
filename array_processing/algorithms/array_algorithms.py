@@ -104,12 +104,8 @@ def wlsqva(data, rij, hz, wgt=None):
 
     >>> vel, az, *aux_vars = wlsqva(data, rij, 20)
 
-    Version
-    ~~~~~~~
-    4.0.2 -- 28 Feb 2017
     """
 
-    wlsqva.__version__ = '4.0.2'
     # (c) 2017 Curt A. L. Szuberla
     # University of Alaska Fairbanks, all rights reserved
     #
@@ -221,7 +217,6 @@ def fk_freq(data, fs, rij, vmin, vmax, fmin, fmax, nvel, ntheta):
         beamformed slowness map, not normalized
         can find max using: ix,iy = np.unravel_index(bmpwr.argmax(), bmpwr.shape)
     """
-    fk_freq.__version__ = '1.0'
 
     #reshape rij from standard setup
     rij = np.transpose(rij)
