@@ -1,8 +1,6 @@
-from scipy.optimize import minimize as nmOpt
-from numpy.linalg import norm
-from numpy import (inf, floor, pi, empty, zeros, hstack, arange, exp, vstack,
-                   flipud, tile, std, average, median, array, round, append)
-from numpy.random import random_sample
+from scipy import optimize
+import numpy as np
+from .array_tools import ft, ift, tauCalcSWxy
 
 
 def bpf(x, band):
@@ -48,26 +46,26 @@ def bpf(x, band):
     # transform time series
     X_bpf = ft(x)
     # sort band
-    band = array(band)
+    band = np.array(band)
     band.sort()
     # size up the data
     N = x.shape
     # separate odd/even tracks for treating the Nyquist freq
     if N[0]%2:  # N odd
         # convert band to integer-valued indices
-        band = round(array(band)*(N[0]-1)/2,decimals=0).astype('int64')
+        band = np.round(np.array(band) * (N[0] - 1) / 2, decimals=0).astype('int64')
         # Nyquist index (not really, since it would actually be delta_f/2
         # more; half an index) for setting corner frequencies
         Nyq = (N[0]+1)//2
         # negative frequency index for band[2]
         idx_temp = 2*Nyq-band[1]
     else:       # N even, same algorithm as odd block
-        band = round(array(band)*N[0]/2,decimals=0).astype('int64')
+        band = np.round(np.array(band) * N[0] / 2, decimals=0).astype('int64')
         Nyq = N[0]//2
         idx_temp = 2*(Nyq)-band[1]+1
     # now odd/even require the same operations
     # corner indices in positive and symmetrically in negative frequencies
-    idx_one = append(band,array([idx_temp, N[0]-band[0]+1])-1)
+    idx_one = np.append(band, np.array([idx_temp, N[0] - band[0] + 1]) - 1)
     # corner indices for zero mask
     idxx = (list(range(0,idx_one[0])) +
             list(range(idx_one[1]+1,idx_one[2])) +
@@ -134,19 +132,19 @@ def MCCMcalc(cmax, wgt=None):
 
     if wgt is None:
         # default is to calculate using all channels & unity for weights
-        MCCM = average(cmax)
-        MdCCM = median(cmax)
+        MCCM = np.average(cmax)
+        MdCCM = np.median(cmax)
     else:
 
         # first, standard weighted arithmetic mean, allows for
         # arbitrary weights
-        Wgt = array([wgt[i]*wgt[j] for i in range(wgt.size-1)
-                                       for j in range(i+1,wgt.size)])
-        MCCM = average(cmax, weights=Wgt)
+        Wgt = np.array([wgt[i] * wgt[j] for i in range(wgt.size - 1)
+                           for j in range(i+1,wgt.size)])
+        MCCM = np.average(cmax, weights=Wgt)
         # next, weighted median here only allows binary weights, so
         # just use non-zero weighted channels
         idx = [i for i, e in enumerate(Wgt) if e != 0]
-        MdCCM = median(cmax[idx])
+        MdCCM = np.median(cmax[idx])
     return MCCM, MdCCM
 
 
@@ -204,7 +202,7 @@ def randc(N, beta=0.0):
     if beta < 0:
         c0 = 0
     else:
-        c0 = inf
+        c0 = np.inf
     # catch the case of a 1D array in python, so dimensions act like a matrix
     if len(N) == 1:
         M = (N[0],1) # use M[1] any time # of columns is called for
@@ -212,25 +210,25 @@ def randc(N, beta=0.0):
         M = N
     # phase array with size (# of unique complex Fourier components,
     # columns of original data)
-    n = int(floor((N[0]-1)/2)) # works for odd/even cases
-    cPhase = random_sample((n, M[1]))*2*pi
+    n = int(np.floor((N[0] - 1) / 2)) # works for odd/even cases
+    cPhase = np.random.random_sample((n, M[1])) * 2 * np.pi
     # Nyquist placeholders
     if N[0]%2:
         # odd case: Nyquist is 1/2 freq step between highest components
         # so it is empty
-        cFiller = empty((0,))
-        pFiller = empty((0,M[1]))
+        cFiller = np.empty((0,))
+        pFiller = np.empty((0, M[1]))
     else:
         # even case: we have a Nyquist component
         cFiller = N[0]/2
-        pFiller = zeros((1,M[1]))
+        pFiller = np.zeros((1, M[1]))
     # noise amplitudes are just indices (unit-offset!!) to be normalized
     # later, phases are arranged as Fourier conjugates
-    r = hstack((c0, arange(1,n+1), cFiller, arange(n,0,-1)))
-    phasor  = exp(vstack((zeros((1,M[1])), 1j*cPhase, pFiller,
-                          -1j*flipud(cPhase))))
+    r = np.hstack((c0, np.arange(1, n + 1), cFiller, np.arange(n, 0, -1)))
+    phasor  = np.exp(np.vstack((np.zeros((1, M[1])), 1j * cPhase, pFiller,
+                                      -1j * np.flipud(cPhase))))
     # this is like my cols.m function in MATLAB
-    r = tile(r,M[1]).reshape(M[1],N[0]).T**(-beta/2)
+    r = np.tile(r, M[1]).reshape(M[1], N[0]).T ** (-beta / 2)
     # catch beta = 0 case here to ensure zero DC component
     if not beta:
         r[0] = 0
@@ -238,7 +236,7 @@ def randc(N, beta=0.0):
     r = ift(r*phasor, allowComplex=False)
     # renormalize r such that mean = 0 & std = 1 (MATLAB dof default used)
     # and return it in its original shape (i.e., a 1D vector, if req'd)
-    return r.reshape(N)/std(r, ddof=1)
+    return r.reshape(N) / np.std(r, ddof=1)
 
 
 def srcLoc(rij, tau, nord=2, seedXY_size=0.05, seedV_size=0.3):
@@ -293,12 +291,12 @@ def srcLoc(rij, tau, nord=2, seedXY_size=0.05, seedV_size=0.3):
     # cost function
     def minTau(xyv_trial, tau_o, rij):
         tau_trial = tauCalcSWxy(xyv_trial[-1], xyv_trial[:-1], rij)
-        return norm(tau_o - tau_trial, nord)
+        return np.linalg.norm(tau_o - tau_trial, nord)
     # copnstruct naive seed
     xyv_seed = [seedXY_size] * len(rij) + [seedV_size]
     for k in range(0, len(xyv_seed)-1, 2):
         xyv_seed[k] = -xyv_seed[k]
     # perform optimization
     costFn = lambda xyv_trial: minTau(xyv_trial, tau, rij)
-    xyv_opt = nmOpt(costFn, xyv_seed, method='Nelder-Mead')
+    xyv_opt = optimize.minimize(costFn, xyv_seed, method='Nelder-Mead')
     return xyv_opt.x, rij2rTh(xyv_opt.x[:len(rij)])

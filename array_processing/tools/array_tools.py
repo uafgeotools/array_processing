@@ -8,11 +8,6 @@ from functools import reduce
 from itertools import groupby
 from operator import itemgetter
 from scipy.signal import convolve2d
-from numpy.fft import fft, ifft
-from numpy import (nan, real, empty, outer, bartlett, isscalar, zeros, pi, cos,
-                   sin, array, sqrt, where, vstack, hstack, tile)
-from numpy.linalg import norm as Norm
-from numpy import min as Min
 
 
 def wlsqva_proc(stf,rij,tvec,windur,winover):
@@ -303,7 +298,7 @@ def psf(x, p=2, w=3, n=3, window=None):
         return S
     def triang(N):
         # for historical reasons, the default window shape
-        return bartlett(N+2)[1:-1]
+        return np.bartlett(N + 2)[1:-1]
     # main code block
 
 
@@ -318,11 +313,11 @@ def psf(x, p=2, w=3, n=3, window=None):
     # was too slow in 1995 is still too slow in 2017!)
     # -- pre-allocate stack & fill it in
     Sidx = [(i, j) for i in range(d) for j in range(i, d)]
-    S = empty((X.shape[0], d*(d+1)//2), dtype=complex)
+    S = np.empty((X.shape[0], d * (d + 1) // 2), dtype=complex)
     for i in range(X.shape[0]):
         # at each freq w, S_w is outer product of raw Fourier transforms
         # of each column at that freq; select unique components to store
-        S_w = outer(X[i,:], X[i,:].conj())
+        S_w = np.outer(X[i, :], X[i, :].conj())
         S[i,:] = S_w[[i[0] for i in Sidx], [j[1] for j in Sidx]]
     # smooth each column of S (i,e., in freq. domain)
     if not window:
@@ -355,11 +350,11 @@ def psf(x, p=2, w=3, n=3, window=None):
         fudgeIdx = 1
         P[-1] = 0
     # apply P as contrast agent to frequency series
-    X *= tile(P**p, d).reshape(X.shape[::-1]).T
+    X *= np.tile(P ** p, d).reshape(X.shape[::-1]).T
     # inverse transform X and ensure real output
-    x_psf = ift(vstack((X[list(range(N//2+1))],
-                          X[list(range(N//2-fudgeIdx,0,-1))].conj())),
-                            allowComplex=False)
+    x_psf = ift(np.vstack((X[list(range(N // 2 + 1))],
+                              X[list(range(N//2-fudgeIdx,0,-1))].conj())),
+                allowComplex=False)
     return x_psf, P
 
 
@@ -411,7 +406,7 @@ def ft(x, n=None, axis=0, norm=None):
     #
     # get normalization constant
     N = x.shape
-    return fft(x, n, axis, norm)/N[axis]
+    return np.fft.fft(x, n, axis, norm)/N[axis]
 
 
 def ift(X, n=None, axis=0, norm=None, allowComplex=False):
@@ -459,8 +454,8 @@ def ift(X, n=None, axis=0, norm=None, allowComplex=False):
     To check on the small imaginary parts of an inverse transform
     one could insert the code below. ::
 
-        from numpy.linalg import norm as Norm
-        print(Norm(x.imag))}``
+        from numpy.linalg import norm
+        print(norm(x.imag))}``
 
     Version
     ~~~~~~~
@@ -474,12 +469,12 @@ def ift(X, n=None, axis=0, norm=None, allowComplex=False):
 
     # get normalization constant
     N = X.shape
-    x = ifft(X, n, axis, norm)*N[axis]
+    x = np.fft.ifft(X, n, axis, norm)*N[axis]
     # force real output, if requested
     if allowComplex:
         return x
     else:
-        return real(x)
+        return np.real(x)
 
 
 def fstatbland(dtmp, rij,fs,tau):
@@ -616,10 +611,10 @@ def beamForm(data, rij, Hz, azPhi, vel=0.340, r=None, wgt=None, refTrace=None,
         if len(wgt) != nTraces:
             # catch dimension mismatch between tau & wgt
             raise IndexError('len(wgt) != ' + str(nTraces))
-    wgt = array(wgt)    # require array form here for later operations
+    wgt = np.array(wgt)    # require array form here for later operations
     # default refTrace is first non-zero wgt
     if refTrace is None:
-        refTrace = Min(where(wgt != 0)) # requires array wgt
+        refTrace = np.min(np.where(wgt != 0)) # requires array wgt
     # default Moffset is zero for all traces
     if Moffset is None:
         Moffset = [0 for i in range(nTraces)]
@@ -635,7 +630,7 @@ def beamForm(data, rij, Hz, azPhi, vel=0.340, r=None, wgt=None, refTrace=None,
 
 
         # need to unpack & repack azPhi with care
-        if isscalar(azPhi):
+        if np.isscalar(azPhi):
             tau = tauCalcSW(vel, [r, azPhi], rij)
         else:
             tau = tauCalcSW(vel, [r, azPhi[0], azPhi[1]], rij)
@@ -698,17 +693,17 @@ def phaseAlignData(data, delays, wgt, refTrace, M, Moffset, plotFlag=False):
     m, nTraces = data.shape
     # if plotting, embed in array of np.nan
     if plotFlag:
-        nanOrOne = nan
+        nanOrOne = np.nan
     else:
         nanOrOne = 1
     # correct for negative Moffset elements
     # subtract this to ensure corrected delays is positive,
     # semi-definite and has (at least) one zero element
-    maxNegMoffset = min(array(Moffset)[array(Moffset) <= 0])
+    maxNegMoffset = min(np.array(Moffset)[np.array(Moffset) <= 0])
     # apply Moffset & correction for negative elements of Moffset
     delays = delays + Moffset - maxNegMoffset
     # start with everything in the window as a default (trim||pad later)
-    data_align = zeros((max(delays) + m, nTraces)) * nanOrOne
+    data_align = np.zeros((max(delays) + m, nTraces)) * nanOrOne
     # embed shifted traces in array
     for k in range(nTraces):
         if wgt[k]:
@@ -726,16 +721,16 @@ def phaseAlignData(data, delays, wgt, refTrace, M, Moffset, plotFlag=False):
         #  -- LHS (graphically, but actually topside in array-land!)
         if alignBounds[0] < 0:
             # pad LHS of traces w zeros or np.nans
-            data_align = vstack((zeros((-alignBounds[0], nTraces)) * nanOrOne,
-                                data_align))
+            data_align = np.vstack((np.zeros((-alignBounds[0], nTraces)) * nanOrOne,
+                                       data_align))
         elif alignBounds[0] > 0:
             data_align = data_align[alignBounds[0]:]
         #  -- RHS (graphically, but actually bottom in array-land!)
         if alignBounds[1] > mp:
             # pad RHS of traces w zeros or np.nans
 
-            data_align = vstack( (data_align, zeros((alignBounds[1]-mp,
-                                      nTraces) ) * nanOrOne))
+            data_align = np.vstack((data_align, np.zeros((alignBounds[1] - mp,
+                                                                nTraces)) * nanOrOne))
         elif alignBounds[1] < mp:
             data_align = data_align[:M]
     return data_align
@@ -780,18 +775,18 @@ def phaseAlignIdx(tau, Hz, wgt, refTrace):
     # -- this is low level code w/out error checks or defaults, designed
     # --  to be called by wrappers that make use of the indices provided
     # solve for number of traces from pairings in tau
-    nTraces = int(1+sqrt(1+8*len(tau)))//2
+    nTraces = int(1 + np.sqrt(1 + 8 * len(tau))) // 2
     # calculate delays (samples) relative to refTrace for each trace
     #   -- first pass grabs delays starting with refTrace as i in ij
     delayIdx = (nTraces*refTrace - refTrace*(refTrace+1)//2,
             nTraces*(refTrace+1) - (refTrace+1)*(refTrace+2)//2)
-    delays = hstack( (0, (tau[range(delayIdx[0],delayIdx[1])]*Hz))
-                    ).astype(int)
+    delays = np.hstack((0, (tau[range(delayIdx[0], delayIdx[1])] * Hz))
+                          ).astype(int)
     # the std. rij list comprehension for unique inter-trace pairs
     tau_ij = [(i, j) for i in range(nTraces) for j in range(i+1, nTraces)]
     #  -- second pass grabs delays with refTrace as j in ij
     preRefTau_idx = [k for k in range(len(tau)) if tau_ij[k][1] == refTrace]
-    delays = hstack( (-tau[preRefTau_idx]*Hz, delays) ).astype(int)
+    delays = np.hstack((-tau[preRefTau_idx] * Hz, delays)).astype(int)
     # re-shift delays such that the first sample of the trace requiring the
     # largest shift left relative to the refTrace (hence, largest positive,
     # semi-definite element of delays) has an index of zero; i.e., all traces
@@ -833,19 +828,19 @@ def tauCalcPW(vel, azPhi, rij):
     #
     dim, nTraces = rij.shape
     if dim == 2:
-        rij = vstack((rij, zeros((1, nTraces))))
+        rij = np.vstack((rij, np.zeros((1, nTraces))))
     idx = [(i, j) for i in range(rij.shape[1]-1)
                     for j in range(i+1,rij.shape[1])]
     X = rij[:,[i[0] for i in idx]] - rij[:,[j[1] for j in idx]]
-    if isscalar(azPhi):
+    if np.isscalar(azPhi):
         phi = 0
         az = azPhi
     else:
-        phi = azPhi[1]/180*pi
+        phi = azPhi[1] / 180 * np.pi
         az = azPhi[0]
-    az = pi*(-az/180 + 0.5)
-    s = array([cos(az), sin(az), sin(phi)])
-    s[:-1] *= cos(phi)
+    az = np.pi * (-az / 180 + 0.5)
+    s = np.array([np.cos(az), np.sin(az), np.sin(phi)])
+    s[:-1] *= np.cos(phi)
     return X.T@(s/vel)
 
 
@@ -883,9 +878,9 @@ def tauCalcSW(vel, rAzPhi, rij):
 
     dim, nTraces = rij.shape
     if dim == 2:
-        rij = vstack((rij, zeros((1, nTraces))))
+        rij = np.vstack((rij, np.zeros((1, nTraces))))
     if len(rAzPhi) == 3:
-        phi = rAzPhi[2]/180*pi
+        phi = rAzPhi[2] / 180 * np.pi
     else:
         phi = 0
     idx = [(i, j) for i in range(rij.shape[1]-1)
@@ -893,10 +888,10 @@ def tauCalcSW(vel, rAzPhi, rij):
     # aw, this is so convolutedly elegant that it must be saved in a
     # comment for posterity!, but the line below it is "simpler"
     # az = -( (rAzPhi[1]/180*pi - 2*pi)%(2*pi) - pi/2  )%(2*pi)
-    az = pi*(-rAzPhi[1]/180 + 0.5)
-    source = rAzPhi[0] * array([cos(az), sin(az), sin(phi)])
-    source[:-1] *= cos(phi)
-    tau2sensor = Norm(rij - tile(source, nTraces).reshape(nTraces, 3).T,
+    az = np.pi * (-rAzPhi[1] / 180 + 0.5)
+    source = rAzPhi[0] * np.array([np.cos(az), np.sin(az), np.sin(phi)])
+    source[:-1] *= np.cos(phi)
+    tau2sensor = np.linalg.norm(rij - np.tile(source, nTraces).reshape(nTraces, 3).T,
                       2, axis=0)/vel
     return tau2sensor[[j[1] for j in idx]] - tau2sensor[[i[0] for i in idx]]
 
@@ -934,16 +929,16 @@ def tauCalcSWxy(vel, xy, rij):
 
     dim, nTraces = len(rij), len(rij[0])
     if dim == 2:
-        rij = vstack((rij, [0]* nTraces))
+        rij = np.vstack((rij, [0] * nTraces))
     else:
-        rij = vstack((rij, ))
+        rij = np.vstack((rij,))
     if len(xy) == 2:
         xy0 = 0
     else:
         xy0 = []
-    source = hstack((xy, xy0))
+    source = np.hstack((xy, xy0))
     idx = [(i, j) for i in range(rij.shape[1]-1)
                     for j in range(i+1,rij.shape[1])]
-    tau2sensor = Norm(rij - tile(source, nTraces).reshape(nTraces, 3).T,
+    tau2sensor = np.linalg.norm(rij - np.tile(source, nTraces).reshape(nTraces, 3).T,
                       2, axis=0)/vel
     return tau2sensor[[j[1] for j in idx]] - tau2sensor[[i[0] for i in idx]]

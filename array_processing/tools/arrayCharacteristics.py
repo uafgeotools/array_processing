@@ -2,11 +2,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy import optimize
 from scipy.special import gammainc
-from numpy import (log, finfo, float64, where, max, hstack, sort, sin, zeros,
-                   arctan2, array, abs, diff, linspace, meshgrid, vstack, sum,
-                   reshape, isreal, sign, real, sqrt, complex, conj, arccos,
-                   cos, pi)
-from numpy.linalg import eig
 
 
 # -*- coding: utf-8 -*-
@@ -150,28 +145,28 @@ def arraySig(rij, kmax, sigLevel, p=0.9, velLims=(0.27, 0.36), NgridV=100,
     # calculate uncertainties
     # preliminaries
     dij = co_array(rij)
-    th = linspace(0, 360*(1-1/NgridTh), NgridTh) / 180*pi
+    th = np.linspace(0, 360 * (1 - 1 / NgridTh), NgridTh) / 180 * np.pi
     if len(velLims) == 1:
         vel = velLims
     else:
-        vel = linspace(velLims[0], velLims[1], NgridV)
-    Th, Vel = meshgrid(th, vel)
-    S1 = sin(Th) / Vel
-    S2 = cos(Th) / Vel
-    sigTh = zeros(Th.shape)
+        vel = np.linspace(velLims[0], velLims[1], NgridV)
+    Th, Vel = np.meshgrid(th, vel)
+    S1 = np.sin(Th) / Vel
+    S2 = np.cos(Th) / Vel
+    sigTh = np.zeros(Th.shape)
     sigV = sigTh.copy()
     # single-pass calcs
     # calculate eigenvalues/vectors of design matrix (one-time shot)
     C = dij@dij.T
-    cii, Ve = eig(C)
-    thEigR = arctan2(Ve[1, 0], Ve[0, 0])
-    R = array([[cos(thEigR), sin(thEigR)], [-sin(thEigR), cos(thEigR)]])
+    cii, Ve = np.linalg.eig(C)
+    thEigR = np.arctan2(Ve[1, 0], Ve[0, 0])
+    R = np.array([[np.cos(thEigR), np.sin(thEigR)], [-np.sin(thEigR), np.cos(thEigR)]])
     # calculate chi2 for desired confidence level
     x2 = chi2(2, 1-p)
-    sigS = sigLevel / sqrt(cii)
+    sigS = sigLevel / np.sqrt(cii)
     # prep for loop
-    a = sqrt(x2)*sigS[0]
-    b = sqrt(x2)*sigS[1]
+    a = np.sqrt(x2) * sigS[0]
+    b = np.sqrt(x2) * sigS[1]
     N, M = Th.shape
     # froot loops
     for n in range(N):
@@ -182,15 +177,15 @@ def arraySig(rij, kmax, sigLevel, p=0.9, velLims=(0.27, 0.36), NgridV=100,
             # rotate & recalculate
             eVec = eVec @ R
             # fix up angle calcs
-            sigTh[n, m] = abs(diff(
-                    (arctan2(eVec[2:, 1], eVec[2:, 0])*180/pi-360)%360
+            sigTh[n, m] = np.abs(np.diff(
+                (np.arctan2(eVec[2:, 1], eVec[2:, 0]) * 180 / np.pi - 360) % 360
                     ))
             if sigTh[n, m] > 180:
-                sigTh[n, m] = abs(sigTh[n, m] - 360)
-            sigV[n, m] = abs(diff(1 / eExtrm[:2]))
+                sigTh[n, m] = np.abs(sigTh[n, m] - 360)
+            sigV[n, m] = np.abs(np.diff(1 / eExtrm[:2]))
     # prepare impulse response
     impResp, kvec = impulseResp(dij, kmax, NgridK)
-    return sigV, sigTh, impResp, vel, th/pi*180, kvec
+    return sigV, sigTh, impResp, vel, th / np.pi * 180, kvec
 
 
 def impulseResp(dij, kmax, NgridK):
@@ -226,13 +221,13 @@ def impulseResp(dij, kmax, NgridK):
 
 
     # pre-allocate grid for k-space
-    kvec  = linspace(-kmax, kmax, NgridK)
-    Kx, Ky = meshgrid(kvec, kvec)
+    kvec  = np.linspace(-kmax, kmax, NgridK)
+    Kx, Ky = np.meshgrid(kvec, kvec)
     N = dij.shape[1]
-    K = vstack((Ky.flatten(), Kx.flatten())).T
-    d = 2 * cos(K@dij)
+    K = np.vstack((Ky.flatten(), Kx.flatten())).T
+    d = 2 * np.cos(K @ dij)
     # last term adds in fact that cos(0)==1 for ignored self-delay terms
-    d = reshape(sum(d, axis=1), (NgridK, NgridK)) + (1+sqrt(1 + 8*N))/2
+    d = np.reshape(np.sum(d, axis=1), (NgridK, NgridK)) + (1 + np.sqrt(1 + 8 * N)) / 2
     return d, kvec
 
 
@@ -283,9 +278,9 @@ def rthEllipse(a, b, x0, y0):
     F = C-A
     G = A/2
     H = C/2
-    eExtrm = zeros((4, ))
-    eVec = zeros((4, 2))
-    eps = finfo(float64).eps
+    eExtrm = np.zeros((4,))
+    eVec = np.zeros((4, 2))
+    eps = np.finfo(np.float64).eps
 
     # some tolerances for numerical errors
     circTol = 1e8  # is it circular to better than circTol*eps?
@@ -293,67 +288,67 @@ def rthEllipse(a, b, x0, y0):
     magTol = 1e-5  # is a sol'n within ellipse*(1+magTol) (maginification)
 
     # pursue circular or elliptical solutions
-    if abs(F) <= circTol * eps:
+    if np.abs(F) <= circTol * eps:
         # circle
-        cent = sqrt(x0**2 + y0**2)
-        eExtrm[0:2]  = cent + array([-a, a])
-        eVec[0:2, :] = array([
+        cent = np.sqrt(x0 ** 2 + y0 ** 2)
+        eExtrm[0:2]  = cent + np.array([-a, a])
+        eVec[0:2, :] = np.array([
                 [x0-a*x0/cent, y0-a*y0/cent],
                 [x0+a*x0/cent, y0+a*y0/cent]
                 ])
     else:
         # ellipse
         # check for trivial distance sol'n
-        if abs(y0) <  zeroTol * eps:
-            eExtrm[0:2] = x0 + array([-a, a])
-            eVec[0:2, :] = vstack( (eExtrm[0:2],  [0, 0]) ).T
-        elif abs(x0) <  zeroTol * eps:
-            eExtrm[0:2] = y0 + array([-b, b])
-            eVec[0:2, :] = vstack( ([0, 0], eExtrm[0:2]) ).T
+        if np.abs(y0) <  zeroTol * eps:
+            eExtrm[0:2] = x0 + np.array([-a, a])
+            eVec[0:2, :] = np.vstack((eExtrm[0:2], [0, 0])).T
+        elif np.abs(x0) <  zeroTol * eps:
+            eExtrm[0:2] = y0 + np.array([-b, b])
+            eVec[0:2, :] = np.vstack(([0, 0], eExtrm[0:2])).T
         else:
             # use dual solutions of quartics to find best, real-valued results
             # solve quartic for y
             fy = F**2*H
             y = quarticEqn(-D*F*(2*H+F)/fy, (B**2*(G+F)+E*F**2+D**2*(H+2*F))/fy,
                            -D*(B**2+2*E*F+D**2)/fy, (D**2*E)/fy)
-            y = array([y[i] for i in list(where(y == real(y))[0])])
+            y = np.array([y[i] for i in list(np.where(y == np.real(y))[0])])
             xy = B*y / (D-F*y)
             # solve quartic for x
             fx = F**2*G
             x = quarticEqn(B*F*(2*G-F)/fx, (B**2*(G-2*F)+E*F**2+D**2*(H-F))/fx,
                            B*(2*E*F-B**2-D**2)/fx, (B**2*E)/fx)
-            x = array([x[i] for i in list(where(x == real(x))[0])])
+            x = np.array([x[i] for i in list(np.where(x == np.real(x))[0])])
             yx = D*x / (F*x+B)
             # combine both approaches
-            distE = hstack(
-                    (sqrt(x**2 + yx**2), sqrt(xy**2 + y**2))
+            distE = np.hstack(
+                    (np.sqrt(x ** 2 + yx ** 2), np.sqrt(xy ** 2 + y ** 2))
                     )
             # trap real, but bogus sol's (esp. near Th = 180)
-            distEidx = where(
-                (distE <= sqrt(x0**2 + y0**2)+max([a, b])*(1+magTol)) &
-                (distE >= sqrt(x0**2 + y0**2)-max([a, b])*(1+magTol))
+            distEidx = np.where(
+                (distE <= np.sqrt(x0 ** 2 + y0 ** 2) + np.max([a, b]) * (1 + magTol)) &
+                (distE >= np.sqrt(x0 ** 2 + y0 ** 2) - np.max([a, b]) * (1 + magTol))
                 )
-            coords = hstack(((x, yx), (xy, y))).T
+            coords = np.hstack(((x, yx), (xy, y))).T
             coords = coords[distEidx,:][0]
             distE = distE[distEidx]
             eExtrm[0:2] = [distE.min(),  distE.max()]
-            eVec[0:2, :] = vstack(
-                    (coords[where(distE == distE.min()), :][0][0],
-                     coords[where(distE == distE.max()), :][0][0])
+            eVec[0:2, :] = np.vstack(
+                    (coords[np.where(distE == distE.min()), :][0][0],
+                     coords[np.where(distE == distE.max()), :][0][0])
                     )
     # angles subtended
     if x0 < 0:
         x0 = -x0
-        y = -array(quadraticEqn(D**2 + B**2*H/G, 4*D*E, 4*E**2 - B**2*E/G))
-        x = -sqrt(E/G - H/G*y**2)
+        y = -np.array(quadraticEqn(D ** 2 + B ** 2 * H / G, 4 * D * E, 4 * E ** 2 - B ** 2 * E / G))
+        x = -np.sqrt(E / G - H / G * y ** 2)
     else:
-        y = -array(quadraticEqn(D**2 + B**2*H/G, 4*D*E, 4*E**2 - B**2*E/G))
-        x = sqrt(E/G - H/G*y**2)
-    eVec[2:, :] = vstack((x, y)).T
+        y = -np.array(quadraticEqn(D ** 2 + B ** 2 * H / G, 4 * D * E, 4 * E ** 2 - B ** 2 * E / G))
+        x = np.sqrt(E / G - H / G * y ** 2)
+    eVec[2:, :] = np.vstack((x, y)).T
     # various quadrant fixes
-    if x0 == 0 or abs(x0) - a < 0:
+    if x0 == 0 or np.abs(x0) - a < 0:
         eVec[2, 0] = -eVec[2, 0]
-    eExtrm[2:] = sort(arctan2(eVec[2:, 1],eVec[2:, 0])/pi*180)
+    eExtrm[2:] = np.sort(np.arctan2(eVec[2:, 1], eVec[2:, 0]) / np.pi * 180)
     return eExtrm, eVec
 
 
@@ -421,12 +416,12 @@ def chi2(nu, alpha, funcTol=1e-10):
     if nu == 2:
 
         # this shorthand owing to Ken Arnoult
-        return -2 * log(alpha)
+        return -2 * np.log(alpha)
     else:
         # but just in case we end up with a nu != 2 situation
 
-        gammaTest = lambda X2test: abs(gammainc(nu/2,
-                                                X2test/2) - (1-alpha))
+        gammaTest = lambda X2test: np.abs(gammainc(nu / 2,
+                                                      X2test / 2) - (1-alpha))
         return optimize.fmin(func=gammaTest, x0=1, ftol=funcTol, disp=False)
 
 
@@ -463,26 +458,26 @@ def quadraticEqn(a,b,c):
     # University of Alaska Fairbanks, all rights reserved
     #
     # real coefficient branch
-    if isreal([a, b, c]).all():
+    if np.isreal([a, b, c]).all():
         # note np.sqrt(-1) = nan, so force complex argument
         if b:
             # std. sub-branch
-            q = -0.5*(b + sign(b)*sqrt(complex(b*b - 4*a*c)))
+            q = -0.5*(b + np.sign(b) * np.sqrt(np.complex(b * b - 4 * a * c)))
         else:
             # b = 0 sub-branch
-            q = -sqrt(complex(-a*c))
+            q = -np.sqrt(np.complex(-a * c))
     # complex coefficient branch
     else:
-        if real(conj(b)*sqrt(b*b - 4*a*c)) >= 0:
-            q = -0.5*(b + sqrt(b*b - 4*a*c))
+        if np.real(np.conj(b) * np.sqrt(b * b - 4 * a * c)) >= 0:
+            q = -0.5*(b + np.sqrt(b * b - 4 * a * c))
         else:
-            q = -0.5*(b - sqrt(b*b - 4*a*c))
+            q = -0.5*(b - np.sqrt(b * b - 4 * a * c))
     # stable root solution
     x = [q/a, c/q]
     # parse real and/or int roots for tidy output
     for k in 0,1:
-        if real(x[k]) == x[k]:
-            x[k] = float(real(x[k]))
+        if np.real(x[k]) == x[k]:
+            x[k] = float(np.real(x[k]))
             if int(x[k]) == x[k]:
                 x[k] = int(x[k])
     return x
@@ -527,38 +522,38 @@ def cubicEqn(a,b,c):
     R2 = R*R
     ao3 = a/3
     # Q & R are real
-    if isreal([a, b, c]).all():
+    if np.isreal([a, b, c]).all():
         # 3 real roots
         if R2 < Q3:
-            sqQ = -2*sqrt(Q)
-            theta = arccos(R/sqrt(Q3))
+            sqQ = -2 * np.sqrt(Q)
+            theta = np.arccos(R / np.sqrt(Q3))
             # this solution first published in 1615 by Viète!
             x = [
-                    sqQ*cos(theta/3) - ao3,
-                    sqQ*cos((theta + 2*pi)/3) - ao3,
-                    sqQ*cos((theta - 2*pi)/3) - ao3
+                sqQ * np.cos(theta / 3) - ao3,
+                sqQ * np.cos((theta + 2 * np.pi) / 3) - ao3,
+                sqQ * np.cos((theta - 2 * np.pi) / 3) - ao3
                     ]
         # Q & R real, but 1 real, 2 complex roots
         else:
             # this is req'd since np.sign(0) = 0
             if R != 0:
-                A = -sign(R)*(abs(R) + sqrt(R2 - Q3))**(1/3)
+                A = -np.sign(R) * (np.abs(R) + np.sqrt(R2 - Q3)) ** (1 / 3)
             else:
-                A = -sqrt(-Q3)**(1/3)
+                A = -np.sqrt(-Q3) ** (1 / 3)
             if A==0:
                 B = 0
             else:
                 B = Q/A
             # one real root & two conjugate complex ones
             x = [
-                    (A+B) - ao3,
-                    -.5*(A+B) + 1j*sqrt(3)/2*(A-B) - ao3,
-                    -.5*(A+B) - 1j*sqrt(3)/2*(A-B) - ao3
+                (A+B) - ao3,
+                -.5 * (A+B) + 1j * np.sqrt(3) / 2 * (A - B) - ao3,
+                -.5 * (A+B) - 1j * np.sqrt(3) / 2 * (A - B) - ao3
                     ]
     # Q & R complex, so also 1 real, 2 complex roots
     else:
-        sqR2mQ3 = sqrt(R2-Q3)
-        if real(conj(R)*sqR2mQ3) >= 0:
+        sqR2mQ3 = np.sqrt(R2 - Q3)
+        if np.real(np.conj(R) * sqR2mQ3) >= 0:
             A = -(R+sqR2mQ3)**(1/3)
         else:
             A = -(R-sqR2mQ3)**(1/3)
@@ -568,14 +563,14 @@ def cubicEqn(a,b,c):
             B = Q/A
         # one real root & two conjugate complex ones
         x = [
-                (A+B) - ao3,
-                -.5*(A+B) + 1j*sqrt(3)/2*(A-B) - ao3,
-                -.5*(A+B) - 1j*sqrt(3)/2*(A-B) - ao3
+            (A+B) - ao3,
+            -.5 * (A+B) + 1j * np.sqrt(3) / 2 * (A - B) - ao3,
+            -.5 * (A+B) - 1j * np.sqrt(3) / 2 * (A - B) - ao3
                 ]
     # parse real and/or int roots for tidy output
     for k in range(0,3):
-        if real(x[k]) == x[k]:
-            x[k] = float(real(x[k]))
+        if np.real(x[k]) == x[k]:
+            x[k] = float(np.real(x[k]))
             if int(x[k]) == x[k]:
                 x[k] = int(x[k])
     return x
@@ -619,15 +614,15 @@ def quarticEqn(a,b,c,d):
     y = cubicEqn(-b, a*c - 4*d, (4*b - a2)*d - c*c)
     y = y[0]
     # find R
-    R = sqrt(a2/4 - (1+0j)*b + y) # force complex in sqrt
+    R = np.sqrt(a2 / 4 - (1 + 0j) * b + y) # force complex in sqrt
     foo = 3*a2/4 - R*R - 2*b
     if R != 0:
-        D = sqrt(foo + (a*b - 2*c - a2*a/4)/R) # R is already complex here
-        E = sqrt(foo - (a*b - 2*c - a2*a/4)/R) # ...
+        D = np.sqrt(foo + (a * b - 2 * c - a2 * a / 4) / R) # R is already complex here
+        E = np.sqrt(foo - (a * b - 2 * c - a2 * a / 4) / R) # ...
     else:
-        sqrtTerm = 2*sqrt(y*y - (4+0j)*d) # force complex in sqrt
-        D = sqrt(foo + sqrtTerm)
-        E = sqrt(foo - sqrtTerm)
+        sqrtTerm = 2 * np.sqrt(y * y - (4 + 0j) * d) # force complex in sqrt
+        D = np.sqrt(foo + sqrtTerm)
+        E = np.sqrt(foo - sqrtTerm)
     x = [
             -a/4 + R/2 + D/2,
             -a/4 + R/2 - D/2,
@@ -636,8 +631,8 @@ def quarticEqn(a,b,c,d):
             ]
     # parse real and/or int roots for tidy output
     for k in range(0,4):
-        if real(x[k]) == x[k]:
-            x[k] = float(real(x[k]))
+        if np.real(x[k]) == x[k]:
+            x[k] = float(np.real(x[k]))
             if int(x[k]) == x[k]:
                 x[k] = int(x[k])
     return x
