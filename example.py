@@ -32,7 +32,7 @@ tvec=dates.date2num(stf[0].stats.starttime.datetime)+stf[0].times()/86400   #dat
 
 
 #%% get element rijs
-from array_processing.algorithms.helpers import array_plot, getrij, wlsqva_proc
+from array_processing.tools import array_plot, getrij, wlsqva_proc
 
 latlist = [tr.stats.latitude for tr in st]
 lonlist = [tr.stats.longitude for tr in st]

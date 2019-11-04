@@ -1,8 +1,3 @@
-from .array_characterization import (arraySig, impulseResp, rthEllipse,
-                                     co_array, chi2, quadraticEqn, cubicEqn,
-                                     quarticEqn, arraySigPlt,
-                                     arraySigContourPlt)
-from .detection import array_thresh, MCCMcalc, fstatbland, srcLoc
-from .signal_processing import bpf, randc, ft, ift, psf
-from .other import (beamForm, phaseAlignData, phaseAlignIdx, tauCalcPW,
-                    tauCalcSW, tauCalcSWxy)
+from .arrayCharacteristics import arraySig, impulseResp, rthEllipse, co_array, chi2, quadraticEqn, cubicEqn, quarticEqn, arraySigPlt, arraySigContourPlt
+from .array_tools import wlsqva_proc, array_plot, array_thresh, getrij, psf, ft, ift, fstatbland, beamForm, phaseAlignData, phaseAlignIdx, tauCalcPW, tauCalcSW, tauCalcSWxy
+from .WATCtools import bpf, MCCMcalc, randc
