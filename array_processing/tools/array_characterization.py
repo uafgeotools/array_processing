@@ -5,8 +5,8 @@ from scipy.special import gammainc
 
 
 """
-arrayCharacteristics
---------------------
+array_characterization
+----------------------
 Provides
     1. Array characteristic methods applicable to geophysical sesnor arrays
     2. Support functions for array characteristic calculations
@@ -14,10 +14,10 @@ Provides
 How to use the module
 ---------------------
 Documentation is available in docstrings provided with the code. The
-docstring examples assume that `arrayCharacteristics` has been imported
+docstring examples assume that `array_characterization` has been imported
 as `arrChar`::
 
-    import arrayCharacteristics as arrChar
+    import array_characterization as arrChar
 
 Code snippets are indicated by three greater-than signs::
 
@@ -34,7 +34,7 @@ Each of the module's methods may be called as::
 
 or imported individually and called as::
 
-    >>> from arrayCharacteristics import co_array
+    >>> from array_characterization import co_array
     >>> dij = co_array(rij)
 
 Available methods
