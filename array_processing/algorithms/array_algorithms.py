@@ -1,8 +1,6 @@
 import numpy as np
 from math import pow, ceil
 from obspy.signal.invsim import cosine_taper
-from numpy import array, diag, empty, correlate, argmax, pi, arctan2, abs, eye, sqrt
-from numpy.linalg import norm, inv
 
 
 def wlsqva(data, rij, hz, wgt=None):
@@ -74,10 +72,6 @@ def wlsqva(data, rij, hz, wgt=None):
     The `data` and `rij` must have a consistent number of sensors. If provided,
     `wgt` must be consistent with the number of sensors.
 
-    This module is self-contained, in the sense that it only requires that
-    the `numpy` package is availble, but need not have been imported into the
-    workspace -- the module imports from `numpy` as required.
-
     Examples
     ~~~~~~~~
     Given an approppriate (m, 4) array ``data``, sampled at 20 Hz, the
@@ -125,11 +119,11 @@ def wlsqva(data, rij, hz, wgt=None):
     # set default wgt, recast as an array, form W array
     if wgt is None:
         # all ones (any constant will do)
-        wgt = array([1 for i in range(nTraces)])
+        wgt = np.array([1 for i in range(nTraces)])
         N_w = nTraces
         # -- no need for an error check since all channels kept
     else:
-        wgt = array(wgt)
+        wgt = np.array(wgt)
         # -- error checks on wgt done here since now in array form
         if len(wgt) != nTraces:
             raise IndexError('len(wgt) != ' + str(nTraces))
@@ -143,42 +137,41 @@ def wlsqva(data, rij, hz, wgt=None):
     # -- co-array is now a one-liner
     xij = rij[:,[i[0] for i in idx]] - rij[:,[j[1] for j in idx]]
     # -- same for generalized weight array
-    W = diag([i[2] for i in idx])
+    W = np.diag([i[2] for i in idx])
     # compute cross correlations across co-array
     N = xij.shape[1]           # number of unique inter-sensor pairs
-    cij = empty((m*2-1, N))    # pre-allocated cross-correlation matrix
+    cij = np.empty((m * 2 - 1, N))    # pre-allocated cross-correlation matrix
     for k in range(N):
         # MATLAB's xcorr w/ 'coeff' normalization: unit auto-correlations
         # and save a little time by only calculating on weighted pairs
         if W[k][k]:
-            cij[:,k] = (correlate(data[:,idx[k][0]], data[:,idx[k][1]],
-               mode='full') / sqrt(sum(data[:,idx[k][0]]*data[:,idx[k][0]]) *
-                sum(data[:,idx[k][1]]*data[:,idx[k][1]])))
+            cij[:,k] = (np.correlate(data[:, idx[k][0]], data[:, idx[k][1]],
+                                        mode='full') / np.sqrt(sum(data[:, idx[k][0]] * data[:, idx[k][0]]) *
+                                                                  sum(data[:,idx[k][1]]*data[:,idx[k][1]])))
     # extract cross correlation maxima and associated delays
     cmax = cij.max(axis=0)
     cmax[[i for i in range(N) if W[i][i] == 0]] = 0  # set to zero if not Wvec
-    delay = argmax(cij, axis=0)+1 # MATLAB-esque +1 offset here for tau
+    delay = np.argmax(cij, axis=0) + 1 # MATLAB-esque +1 offset here for tau
     # form tau vector
     tau = (m - delay)/hz
     # form auxiliary arrays for general weighted LS
     X_p = W@xij.T
     tau_p = W@tau
     # calculate least squares slowness vector
-    s_p = inv(X_p.T@X_p) @ X_p.T @ tau_p
+    s_p = np.linalg.inv(X_p.T@X_p) @ X_p.T @ tau_p
     # re-cast slowness as geographic vel, az (and phi, if req'd)
-    vel = 1/norm(s_p, 2)
+    vel = 1/np.linalg.norm(s_p, 2)
     # this converts az from mathematical CCW from E to geographical CW from N
-    az = (arctan2(s_p[0],s_p[1])*180/pi-360)%360
+    az = (np.arctan2(s_p[0], s_p[1]) * 180 / np.pi - 360) % 360
     if dim == 3:
         # if 3D, tack on elevation angle to azimuth
-        from numpy import hstack
-        az = hstack((az, arctan2(s_p[2], norm(s_p[:2], 2))*180/pi))
+        az = np.hstack((az, np.arctan2(s_p[2], np.linalg.norm(s_p[:2], 2)) * 180 / np.pi))
     # calculate sig_tau (note: moved abs function inside sqrt so that std.
-    # numpy.sqrt can be used; only relevant in 3D case w nearly singular
+    # np.sqrt can be used; only relevant in 3D case w nearly singular
     # solutions, where argument of sqrt is small, but negative)
     N_p = N_w*(N_w-1)/2
-    sig_tau_p = sqrt(abs(tau_p @ (eye(N) - X_p @ inv(X_p.T @ X_p) @ X_p.T) @
-                       tau_p / (N_p - dim)))
+    sig_tau_p = np.sqrt(np.abs(tau_p @ (np.eye(N) - X_p @ np.linalg.inv(X_p.T @ X_p) @ X_p.T) @
+                                     tau_p / (N_p - dim)))
     return vel, az, tau_p, cmax, sig_tau_p, s_p, xij
 
 
