@@ -33,13 +33,8 @@ def bpf(x, band):
     ~~~~~
     This filter may cause "ringing" at the start and end of the
     filtered time series.
-
-    Version
-    ~~~~~~~
-    1.0.1 -- 30 Jan 2017
-
     """
-    bpf.__version__ = '1.0.1'
+
     # (c) 2017 Curt A. L. Szuberla
     # University of Alaska Fairbanks, all rights reserved
     #
@@ -118,13 +113,8 @@ def MCCMcalc(cmax, wgt=None):
 
     In the calculation of `MdCCM`, the weights are converted to binary -- i.e,
     channels are simply either included or excluded.
-
-    Version
-    ~~~~~~~
-    1.1 -- 3 Aug 2017
-
     """
-    MCCMcalc.__version__ = '1.1'
+
     # (c) 2017 Curt A. L. Szuberla
     # University of Alaska Fairbanks, all rights reserved
     #
@@ -184,13 +174,8 @@ def randc(N, beta=0.0):
 
     Since the output is zero-mean, the DC spectral component(s) will
     be identically zero.
-
-    Version
-    ~~~~~~~
-    1.0.1 -- 13 Feb 2017
-
     """
-    randc.__version__ = '1.0.1'
+
     # (c) 2017 Curt A. L. Szuberla
     # University of Alaska Fairbanks, all rights reserved
     #
@@ -274,16 +259,11 @@ def srcLoc(rij, tau, nord=2, seedXY_size=0.05, seedV_size=0.3):
     It takes a naive approach to the seed, ignoring Dr. Arnoult's spacetime
     approach, but takes into account the quirks of the Nelder-Mead optimization
     and prduces a fairly good (if not great) facsimilie of the MATLAB version.
-
-    Version
-    ~~~~~~~
-    1.0.2 -- 19 Mar 2018
     """
 
     # The below line can be removed once we add rij2rTh
     raise NotImplementedError('rij2rTh not available!')
 
-    srcLoc.__version__ = '1.0.2'
     # (c) 2018 Curt A. L. Szuberla
     # University of Alaska Fairbanks, all rights reserved
     #

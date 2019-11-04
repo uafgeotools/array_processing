@@ -63,16 +63,6 @@ Notes
 -----
 All of the methods in this module are written for use under Python 3.*
 
-"""
-
-# Archival note: per PEP 396, for a module with version-numbered methods,
-# the module has no version number.  Each method in this module has a
-# version-number embedded as an attribute per PEP 440 as (e.g.):
-#       method.__version__ = '3.2.1'
-
-
-"""
-Created on Wed Sep 18 13:02:15 2019
 @author: cas
       (c) 2019 Curt A. L. Szuberla
       University of Alaska Fairbanks, all rights reserved
@@ -128,19 +118,10 @@ def arraySig(rij, kmax, sigLevel, p=0.9, velLims=(0.27, 0.36), NgridV=100,
         Vector of back azimuths :math:`(^\circ)` for axis in (NgridTh, ) array
     kvec : array
         Vector wavenumbers for axes in k-space in (NgridK, ) array
-
-
-    Version
-    -------
-    2.4 -- 20 Sep 2019
-
     """
-    arraySig.__version__ = '2.4'
+
     # (c) 2019 Curt A. L. Szuberla
     # University of Alaska Fairbanks, all rights reserved
-
-
-
 
     # calculate uncertainties
     # preliminaries
@@ -208,13 +189,8 @@ def impulseResp(dij, kmax, NgridK):
         Impulse response over grid as (NgridK, NgridK) array
     kvec : array
         Vector wavenumbers for axes in k-space in (NgridK, ) array
-
-    Version
-    ~~~~~~~
-    1.0 -- 20 Sep 2019
-
     """
-    impulseResp.__version__ = '1.0'
+
     # (c) 2019 Curt A. L. Szuberla
     # University of Alaska Fairbanks, all rights reserved
 
@@ -257,13 +233,8 @@ def rthEllipse(a, b, x0, y0):
         [[x min dist., y min dist.], [x max dist., y max dist.],
          [x max angle tangency, y max angle tangency],
          [x min angle tangency, y min angle tangency]]
-
-    Version
-    ~~~~~~~
-    1.1.1 -- 7 Oct 2019
-
     """
-    rthEllipse.__version__ = '1.1.1'
+
     # (c) 2019 Curt A. L. Szuberla
     # University of Alaska Fairbanks, all rights reserved
 
@@ -366,13 +337,8 @@ def co_array(rij):
     ~~~~~~~
     dij : array
         (d, n(n-1)//2) co-array, coordinates of the sensor pairing separations
-
-    Version
-    ~~~~~~~
-    1.0 -- 13 Feb 2017
-
     """
-    co_array.__version__ = '1.0'
+
     # (c) 2017 Curt A. L. Szuberla
     # University of Alaska Fairbanks, all rights reserved
     #
@@ -402,14 +368,8 @@ def chi2(nu, alpha, funcTol=1e-10):
     chi2val : float
         value of a :math:`\chi^2` enclosing :math:`1 - \alpha` confidence
         region
-
-    Version
-    ~~~~~~~
-    1.0 -- 7 Oct 2019
-
     """
 
-    chi2.__version__ = '1.0'
     # (c) 2019 Curt A. L. Szuberla
     # University of Alaska Fairbanks, all rights reserved
 
@@ -447,13 +407,8 @@ def quadraticEqn(a,b,c):
     ~~~~~
     1) Stable solutions, even for :math:`b^2 >> ac` or complex coefficients,
     per algorithm of NR 2d ed. :math:`\S` 5.6.
-
-    Version
-    ~~~~~~~
-    1.0.1 -- 10 Feb 2017
-
     """
-    quadraticEqn.__version__ = '1.0.1'
+
     # (c) 2017 Curt A. L. Szuberla
     # University of Alaska Fairbanks, all rights reserved
     #
@@ -506,16 +461,12 @@ def cubicEqn(a,b,c):
     1) Relatively stable solutions, with some tweaks by Dr. Z, per algorithm
     of NR 2d ed. :math:`\S` 5.6.  Even np.roots can have some (minor) issues;
     e.g., :math:`x^3 - 5x^2 + 8x - 4 = 0`.
-
-    Version
-    ~~~~~~~
-    1.0.1 -- 11 Feb 2017
-
     """
+
     # (c) 2017 Curt A. L. Szuberla
     # University of Alaska Fairbanks, all rights reserved
     #
-    cubicEqn.__version__ = '1.0.1'
+
     Q = a*a/9 - b/3
     R = (3*c - a*b)/6 + a*a*a/27
     Q3 = Q*Q*Q
@@ -599,16 +550,12 @@ def quarticEqn(a,b,c,d):
     ~~~~~
     1) Stable solutions per algorithm of CRC  Std. Mathematical
     Tables, 29th ed.
-
-    Version
-    ~~~~~~~
-    1.0.1 -- 11 Feb 2017
-
     """
+
     # (c) 2017 Curt A. L. Szuberla
     # University of Alaska Fairbanks, all rights reserved
     #
-    quarticEqn.__version__ = '1.0.1'
+
     # find *any* root of resolvent cubic
     a2 = a*a
     y = cubicEqn(-b, a*c - 4*d, (4*b - a2)*d - c*c)
@@ -664,11 +611,7 @@ def arraySigPlt(rij, sig, sigV, sigTh, impResp, vel, th, kvec, figName=None):
         Vector wavenumbers for axes in k-space in (NgridK, ) array
     figName : str
         Name of output file, will be written as figName.png (optional)
-
     """
-
-    # this is just a sanity check, so no real docstring
-    arraySigPlt.__version__ = '1.0'
 
     # for plotting methods & scripts
     figFormat = 'png'       # MUCH faster than pdf!!

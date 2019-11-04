@@ -168,10 +168,7 @@ def getrij(latlist, lonlist):
 
     rij - a numpy array with the first row corresponding to cartesian
     "X"-coordinates and the second row corresponding to cartesian "Y"-coordinates.
-
     '''
-
-    getrij.__version__ = '1.0'
 
     # Basic error checking
     latsize = len(latlist)
@@ -281,9 +278,8 @@ def psf(x, p=2, w=3, n=3, window=None):
     variations among the channels.  To mitigate the effects of smoothing
     complex values into the DC and Nyquist components, they are set to zero
     before computing the inverse transform of :math:`\hat{\mathbf{X}}`.
-
     """
-    psf.__version__ = '1.0.2'
+
     # (c) 2017 Curt A. L. Szuberla
     # University of Alaska Fairbanks, all rights reserved
     #
@@ -400,7 +396,6 @@ def ft(x, n=None, axis=0, norm=None):
     1.0.1 -- 3 Oct 2016
 
     """
-    ft.__version__ = '1.0.1'
     # (c) 2016 Curt A. L. Szuberla
     # University of Alaska Fairbanks, all rights reserved
     #
@@ -462,7 +457,6 @@ def ift(X, n=None, axis=0, norm=None, allowComplex=False):
     1.0.1 -- 7 Oct 2016
 
     """
-    ift.__version__ = '1.0.1'
     # (c) 2016 Curt A. L. Szuberla
     # University of Alaska Fairbanks, all rights reserved
     #
@@ -506,10 +500,7 @@ def fstatbland(dtmp, rij,fs,tau):
 
     Reference:
       Blandford, R. R., 1974, Geophysics, vol. 39, no. 5, p. 633-643
-
     """
-    fstatbland.__version__ = '1.0'
-
 
     m,n=dtmp.shape
     wgt=np.ones(n)
@@ -591,13 +582,8 @@ def beamForm(data, rij, Hz, azPhi, vel=0.340, r=None, wgt=None, refTrace=None,
     arbitrarily elevated sources incident on 2- or 3D arrays.  Weights are
     relative and normalized upon beam output.  The default value for `vel`
     assumes rij is in units of km (e.g., the speed is in km/s).
-
-    Version
-    ~~~~~~~
-    0.2 -- 2 Mar 2018
-
 """
-    beamForm.__version__ = '0.2'
+
     # (c) 2017 Curt A. L. Szuberla
     # University of Alaska Fairbanks, all rights reserved
     #
@@ -677,13 +663,8 @@ def phaseAlignData(data, delays, wgt, refTrace, M, Moffset, plotFlag=False):
     Notes
     ~~~~~
     The output of `phaseAlignIdx` is used to calculate the input `delays`.
-
-    Version
-    ~~~~~~~
-    0.2 -- 27 Feb 2017
-
     """
-    phaseAlignData.__version__ = '0.0.2'
+
     # (c) 2017 Curt A. L. Szuberla
     # University of Alaska Fairbanks, all rights reserved
     #
@@ -762,13 +743,8 @@ def phaseAlignIdx(tau, Hz, wgt, refTrace):
     ~~~~~
     The output of this function is compatible with the inputs of
     `phaseAlignData`.
-
-    Version
-    ~~~~~~~
-    0.2 -- 27 Feb 2017
-
     """
-    phaseAlignIdx.__version__ = '0.2'
+
     # (c) 2017 Curt A. L. Szuberla
     # University of Alaska Fairbanks, all rights reserved
     #
@@ -816,13 +792,8 @@ def tauCalcPW(vel, azPhi, rij):
     tau : array
         (n(n-1)//2, ) time delays of relative signal arrivals (TDOA) for all
         unique sensor pairings
-
-    Version
-    ~~~~~~~
-    1.0.1 -- 2 Mar 2018
-
     """
-    tauCalcPW.__version__ = '1.0.1'
+
     # (c) 2017 Curt A. L. Szuberla
     # University of Alaska Fairbanks, all rights reserved
     #
@@ -866,12 +837,8 @@ def tauCalcSW(vel, rAzPhi, rij):
     tau : array
         (n(n-1)//2, ) time delays of relative signal arrivals (TDOA) for all
         unique sensor pairings
-
-    Version
-    ~~~~~~~
-    1.0.1 -- 2 Mar 2018
     """
-    tauCalcSW.__version__ = '1.0.1'
+
     # (c) 2017 Curt A. L. Szuberla
     # University of Alaska Fairbanks, all rights reserved
     #
@@ -917,12 +884,8 @@ def tauCalcSWxy(vel, xy, rij):
     tau : array
         (n(n-1)//2, ) time delays of relative signal arrivals (TDOA) for all
         unique sensor pairings
-
-    Version
-    ~~~~~~~
-    1.1 -- 16 Mar 2018
     """
-    tauCalcSWxy.__version__ = '1.1'
+
     # (c) 2018 Curt A. L. Szuberla
     # University of Alaska Fairbanks, all rights reserved
     #
