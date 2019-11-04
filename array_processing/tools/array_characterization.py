@@ -41,25 +41,25 @@ Available methods
 -----------------
 arraySig
     Estimate array uncertainties and impulse response
+impulseResp
+    Calculate impulse response of an array
+rthEllipse
+    Calculate angles subtending and extremal distances to an ellipse       
+co_array
+    Form co-array coordinates from array coordinates
+chi2
+    Calculates value of :math:`\chi^2` for given confidence level    
+quadraticEqn
+    Find roots of :math:`ax^2 + bx + c = 0`    
+cubicEqn
+    Find roots of :math:`x^3 + ax^2 + bx + c = 0`
+quarticEqn
+    Find roots of :math:`x^4 + ax^3 + bx^2 + cx + d = 0`
 arraySigPlt
     Plots output of arraySig method
 arraySigContourPlt
     Plots output of arraySig method onto a polar plot for a specified trace
-    velocity. 
-chi2
-    Calculates value of :math:`\chi^2` for given confidence level
-co_array
-    Form co-array coordinates from array coordinates
-cubicEqn
-    Find roots of :math:`x^3 + ax^2 + bx + c = 0`
-impulseResp
-    Calculate impulse response of an array
-quadraticEqn
-    Find roots of :math:`ax^2 + bx + c = 0`
-quarticEqn
-    Find roots of :math:`x^4 + ax^3 + bx^2 + cx + d = 0`
-rthEllipse
-    Calculate angles subtending and extremal distances to an ellipse
+    velocity
 
 Notes
 -----
