@@ -43,6 +43,9 @@ arraySig
     Estimate array uncertainties and impulse response
 arraySigPlt
     Plots output of arraySig method
+arraySigContourPlt
+    Plots output of arraySig method onto a polar plot for a specified trace
+    velocity. 
 chi2
     Calculates value of :math:`\chi^2` for given confidence level
 co_array
