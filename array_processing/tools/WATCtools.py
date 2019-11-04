@@ -451,7 +451,7 @@ def srcLoc(rij, tau, nord=2, seedXY_size=0.05, seedV_size=0.3):
     r"""
     Estimate a geopgraphical source location and propagation velocity for an
     event recorded on an array of sensors
-    
+
     Parameters
     ~~~~~~~~~~
     rij : list|array
@@ -460,20 +460,20 @@ def srcLoc(rij, tau, nord=2, seedXY_size=0.05, seedV_size=0.3):
     tau : array
         (n*(n-1)/2, ) unique intersensor TDOA information (delays)
     nord : positive int|inf
-        Order of the norm to calculate the cost function (optional, default 
+        Order of the norm to calculate the cost function (optional, default
         is 2 for the usual Euclidean L2 norm)
     seedXY_size : float
         Geographic seed value (optional, default is 0.05)
     seedXY_size : float
         Propagation velocity seed value (optional, default is 0.3)
-        
+
     Returns
     ~~~~~~~
     Sxyc : array
-        (d+1, ) optimized source location as geographic coordinates (same as 
+        (d+1, ) optimized source location as geographic coordinates (same as
         the columns of `rij`) and propagation speed
     Srtc : array
-        (d+1, ) optimized source location as [range, azimuth, {elevation}, 
+        (d+1, ) optimized source location as [range, azimuth, {elevation},
         propagation speed]
 
     Notes

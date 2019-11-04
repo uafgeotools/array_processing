@@ -189,7 +189,7 @@ def wlsqva(data, rij, Hz, wgt=None):
 def fk_freq(data, fs, rij, vmin, vmax, fmin, fmax, nvel,ntheta):
     """
     f-k beamforming with loop over frequency bands
-    
+
     @ authors: Jordan W. Bishop and David Fee
 
     Parameters
@@ -212,15 +212,15 @@ def fk_freq(data, fs, rij, vmin, vmax, fmin, fmax, nvel,ntheta):
     nvel: float or int
         number of velocity iterations, suggest 100-200
     ntheta: float or int
-        number of azimuth iterations, suggest 100-200 
-        
+        number of azimuth iterations, suggest 100-200
+
     Returns
     ~~~~~~~
     pow_map : array
         (ntheta, nvel))
         beamformed slowness map, not normalized
         can find max using: ix,iy = np.unravel_index(bmpwr.argmax(), bmpwr.shape)
-          
+
 
     """
     fk_freq.__version__ = '1.0'
@@ -229,7 +229,7 @@ def fk_freq(data, fs, rij, vmin, vmax, fmin, fmax, nvel,ntheta):
     rij = np.transpose(rij)
     rij[:, 0] = rij[:, 0] - np.mean(rij[:, 0])
     rij[:, 1] = rij[:, 1] - np.mean(rij[:, 1])
-    
+
     # Getting the size of the data
     [m, nsta] = np.shape(data)
 

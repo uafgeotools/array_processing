@@ -7,44 +7,44 @@ from obspy.geodetics.base import calc_vincenty_inverse
 from functools import reduce
 from itertools import groupby
 from operator import itemgetter
-    
+
 
 def wlsqva_proc(stf,rij,tvec,windur,winover):
     '''
-    Module to run wlsqva array processing 
+    Module to run wlsqva array processing
     @ authors: David Fee, Curt Szuberla
 
     example: vel,az,mdccm,t=wlsqva_proc(stf,rij,tvec,windur,winover)
-    
+
     stf=(d,n) obspy stream of filtered data for n sensors
     rij=(d,n) array of `n` sensor coordinates as [easting, northing, {elevation}]
         column vectors in `d` dimension, units are km
     tvec=(n) time vector in datenum format
     windur=scalar, array processing window length in seconds
-    winover=scalar, array processing window overlap    
-    
+    winover=scalar, array processing window overlap
+
     vel=vector of trace velocities (km/s)
     az=vector of back-azimuths (deg from N)
     mdccm=median of the xcorr max between sensor pairs (0-1)
     t=vector of time windows (datenum)
-            
+
     '''
-    
+
     nchans=len(stf)
     npts=len(stf[0].data)
     Fs=stf[0].stats.sampling_rate
-    
+
     #set up windows
     winlensamp=windur*Fs
     sampinc=int((1-winover)*winlensamp)
     its=np.arange(0,npts,sampinc)
     nits=len(its)-1
-    
+
     vel=np.zeros(nits)
     az=np.zeros(nits)
     mdccm=np.zeros(nits)
     t=np.zeros(nits)
-    
+
     #put data from stream into matrix
     data=np.empty((npts,nchans))
     for i,tr in enumerate(stf):
@@ -67,7 +67,7 @@ def wlsqva_proc(stf,rij,tvec,windur,winover):
     print('Done\n')
 
     return vel,az,mdccm,t,data
-    
+
 
 def array_plot(tvec,data,t,mdccm,vel,az,mcthresh):
     '''
@@ -75,9 +75,9 @@ def array_plot(tvec,data,t,mdccm,vel,az,mcthresh):
     @ authors: David Fee
 
     example: array_plot(stf,tvec,t,mdccm,vel,az,mcthresh):
-    
+
     '''
-    
+
     cm='RdYlBu_r'   #colormap
     cax=0.2,1       #colorbar/y-axis for mccm
 
@@ -88,7 +88,7 @@ def array_plot(tvec,data,t,mdccm,vel,az,mcthresh):
     axs1[0].axis('tight')
     axs1[0].set_ylabel('Pressure [Pa]')
     #set_xlim(st[0].stats.starttime,st[0].stats.endtime)
-    
+
     sc=axs1[1].scatter(t,mdccm,c=mdccm,edgecolors='k',lw=.3,cmap=cm)
     axs1[1].plot([t[0],t[-1]],[mcthresh,mcthresh],'r--')
     axs1[1].axis('tight')
@@ -96,13 +96,13 @@ def array_plot(tvec,data,t,mdccm,vel,az,mcthresh):
     axs1[1].set_ylim(cax)
     sc.set_clim(cax)
     axs1[1].set_ylabel('MdCCM')
-    
+
     sc=axs1[2].scatter(t,vel,c=mdccm,edgecolors='k',lw=.3,cmap=cm)
     axs1[2].set_ylim(.25,.45)
     axs1[2].set_xlim(t[0],t[-1])
     sc.set_clim(cax)
     axs1[2].set_ylabel('Trace Velocity\n [km/s]')
-    
+
     sc=axs1[3].scatter(t,az,c=mdccm,edgecolors='k',lw=.3,cmap=cm)
     #axs1[3].plot([t[0],t[-1]],[azvolc,azvolc],'r--')
     axs1[3].set_ylim(0,360)
@@ -110,13 +110,13 @@ def array_plot(tvec,data,t,mdccm,vel,az,mcthresh):
     axs1[3].set_xlim(t[0],t[-1])
     sc.set_clim(cax)
     axs1[3].set_ylabel('Back-azimuth\n [deg]')
-    
+
     axs1[3].xaxis_date()
     axs1[3].tick_params(axis='x',labelbottom='on')
     axs1[3].fmt_xdata = dates.DateFormatter('%HH:%MM')
     axs1[3].xaxis.set_major_formatter(dates.DateFormatter("%d-%H:%M"))
     axs1[3].set_xlabel('UTC Time')
-    
+
     cbot=.1
     ctop=axs1[1].get_position().y1
     cbaxes=fig1.add_axes([.92,cbot,.02,ctop-cbot])
@@ -124,10 +124,10 @@ def array_plot(tvec,data,t,mdccm,vel,az,mcthresh):
     hc.set_label('MdCCM')
 
     return fig1,axs1
-    
+
 
 def array_thresh(mcthresh,azvolc,azdiff,mdccm,az,vel):
-    
+
     #find values above threshold...using numpy for now
     mcgood=np.where(mdccm>mcthresh)[0]
     azgood=np.where((az>=azvolc-azdiff) & (az<=azvolc+azdiff))[0]
@@ -140,19 +140,19 @@ def array_thresh(mcthresh,azvolc,azdiff,mdccm,az,vel):
         group = list(map(itemgetter(1), g))
         ranges.append((group[0], group[-1]))
         nconsec.append(group[-1]-group[0]+1)
-        
+
     if len(nconsec)>0:
         consecmax=max(nconsec)
     else:
         consecmax=0
     print('%d above trheshold, %d consecutive\n' % (len(igood),consecmax))
-    
+
     return igood
 
 
 def getrij(latlist, lonlist):
     r'''
-    Returns the projected geographic positions in X-Y. Points are calculated 
+    Returns the projected geographic positions in X-Y. Points are calculated
     with the Vicenty inverse and will  have a zero-mean.
 
     @ authors: Jordan W. Bishop and David Fee
@@ -165,7 +165,7 @@ def getrij(latlist, lonlist):
     1) X - a list of cartesian "X"-coordinates
     2) Y - a list of cartesian "Y"-coordinates
 
-    rij - a numpy array with the first row corresponding to cartesian 
+    rij - a numpy array with the first row corresponding to cartesian
     "X"-coordinates and the second row corresponding to cartesian "Y"-coordinates.
 
     '''
@@ -482,8 +482,8 @@ def ift(X, n=None, axis=0, norm=None, allowComplex=False):
 def fstatbland(dtmp, rij,fs,tau):
     """
     calculates the F-statistic based on Blandford's method.
-    
-    @author: David Fee, dfee1@alaska.edu using some WATC/Szuberla codes  
+
+    @author: David Fee, dfee1@alaska.edu using some WATC/Szuberla codes
 
 
     Parameters
@@ -498,35 +498,35 @@ def fstatbland(dtmp, rij,fs,tau):
     tau : array
         (n(n-1)//2, ) time delays of relative signal arrivals (TDOA) for all
         unique sensor pairings
-        
+
     Returns
     ~~~~~~~
     fstat : array
         f-statistic
     snr : float
-        SNR    
-          
+        SNR
+
     Reference:
       Blandford, R. R., 1974, Geophysics, vol. 39, no. 5, p. 633-643
-    
+
     """
     fstatbland.__version__ = '1.0'
 
     import numpy as np
     from Z import phaseAlignIdx, phaseAlignData
-    
+
     m,n=dtmp.shape
     wgt=np.ones(n)
-    
+
     #individual trace offsets from arrival model shifts...zero for this
     Moffset=[0 for i in range(n)]
-    
+
     # calculate beam delays
     beam_delays = phaseAlignIdx(tau, fs, wgt, 0)
-    
+
     # apply shifts, resulting in a zero-padded array
     beamMatrix = phaseAlignData(dtmp, beam_delays, wgt, 0,m,Moffset)
-    
+
     fnum = np.sum(np.sum(beamMatrix,axis=1)**2)
     term1 = np.sum(beamMatrix,axis=1)/n
     term1_0 = term1
@@ -534,12 +534,12 @@ def fstatbland(dtmp, rij,fs,tau):
         term1 = np.vstack((term1,term1_0))
     fden = np.sum(np.sum((beamMatrix.T-term1)**2))
     fstat= (n-1)*fnum/(n*fden)
-    
+
     #calculate snr based on fstat
     snr=np.sqrt((fstat-1)/n)
-    
+
     return fstat,snr
-    
+
 
 def beamForm(data, rij, Hz, azPhi, vel=0.340, r=None, wgt=None, refTrace=None,
              M=None, Moffset=None):
