@@ -1,3 +1,13 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy import optimize
+from scipy.special import gammainc
+from numpy import (log, finfo, float64, where, max, hstack, sort, sin, zeros,
+                   arctan2, array, abs, diff, linspace, meshgrid, vstack, sum,
+                   reshape, isreal, sign, real, sqrt, complex, conj, arccos,
+                   cos, pi)
+from numpy.linalg import eig
+
 
 # -*- coding: utf-8 -*-
 r"""
@@ -134,9 +144,7 @@ def arraySig(rij, kmax, sigLevel, p=0.9, velLims=(0.27, 0.36), NgridV=100,
     # (c) 2019 Curt A. L. Szuberla
     # University of Alaska Fairbanks, all rights reserved
 
-    from numpy import (linspace, pi, meshgrid, sin, cos, zeros, arctan2, array,
-                       sqrt, abs, diff)
-    from numpy.linalg import eig
+
 
 
     # calculate uncertainties
@@ -215,7 +223,6 @@ def impulseResp(dij, kmax, NgridK):
     # (c) 2019 Curt A. L. Szuberla
     # University of Alaska Fairbanks, all rights reserved
 
-    from numpy import linspace, meshgrid, vstack, cos, sum, reshape, sqrt
 
 
     # pre-allocate grid for k-space
@@ -265,8 +272,7 @@ def rthEllipse(a, b, x0, y0):
     # (c) 2019 Curt A. L. Szuberla
     # University of Alaska Fairbanks, all rights reserved
 
-    from numpy import (zeros, abs, finfo, float64, array, sqrt, where, real,
-                       vstack, max, hstack, sort, arctan2, pi)
+
 
     # set constants
     A = 2/a**2
@@ -413,14 +419,12 @@ def chi2(nu, alpha, funcTol=1e-10):
     # University of Alaska Fairbanks, all rights reserved
 
     if nu == 2:
-        from numpy import log
+
         # this shorthand owing to Ken Arnoult
         return -2 * log(alpha)
     else:
         # but just in case we end up with a nu != 2 situation
-        from scipy import optimize
-        from scipy.special import gammainc
-        from numpy import abs
+
         gammaTest = lambda X2test: abs(gammainc(nu/2,
                                                 X2test/2) - (1-alpha))
         return optimize.fmin(func=gammaTest, x0=1, ftol=funcTol, disp=False)
@@ -458,7 +462,6 @@ def quadraticEqn(a,b,c):
     # (c) 2017 Curt A. L. Szuberla
     # University of Alaska Fairbanks, all rights reserved
     #
-    from numpy import isreal, sign, real, sqrt, complex
     # real coefficient branch
     if isreal([a, b, c]).all():
         # note np.sqrt(-1) = nan, so force complex argument
@@ -470,7 +473,6 @@ def quadraticEqn(a,b,c):
             q = -sqrt(complex(-a*c))
     # complex coefficient branch
     else:
-        from numpy import conj
         if real(conj(b)*sqrt(b*b - 4*a*c)) >= 0:
             q = -0.5*(b + sqrt(b*b - 4*a*c))
         else:
@@ -519,7 +521,6 @@ def cubicEqn(a,b,c):
     # University of Alaska Fairbanks, all rights reserved
     #
     cubicEqn.__version__ = '1.0.1'
-    from numpy import isreal, sqrt, real
     Q = a*a/9 - b/3
     R = (3*c - a*b)/6 + a*a*a/27
     Q3 = Q*Q*Q
@@ -529,7 +530,6 @@ def cubicEqn(a,b,c):
     if isreal([a, b, c]).all():
         # 3 real roots
         if R2 < Q3:
-            from numpy import arccos, cos, pi
             sqQ = -2*sqrt(Q)
             theta = arccos(R/sqrt(Q3))
             # this solution first published in 1615 by Viète!
@@ -542,7 +542,6 @@ def cubicEqn(a,b,c):
         else:
             # this is req'd since np.sign(0) = 0
             if R != 0:
-                from numpy import sign
                 A = -sign(R)*(abs(R) + sqrt(R2 - Q3))**(1/3)
             else:
                 A = -sqrt(-Q3)**(1/3)
@@ -559,7 +558,6 @@ def cubicEqn(a,b,c):
     # Q & R complex, so also 1 real, 2 complex roots
     else:
         sqR2mQ3 = sqrt(R2-Q3)
-        from numpy import conj
         if real(conj(R)*sqR2mQ3) >= 0:
             A = -(R+sqR2mQ3)**(1/3)
         else:
@@ -616,7 +614,6 @@ def quarticEqn(a,b,c,d):
     # University of Alaska Fairbanks, all rights reserved
     #
     quarticEqn.__version__ = '1.0.1'
-    from numpy import sqrt, real
     # find *any* root of resolvent cubic
     a2 = a*a
     y = cubicEqn(-b, a*c - 4*d, (4*b - a2)*d - c*c)
@@ -677,9 +674,6 @@ def arraySigPlt(rij, sig, sigV, sigTh, impResp, vel, th, kvec, figName=None):
 
     # this is just a sanity check, so no real docstring
     arraySigPlt.__version__ = '1.0'
-
-    # std. (if inefficient) plotting import block
-    import matplotlib.pyplot as plt
 
     # for plotting methods & scripts
     figFormat = 'png'       # MUCH faster than pdf!!
@@ -751,8 +745,6 @@ def arraySigContourPlt(sigV, sigTh, vel, th, trace_v):
     author: D. Fee
 
     """
-    import matplotlib.pyplot as plt
-    import numpy as np
 
     tvel_ptr = np.abs(vel - trace_v).argmin()
     sigV_cont = sigV[tvel_ptr,:]
@@ -781,4 +773,3 @@ def arraySigContourPlt(sigV, sigTh, vel, th, trace_v):
     ax2.set_title('Back-Azimuth Uncertainty, V=%.2f' % trace_v, va='bottom', pad=20)
 
     return fig
-

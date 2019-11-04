@@ -1,5 +1,5 @@
-import numpy as np
 import sys
+import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import dates
 from ..algorithms.array_algorithms import wlsqva
@@ -7,6 +7,12 @@ from obspy.geodetics.base import calc_vincenty_inverse
 from functools import reduce
 from itertools import groupby
 from operator import itemgetter
+from scipy.signal import convolve2d
+from numpy.fft import fft, ifft
+from numpy import (nan, real, empty, outer, bartlett, isscalar, zeros, pi, cos,
+                   sin, array, sqrt, where, vstack, hstack, tile)
+from numpy.linalg import norm as Norm
+from numpy import min as Min
 
 
 def wlsqva_proc(stf,rij,tvec,windur,winover):
@@ -289,7 +295,6 @@ def psf(x, p=2, w=3, n=3, window=None):
     # private functions up front
     def Ssmooth(S, w, n, window):
         # smooth special format of spectral matries as vectors
-        from scipy.signal import convolve2d
         for k in range(n):
             # f@#$ing MATLAB treats odd/even differently with mode='full'
             # but the behavior below now matches conv2 exactly
@@ -298,10 +303,10 @@ def psf(x, p=2, w=3, n=3, window=None):
         return S
     def triang(N):
         # for historical reasons, the default window shape
-        from numpy import bartlett
         return bartlett(N+2)[1:-1]
     # main code block
-    from numpy import empty, outer, tile, vstack
+
+
     # size up input data
     N, d = x.shape
     # Fourier transform of data matrix by time series columns, retain only
@@ -404,7 +409,6 @@ def ft(x, n=None, axis=0, norm=None):
     # (c) 2016 Curt A. L. Szuberla
     # University of Alaska Fairbanks, all rights reserved
     #
-    from numpy.fft import fft
     # get normalization constant
     N = x.shape
     return fft(x, n, axis, norm)/N[axis]
@@ -467,8 +471,7 @@ def ift(X, n=None, axis=0, norm=None, allowComplex=False):
     # (c) 2016 Curt A. L. Szuberla
     # University of Alaska Fairbanks, all rights reserved
     #
-    from numpy import real
-    from numpy.fft import ifft
+
     # get normalization constant
     N = X.shape
     x = ifft(X, n, axis, norm)*N[axis]
@@ -512,8 +515,6 @@ def fstatbland(dtmp, rij,fs,tau):
     """
     fstatbland.__version__ = '1.0'
 
-    import numpy as np
-    from Z import phaseAlignIdx, phaseAlignData
 
     m,n=dtmp.shape
     wgt=np.ones(n)
@@ -605,7 +606,6 @@ def beamForm(data, rij, Hz, azPhi, vel=0.340, r=None, wgt=None, refTrace=None,
     # (c) 2017 Curt A. L. Szuberla
     # University of Alaska Fairbanks, all rights reserved
     #
-    from numpy import array
     # size things up
     m, nTraces = data.shape
     # -- default parsing & error checking -----------------------------------
@@ -619,7 +619,6 @@ def beamForm(data, rij, Hz, azPhi, vel=0.340, r=None, wgt=None, refTrace=None,
     wgt = array(wgt)    # require array form here for later operations
     # default refTrace is first non-zero wgt
     if refTrace is None:
-        from numpy import min as Min, where
         refTrace = Min(where(wgt != 0)) # requires array wgt
     # default Moffset is zero for all traces
     if Moffset is None:
@@ -633,7 +632,8 @@ def beamForm(data, rij, Hz, azPhi, vel=0.340, r=None, wgt=None, refTrace=None,
     if r is None:
         tau = tauCalcPW(vel, azPhi, rij)
     else:
-        from numpy import isscalar
+
+
         # need to unpack & repack azPhi with care
         if isscalar(azPhi):
             tau = tauCalcSW(vel, [r, azPhi], rij)
@@ -694,12 +694,10 @@ def phaseAlignData(data, delays, wgt, refTrace, M, Moffset, plotFlag=False):
     #
     # -- this is low level code w/out error checks or defaults, designed
     # --  to be called by wrappers that make use of the indices provided
-    from numpy import zeros, array
     # size up data
     m, nTraces = data.shape
     # if plotting, embed in array of np.nan
     if plotFlag:
-        from numpy import nan
         nanOrOne = nan
     else:
         nanOrOne = 1
@@ -728,7 +726,6 @@ def phaseAlignData(data, delays, wgt, refTrace, M, Moffset, plotFlag=False):
         #  -- LHS (graphically, but actually topside in array-land!)
         if alignBounds[0] < 0:
             # pad LHS of traces w zeros or np.nans
-            from numpy import vstack
             data_align = vstack((zeros((-alignBounds[0], nTraces)) * nanOrOne,
                                 data_align))
         elif alignBounds[0] > 0:
@@ -736,7 +733,7 @@ def phaseAlignData(data, delays, wgt, refTrace, M, Moffset, plotFlag=False):
         #  -- RHS (graphically, but actually bottom in array-land!)
         if alignBounds[1] > mp:
             # pad RHS of traces w zeros or np.nans
-            from numpy import vstack
+
             data_align = vstack( (data_align, zeros((alignBounds[1]-mp,
                                       nTraces) ) * nanOrOne))
         elif alignBounds[1] < mp:
@@ -782,7 +779,6 @@ def phaseAlignIdx(tau, Hz, wgt, refTrace):
     #
     # -- this is low level code w/out error checks or defaults, designed
     # --  to be called by wrappers that make use of the indices provided
-    from numpy import sqrt, hstack
     # solve for number of traces from pairings in tau
     nTraces = int(1+sqrt(1+8*len(tau)))//2
     # calculate delays (samples) relative to refTrace for each trace
@@ -835,7 +831,6 @@ def tauCalcPW(vel, azPhi, rij):
     # (c) 2017 Curt A. L. Szuberla
     # University of Alaska Fairbanks, all rights reserved
     #
-    from numpy import vstack, zeros, isscalar, pi, cos, sin, array
     dim, nTraces = rij.shape
     if dim == 2:
         rij = vstack((rij, zeros((1, nTraces))))
@@ -885,8 +880,7 @@ def tauCalcSW(vel, rAzPhi, rij):
     # (c) 2017 Curt A. L. Szuberla
     # University of Alaska Fairbanks, all rights reserved
     #
-    from numpy import vstack, zeros, pi, cos, sin, array, tile
-    from numpy.linalg import norm as Norm
+
     dim, nTraces = rij.shape
     if dim == 2:
         rij = vstack((rij, zeros((1, nTraces))))
@@ -937,8 +931,7 @@ def tauCalcSWxy(vel, xy, rij):
     # (c) 2018 Curt A. L. Szuberla
     # University of Alaska Fairbanks, all rights reserved
     #
-    from numpy import vstack, hstack, tile
-    from numpy.linalg import norm as Norm
+
     dim, nTraces = len(rij), len(rij[0])
     if dim == 2:
         rij = vstack((rij, [0]* nTraces))

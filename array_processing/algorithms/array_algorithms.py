@@ -74,10 +74,6 @@ def wlsqva(data, rij, hz, wgt=None):
     The `data` and `rij` must have a consistent number of sensors. If provided,
     `wgt` must be consistent with the number of sensors.
 
-    This module is self-contained, in the sense that it only requires that
-    the `numpy` package is availble, but need not have been imported into the
-    workspace -- the module imports from `numpy` as required.
-
     Examples
     ~~~~~~~~
     Given an approppriate (m, 4) array ``data``, sampled at 20 Hz, the
@@ -171,8 +167,7 @@ def wlsqva(data, rij, hz, wgt=None):
     az = (arctan2(s_p[0],s_p[1])*180/pi-360)%360
     if dim == 3:
         # if 3D, tack on elevation angle to azimuth
-        from numpy import hstack
-        az = hstack((az, arctan2(s_p[2], norm(s_p[:2], 2))*180/pi))
+        az = np.hstack((az, arctan2(s_p[2], norm(s_p[:2], 2))*180/pi))
     # calculate sig_tau (note: moved abs function inside sqrt so that std.
     # numpy.sqrt can be used; only relevant in 3D case w nearly singular
     # solutions, where argument of sqrt is small, but negative)

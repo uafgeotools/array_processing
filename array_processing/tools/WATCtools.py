@@ -1,3 +1,10 @@
+from scipy.optimize import minimize as nmOpt
+from numpy.linalg import norm
+from numpy import (inf, floor, pi, empty, zeros, hstack, arange, exp, vstack,
+                   flipud, tile, std, average, median, array, round, append)
+from numpy.random import random_sample
+
+
 def bpf(x, band):
     """
     Fourier bandpass-filter a data matrix or vector
@@ -38,7 +45,6 @@ def bpf(x, band):
     # (c) 2017 Curt A. L. Szuberla
     # University of Alaska Fairbanks, all rights reserved
     #
-    from numpy import array, round, append
     # transform time series
     X_bpf = ft(x)
     # sort band
@@ -124,13 +130,14 @@ def MCCMcalc(cmax, wgt=None):
     # (c) 2017 Curt A. L. Szuberla
     # University of Alaska Fairbanks, all rights reserved
     #
-    from numpy import average, median
+
+
     if wgt is None:
         # default is to calculate using all channels & unity for weights
         MCCM = average(cmax)
         MdCCM = median(cmax)
     else:
-        from numpy import array
+
         # first, standard weighted arithmetic mean, allows for
         # arbitrary weights
         Wgt = array([wgt[i]*wgt[j] for i in range(wgt.size-1)
@@ -189,9 +196,7 @@ def randc(N, beta=0.0):
     # (c) 2017 Curt A. L. Szuberla
     # University of Alaska Fairbanks, all rights reserved
     #
-    from numpy import (inf, floor, pi, empty, zeros, hstack, arange, exp,
-                       vstack, flipud, tile, std)
-    from numpy.random import random_sample
+
     # catch scalar input & form tuple
     if type(N) is int:
         N = (N,)
@@ -284,8 +289,7 @@ def srcLoc(rij, tau, nord=2, seedXY_size=0.05, seedV_size=0.3):
     # (c) 2018 Curt A. L. Szuberla
     # University of Alaska Fairbanks, all rights reserved
     #
-    from scipy.optimize import minimize as nmOpt
-    from numpy.linalg import norm
+
     # cost function
     def minTau(xyv_trial, tau_o, rij):
         tau_trial = tauCalcSWxy(xyv_trial[-1], xyv_trial[:-1], rij)
