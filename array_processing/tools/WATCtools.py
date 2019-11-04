@@ -1,64 +1,3 @@
-
-# -*- coding: utf-8 -*-
-"""
-WATCtools
-=========
-
-Provides
-    1. Array processing methods applicable to geophysical time series
-    2. Parameter estimation tools
-    3. Support functions for digital signal processing
-
-How to use the module
-~~~~~~~~~~~~~~~~~~~~~
-Documentation is available in docstrings provided with the code. The
-docstring examples assume that `WATCtools` has been imported as `watc`::
-
-    import WATCtools as watc
-
-Code snippets are indicated by three greater-than signs::
-
-    >>> x = 42
-    >>> x = x + 1
-
-Use the built-in ``help`` function to view a function's docstring::
-
-    >>> help(watc.bpf)
-
-Each of the module's methods may be called as::
-
-    >>> watc.bpf(data, filt_band)
-
-or imported individually and called as::
-
-    >>> from WATCtools import bpf
-    >>> bpf(data, filt_band)
-
-Available methods
-~~~~~~~~~~~~~~~~~
-bpf
-    Fourier bandpass-filter data matrix or vector
-MCCMcalc
-    Weighted mean (and median) of the cross-correlation maxima from wlsqva
-psf
-    Pure state filter data matrix
-randc
-    Colored noise generator (e.g., 1/f "pink" noise)
- srcLoc
-    Estimate source location and trace velocity
-
-Notes
-~~~~~
-Unless otherwise indicated, all of the methods in this module are assumed
-written for use under Python 3.*
-
-"""
-
-# Archival note: per PEP 396, for a module with version-numbered methods,
-# the module has no version number.  Each method in this module has a
-# version-number embedded as an attribute per PEP 440 as (e.g.):
-#       method.__version__ = '3.2.1'
-
 def bpf(x, band):
     """
     Fourier bandpass-filter a data matrix or vector
@@ -132,156 +71,6 @@ def bpf(x, band):
     X_bpf[idxx] = 0
     x_bpf = ift(X_bpf, allowComplex=False)  # guarantee real output
     return x_bpf, X_bpf
-
-
-def co_array(rij):
-    """
-    Form co-array coordinates for given array coordinates
-
-    Parameters
-    ~~~~~~~~~~
-    rij : array
-        (d, n) `n` sensor coordinates as [northing, easting, {elevation}]
-        column vectors in `d` dimensions
-
-    Returns
-    ~~~~~~~
-    xij : array
-        (d, n(n-1)//2) co-array, coordinates of the sensor pairing separations
-
-    Version
-    ~~~~~~~
-    1.0 -- 13 Feb 2017
-
-    """
-    co_array.__version__ = '1.0.0'
-    # (c) 2017 Curt A. L. Szuberla
-    # University of Alaska Fairbanks, all rights reserved
-    #
-    idx = [(i, j) for i in range(rij.shape[1]-1)
-                    for j in range(i+1,rij.shape[1])]
-    return rij[:,[i[0] for i in idx]] - rij[:,[j[1] for j in idx]]
-
-
-def ft(x, n=None, axis=0, norm=None):
-    """
-    Sentman-like normalization of numpy's fft
-
-    This function calculates the fast Fourier transform of a time series.
-
-    Parameters
-    ~~~~~~~~~~
-    x : array
-        Array of data, can be complex
-    n : int, optional
-        Length of the transformed axis of the output.
-        If `n` is smaller than the length of the input, the input is cropped.
-        If it is larger, the input is padded with zeros.  If `n` is not given,
-        the length of the input along the axis specified by `axis` is used.
-    axis : int, optional
-        Axis over which to compute the FFT.  Default is 0.
-    norm : {None, "ortho"}, optional
-        Normalization mode (see `numpy.fft`). Default is None.
-
-    Returns
-    ~~~~~~~
-    out : complex array
-        The truncated or zero-padded input, transformed along the
-        indicated axis.
-
-    See Also
-    ~~~~~~~~
-    ift : from `Z.py`, Sentman-like normalization of ifft
-    numpy.fft : master fft functions
-
-    Notes
-    ~~~~~
-    This function is just `numpy.fft.fft` with Dr. Davis Sentman
-    normalization such that the DC components of the transform are the
-    mean of the each column/row in the input time series.
-
-    Version
-    ~~~~~~~
-    1.0.1 -- 3 Oct 2016
-
-    """
-    ft.__version__ = '1.0.1'
-    # (c) 2016 Curt A. L. Szuberla
-    # University of Alaska Fairbanks, all rights reserved
-    #
-    from numpy.fft import fft
-    # get normalization constant
-    N = x.shape
-    return fft(x, n, axis, norm)/N[axis]
-
-
-def ift(X, n=None, axis=0, norm=None, allowComplex=False):
-    r"""
-    Sentman-like normalization of numpy's ifft
-
-    This function calculates the fast Fourier inverse transform of a
-    frequency series.
-
-    Parameters
-    ~~~~~~~~~~
-    X : array
-        Array of data, can be complex
-    n : int, optional
-        Length of the transformed axis of the output.
-        If `n` is smaller than the length of the input, the input is cropped.
-        If it is larger, the input is padded with zeros.  If `n` is not given,
-        the length of the input along the axis specified by `axis` is used.
-    axis : int, optional
-        Axis over which to compute the FFT.  Default is 0.
-    norm : {None, "ortho"}, optional
-        Normalization mode (see `numpy.fft`).  Default is None.
-    allowComplex : boolean
-        If False, will force real output.  This is useful for suppressing
-        cases of spurious (machine precision) imaginary parts where the
-        time series are known to be real.  Default is False.
-
-    Returns
-    ~~~~~~~
-    out : complex array
-        The truncated or zero-padded input, transformed along the
-        indicated axis.
-
-    See Also
-    ~~~~~~~~
-    ft : from `Z.py`, Sentman-like normalization of fft
-    numpy.fft : master fft functions
-
-    Notes
-    ~~~~~
-    This function is just `numpy.fft.ifft` with Dr. Davis Sentman
-    normalization such that the DC components of the input are the
-    mean of the each column/row in the output time series.
-
-    To check on the small imaginary parts of an inverse transform
-    one could insert the code below. ::
-
-        from numpy.linalg import norm as Norm
-        print(Norm(x.imag))}``
-
-    Version
-    ~~~~~~~
-    1.0.1 -- 7 Oct 2016
-
-    """
-    ift.__version__ = '1.0.1'
-    # (c) 2016 Curt A. L. Szuberla
-    # University of Alaska Fairbanks, all rights reserved
-    #
-    from numpy import real
-    from numpy.fft import ifft
-    # get normalization constant
-    N = X.shape
-    x = ifft(X, n, axis, norm)*N[axis]
-    # force real output, if requested
-    if allowComplex:
-        return x
-    else:
-        return real(x)
 
 
 def MCCMcalc(cmax, wgt=None):
@@ -487,6 +276,10 @@ def srcLoc(rij, tau, nord=2, seedXY_size=0.05, seedV_size=0.3):
     ~~~~~~~
     1.0.2 -- 19 Mar 2018
     """
+
+    # The below line can be removed once we add rij2rTh
+    raise NotImplementedError('rij2rTh not available!')
+
     srcLoc.__version__ = '1.0.2'
     # (c) 2018 Curt A. L. Szuberla
     # University of Alaska Fairbanks, all rights reserved
@@ -505,5 +298,3 @@ def srcLoc(rij, tau, nord=2, seedXY_size=0.05, seedV_size=0.3):
     costFn = lambda xyv_trial: minTau(xyv_trial, tau, rij)
     xyv_opt = nmOpt(costFn, xyv_seed, method='Nelder-Mead')
     return xyv_opt.x, rij2rTh(xyv_opt.x[:len(rij)])
-
-
