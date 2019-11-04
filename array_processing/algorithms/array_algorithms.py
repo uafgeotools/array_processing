@@ -1,12 +1,12 @@
 import numpy as np
-from math import (pow, ceil)
+from math import pow, ceil
 from obspy.signal.invsim import cosine_taper
-from numpy import (array, diag, empty, correlate, argmax, pi, arctan2,
-                       abs, eye, sqrt)
+from numpy import array, diag, empty, correlate, argmax, pi, arctan2, abs, eye, sqrt
 from numpy.linalg import norm, inv
 
-def wlsqva(data, rij, Hz, wgt=None):
-    r"""
+
+def wlsqva(data, rij, hz, wgt=None):
+    """
     Weighted least squares solution for slowness of a plane wave crossing
     an array of sensors
 
@@ -24,7 +24,7 @@ def wlsqva(data, rij, Hz, wgt=None):
     rij : array
         (d, n) `n` sensor coordinates as [northing, easting, {elevation}]
         column vectors in `d` dimensions
-    Hz : float or int
+    hz : float or int
         sample rate
     wgt : list or array
         optional list|vector of relative weights of length `n`
@@ -107,8 +107,8 @@ def wlsqva(data, rij, Hz, wgt=None):
     Version
     ~~~~~~~
     4.0.2 -- 28 Feb 2017
-
     """
+
     wlsqva.__version__ = '4.0.2'
     # (c) 2017 Curt A. L. Szuberla
     # University of Alaska Fairbanks, all rights reserved
@@ -163,7 +163,7 @@ def wlsqva(data, rij, Hz, wgt=None):
     cmax[[i for i in range(N) if W[i][i] == 0]] = 0  # set to zero if not Wvec
     delay = argmax(cij, axis=0)+1 # MATLAB-esque +1 offset here for tau
     # form tau vector
-    tau = (m - delay)/Hz
+    tau = (m - delay)/hz
     # form auxiliary arrays for general weighted LS
     X_p = W@xij.T
     tau_p = W@tau
@@ -186,7 +186,7 @@ def wlsqva(data, rij, Hz, wgt=None):
     return vel, az, tau_p, cmax, sig_tau_p, s_p, xij
 
 
-def fk_freq(data, fs, rij, vmin, vmax, fmin, fmax, nvel,ntheta):
+def fk_freq(data, fs, rij, vmin, vmax, fmin, fmax, nvel, ntheta):
     """
     f-k beamforming with loop over frequency bands
 
@@ -220,8 +220,6 @@ def fk_freq(data, fs, rij, vmin, vmax, fmin, fmax, nvel,ntheta):
         (ntheta, nvel))
         beamformed slowness map, not normalized
         can find max using: ix,iy = np.unravel_index(bmpwr.argmax(), bmpwr.shape)
-
-
     """
     fk_freq.__version__ = '1.0'
 
