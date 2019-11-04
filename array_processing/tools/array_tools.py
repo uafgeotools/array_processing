@@ -10,8 +10,8 @@ from operator import itemgetter
 from scipy.signal import convolve2d
 
 
-def wlsqva_proc(stf,rij,tvec,windur,winover):
-    '''
+def wlsqva_proc(stf, rij, tvec, windur, winover):
+    """
     Module to run wlsqva array processing
     @ authors: David Fee, Curt Szuberla
 
@@ -28,8 +28,7 @@ def wlsqva_proc(stf,rij,tvec,windur,winover):
     az=vector of back-azimuths (deg from N)
     mdccm=median of the xcorr max between sensor pairs (0-1)
     t=vector of time windows (datenum)
-
-    '''
+    """
 
     nchans=len(stf)
     npts=len(stf[0].data)
@@ -70,14 +69,13 @@ def wlsqva_proc(stf,rij,tvec,windur,winover):
     return vel,az,mdccm,t,data
 
 
-def array_plot(tvec,data,t,mdccm,vel,az,mcthresh):
-    '''
+def array_plot(tvec, data, t, mdccm, vel, az, mcthresh):
+    """
     Module to run plot array processing results
     @ authors: David Fee
 
     example: array_plot(stf,tvec,t,mdccm,vel,az,mcthresh):
-
-    '''
+    """
 
     cm='RdYlBu_r'   #colormap
     cax=0.2,1       #colorbar/y-axis for mccm
@@ -127,7 +125,7 @@ def array_plot(tvec,data,t,mdccm,vel,az,mcthresh):
     return fig1,axs1
 
 
-def array_thresh(mcthresh,azvolc,azdiff,mdccm,az,vel):
+def array_thresh(mcthresh, azvolc, azdiff, mdccm, az, vel):
 
     #find values above threshold...using numpy for now
     mcgood=np.where(mdccm>mcthresh)[0]
@@ -152,7 +150,7 @@ def array_thresh(mcthresh,azvolc,azdiff,mdccm,az,vel):
 
 
 def getrij(latlist, lonlist):
-    r'''
+    """
     Returns the projected geographic positions in X-Y. Points are calculated
     with the Vicenty inverse and will  have a zero-mean.
 
@@ -168,7 +166,7 @@ def getrij(latlist, lonlist):
 
     rij - a numpy array with the first row corresponding to cartesian
     "X"-coordinates and the second row corresponding to cartesian "Y"-coordinates.
-    '''
+    """
 
     # Basic error checking
     latsize = len(latlist)
@@ -203,7 +201,7 @@ def getrij(latlist, lonlist):
 
 
 def psf(x, p=2, w=3, n=3, window=None):
-    r"""
+    """
     Pure-state filter a data matrix
 
     This function uses a generalized coherence estimator to enhance coherent
@@ -390,12 +388,8 @@ def ft(x, n=None, axis=0, norm=None):
     This function is just `numpy.fft.fft` with Dr. Davis Sentman
     normalization such that the DC components of the transform are the
     mean of the each column/row in the input time series.
-
-    Version
-    ~~~~~~~
-    1.0.1 -- 3 Oct 2016
-
     """
+
     # (c) 2016 Curt A. L. Szuberla
     # University of Alaska Fairbanks, all rights reserved
     #
@@ -405,7 +399,7 @@ def ft(x, n=None, axis=0, norm=None):
 
 
 def ift(X, n=None, axis=0, norm=None, allowComplex=False):
-    r"""
+    """
     Sentman-like normalization of numpy's ifft
 
     This function calculates the fast Fourier inverse transform of a
@@ -451,12 +445,8 @@ def ift(X, n=None, axis=0, norm=None, allowComplex=False):
 
         from numpy.linalg import norm
         print(norm(x.imag))}``
-
-    Version
-    ~~~~~~~
-    1.0.1 -- 7 Oct 2016
-
     """
+
     # (c) 2016 Curt A. L. Szuberla
     # University of Alaska Fairbanks, all rights reserved
     #

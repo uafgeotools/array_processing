@@ -4,8 +4,7 @@ from scipy import optimize
 from scipy.special import gammainc
 
 
-# -*- coding: utf-8 -*-
-r"""
+"""
 arrayCharacteristics
 --------------------
 Provides
@@ -68,13 +67,10 @@ All of the methods in this module are written for use under Python 3.*
       University of Alaska Fairbanks, all rights reserved
 """
 
-# unicode test & digital signature of this module
-wolf = '\U0001F43A'
-print(wolf)
 
 def arraySig(rij, kmax, sigLevel, p=0.9, velLims=(0.27, 0.36), NgridV=100,
              NgridTh=100, NgridK=100):
-    r"""
+    """
     Estimate 2D array uncertainties in trace velocity and back azimuth,
     calculate impulse response
 
@@ -348,7 +344,7 @@ def co_array(rij):
 
 
 def chi2(nu, alpha, funcTol=1e-10):
-    r"""
+    """
     Calculate value of a :math:`\chi^2` such that a :math:`\nu`-dimensional
     confidence ellipsoid encloses a fraction :math:`1 - \alpha` of normally
     distributed variable
@@ -386,7 +382,7 @@ def chi2(nu, alpha, funcTol=1e-10):
 
 
 def quadraticEqn(a,b,c):
-    r"""
+    """
     Roots of quadratic equation in the form :math:`ax^2 + bx + c = 0`
 
     Parameters

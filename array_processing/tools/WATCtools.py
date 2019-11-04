@@ -73,7 +73,7 @@ def bpf(x, band):
 
 
 def MCCMcalc(cmax, wgt=None):
-    r"""
+    """
     Weighted mean (and median) of the cross-correlation maxima of wlsqva
 
     This method calculates `MCCM` as the weighted arithmetic mean of the cross-
@@ -139,7 +139,7 @@ def MCCMcalc(cmax, wgt=None):
 
 
 def randc(N, beta=0.0):
-    r"""
+    """
     Colored noise generator
 
     This function generates pseudo-random colored noise (power spectrum
@@ -225,7 +225,7 @@ def randc(N, beta=0.0):
 
 
 def srcLoc(rij, tau, nord=2, seedXY_size=0.05, seedV_size=0.3):
-    r"""
+    """
     Estimate a geopgraphical source location and propagation velocity for an
     event recorded on an array of sensors
 
