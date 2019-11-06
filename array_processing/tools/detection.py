@@ -1,33 +1,5 @@
-from scipy import optimize
 import numpy as np
-from .other import tauCalcSWxy, phaseAlignIdx, phaseAlignData
-from functools import reduce
-from itertools import groupby
-from operator import itemgetter
-
-
-def array_thresh(mcthresh, azvolc, azdiff, mdccm, az, vel):
-
-    #find values above threshold...using numpy for now
-    mcgood=np.where(mdccm>mcthresh)[0]
-    azgood=np.where((az>=azvolc-azdiff) & (az<=azvolc+azdiff))[0]
-    velgood=np.where((vel>=.25) & (vel<=.45))[0]
-    igood=reduce(np.intersect1d,(mcgood,azgood,velgood))
-
-    ranges=[]
-    nconsec=[]
-    for k, g in groupby(enumerate(igood), lambda x:x[0]-x[1]):
-        group = list(map(itemgetter(1), g))
-        ranges.append((group[0], group[-1]))
-        nconsec.append(group[-1]-group[0]+1)
-
-    if len(nconsec)>0:
-        consecmax=max(nconsec)
-    else:
-        consecmax=0
-    print('%d above trheshold, %d consecutive\n' % (len(igood),consecmax))
-
-    return igood
+from .other import phaseAlignIdx, phaseAlignData
 
 
 def MCCMcalc(cmax, wgt=None):
