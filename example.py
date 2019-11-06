@@ -2,7 +2,6 @@
 
 from waveform_collection import gather_waveforms
 from obspy.core import UTCDateTime
-from matplotlib import dates
 
 SOURCE = 'IRIS'
 NETWORK = 'AV'
