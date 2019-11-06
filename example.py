@@ -29,7 +29,7 @@ stf = st.copy()
 stf.filter('bandpass', freqmin=FMIN, freqmax=FMAX, corners=2, zerophase=True)
 stf.taper(max_percentage=.01)
 
-tvec = dates.date2num(stf[0].stats.starttime.datetime)+stf[0].times()/86400
+tvec = stf[0].times('matplotlib')
 
 #%% Array processing and plotting using least squares
 
