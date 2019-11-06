@@ -489,7 +489,9 @@ def randc(N, beta=0.0):
     if not beta:
         r[0] = 0
     # inverse transform to get time series as columns, ensuring real output
-    r = ift(r*phasor, allowComplex=False)
+    X = r*phasor
+    r = np.real(np.fft.ifft(X, axis=0)*X.shape[0])
+
     # renormalize r such that mean = 0 & std = 1 (MATLAB dof default used)
     # and return it in its original shape (i.e., a 1D vector, if req'd)
     return r.reshape(N) / np.std(r, ddof=1)
@@ -595,7 +597,8 @@ def psf(x, p=2, w=3, n=3, window=None):
     N, d = x.shape
     # Fourier transform of data matrix by time series columns, retain only
     # the diagonal & above (unique spectral components)
-    X = ft(x)
+    Nx = x.shape
+    X = np.fft.fft(x, axis=0)/Nx[0]
     X = X[:N//2+1, :]
     # form spectral matrix stack in reduced vector form (**significant**
     # speed improvement due to memory problem swith 3D tensor format -- what
@@ -641,9 +644,10 @@ def psf(x, p=2, w=3, n=3, window=None):
     # apply P as contrast agent to frequency series
     X *= np.tile(P ** p, d).reshape(X.shape[::-1]).T
     # inverse transform X and ensure real output
-    x_psf = ift(np.vstack((X[list(range(N // 2 + 1))],
-                              X[list(range(N//2-fudgeIdx,0,-1))].conj())),
-                allowComplex=False)
+    XX = np.vstack((X[list(range(N // 2 + 1))],
+                    X[list(range(N//2-fudgeIdx,0,-1))].conj()))
+    x_psf = np.real(np.fft.ifft(XX, axis=0)*XX.shape[0])
+
     return x_psf, P
 
 
