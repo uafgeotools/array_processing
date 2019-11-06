@@ -1,7 +1,5 @@
 import sys
 import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib import dates
 from ..algorithms.array_algorithms import wlsqva
 from obspy.geodetics.base import calc_vincenty_inverse
 
@@ -63,62 +61,6 @@ def wlsqva_proc(stf, rij, tvec, windur, winover):
     print('Done\n')
 
     return vel,az,mdccm,t,data
-
-
-def array_plot(tvec, data, t, mdccm, vel, az, mcthresh):
-    """
-    Module to run plot array processing results
-    @ authors: David Fee
-
-    example: array_plot(stf,tvec,t,mdccm,vel,az,mcthresh):
-    """
-
-    cm='RdYlBu_r'   #colormap
-    cax=0.2,1       #colorbar/y-axis for mccm
-
-    fig1, axarr1 = plt.subplots(4, 1,sharex='col')
-    fig1.set_size_inches(10,9)
-    axs1=axarr1.ravel()
-    axs1[0].plot(tvec,data[:,0],'k')
-    axs1[0].axis('tight')
-    axs1[0].set_ylabel('Pressure [Pa]')
-    #set_xlim(st[0].stats.starttime,st[0].stats.endtime)
-
-    sc=axs1[1].scatter(t,mdccm,c=mdccm,edgecolors='k',lw=.3,cmap=cm)
-    axs1[1].plot([t[0],t[-1]],[mcthresh,mcthresh],'r--')
-    axs1[1].axis('tight')
-    axs1[1].set_xlim(t[0],t[-1])
-    axs1[1].set_ylim(cax)
-    sc.set_clim(cax)
-    axs1[1].set_ylabel('MdCCM')
-
-    sc=axs1[2].scatter(t,vel,c=mdccm,edgecolors='k',lw=.3,cmap=cm)
-    axs1[2].set_ylim(.25,.45)
-    axs1[2].set_xlim(t[0],t[-1])
-    sc.set_clim(cax)
-    axs1[2].set_ylabel('Trace Velocity\n [km/s]')
-
-    sc=axs1[3].scatter(t,az,c=mdccm,edgecolors='k',lw=.3,cmap=cm)
-    #axs1[3].plot([t[0],t[-1]],[azvolc,azvolc],'r--')
-    axs1[3].set_ylim(0,360)
-
-    axs1[3].set_xlim(t[0],t[-1])
-    sc.set_clim(cax)
-    axs1[3].set_ylabel('Back-azimuth\n [deg]')
-
-    axs1[3].xaxis_date()
-    axs1[3].tick_params(axis='x',labelbottom='on')
-    axs1[3].fmt_xdata = dates.DateFormatter('%HH:%MM')
-    axs1[3].xaxis.set_major_formatter(dates.DateFormatter("%d-%H:%M"))
-    axs1[3].set_xlabel('UTC Time')
-
-    cbot=.1
-    ctop=axs1[1].get_position().y1
-    cbaxes=fig1.add_axes([.92,cbot,.02,ctop-cbot])
-    hc=plt.colorbar(sc,cax=cbaxes)
-    hc.set_label('MdCCM')
-
-    return fig1,axs1
 
 
 def getrij(latlist, lonlist):
