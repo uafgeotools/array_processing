@@ -1,6 +1,6 @@
 import sys
 import numpy as np
-from ..algorithms.array_algorithms import wlsqva
+from ..algorithms.wlsqva import wlsqva
 from obspy.geodetics.base import calc_vincenty_inverse
 
 
