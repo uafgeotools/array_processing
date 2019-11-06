@@ -47,11 +47,11 @@ rthEllipse
 co_array
     Form co-array coordinates from array coordinates
 chi2
-    Calculates value of :math:`\chi^2` for given confidence level    
+    Calculates value of :math:`\chi^2` for given confidence level       
+cubicEqn
+    Find roots of :math:`x^3 + ax^2 + bx + c = 0`     
 quadraticEqn
     Find roots of :math:`ax^2 + bx + c = 0`    
-cubicEqn
-    Find roots of :math:`x^3 + ax^2 + bx + c = 0`
 quarticEqn
     Find roots of :math:`x^4 + ax^3 + bx^2 + cx + d = 0`
 
@@ -378,59 +378,6 @@ def chi2(nu, alpha, funcTol=1e-10):
         return optimize.fmin(func=gammaTest, x0=1, ftol=funcTol, disp=False)
 
 
-def quadraticEqn(a,b,c):
-    """
-    Roots of quadratic equation in the form :math:`ax^2 + bx + c = 0`
-
-    Parameters
-    ~~~~~~~~~~
-    a, b, c : int or float, can be complex
-        Scalar coefficients of quadratic equation in standard form
-
-    Returns
-    ~~~~~~~
-    x : list
-        Roots of quadratic equation in standard form
-
-    See Also
-    ~~~~~~~~
-    numpy.roots : generic polynomial root finder
-
-    Notes
-    ~~~~~
-    1) Stable solutions, even for :math:`b^2 >> ac` or complex coefficients,
-    per algorithm of NR 2d ed. :math:`\S` 5.6.
-    """
-
-    # (c) 2017 Curt A. L. Szuberla
-    # University of Alaska Fairbanks, all rights reserved
-    #
-    # real coefficient branch
-    if np.isreal([a, b, c]).all():
-        # note np.sqrt(-1) = nan, so force complex argument
-        if b:
-            # std. sub-branch
-            q = -0.5*(b + np.sign(b) * np.sqrt(np.complex(b * b - 4 * a * c)))
-        else:
-            # b = 0 sub-branch
-            q = -np.sqrt(np.complex(-a * c))
-    # complex coefficient branch
-    else:
-        if np.real(np.conj(b) * np.sqrt(b * b - 4 * a * c)) >= 0:
-            q = -0.5*(b + np.sqrt(b * b - 4 * a * c))
-        else:
-            q = -0.5*(b - np.sqrt(b * b - 4 * a * c))
-    # stable root solution
-    x = [q/a, c/q]
-    # parse real and/or int roots for tidy output
-    for k in 0,1:
-        if np.real(x[k]) == x[k]:
-            x[k] = float(np.real(x[k]))
-            if int(x[k]) == x[k]:
-                x[k] = int(x[k])
-    return x
-
-
 def cubicEqn(a,b,c):
     """
     Roots of cubic equation in the form :math:`x^3 + ax^2 + bx + c = 0`
@@ -513,6 +460,59 @@ def cubicEqn(a,b,c):
                 ]
     # parse real and/or int roots for tidy output
     for k in range(0,3):
+        if np.real(x[k]) == x[k]:
+            x[k] = float(np.real(x[k]))
+            if int(x[k]) == x[k]:
+                x[k] = int(x[k])
+    return x
+
+
+def quadraticEqn(a,b,c):
+    """
+    Roots of quadratic equation in the form :math:`ax^2 + bx + c = 0`
+
+    Parameters
+    ~~~~~~~~~~
+    a, b, c : int or float, can be complex
+        Scalar coefficients of quadratic equation in standard form
+
+    Returns
+    ~~~~~~~
+    x : list
+        Roots of quadratic equation in standard form
+
+    See Also
+    ~~~~~~~~
+    numpy.roots : generic polynomial root finder
+
+    Notes
+    ~~~~~
+    1) Stable solutions, even for :math:`b^2 >> ac` or complex coefficients,
+    per algorithm of NR 2d ed. :math:`\S` 5.6.
+    """
+
+    # (c) 2017 Curt A. L. Szuberla
+    # University of Alaska Fairbanks, all rights reserved
+    #
+    # real coefficient branch
+    if np.isreal([a, b, c]).all():
+        # note np.sqrt(-1) = nan, so force complex argument
+        if b:
+            # std. sub-branch
+            q = -0.5*(b + np.sign(b) * np.sqrt(np.complex(b * b - 4 * a * c)))
+        else:
+            # b = 0 sub-branch
+            q = -np.sqrt(np.complex(-a * c))
+    # complex coefficient branch
+    else:
+        if np.real(np.conj(b) * np.sqrt(b * b - 4 * a * c)) >= 0:
+            q = -0.5*(b + np.sqrt(b * b - 4 * a * c))
+        else:
+            q = -0.5*(b - np.sqrt(b * b - 4 * a * c))
+    # stable root solution
+    x = [q/a, c/q]
+    # parse real and/or int roots for tidy output
+    for k in 0,1:
         if np.real(x[k]) == x[k]:
             x[k] = float(np.real(x[k]))
             if int(x[k]) == x[k]:
