@@ -29,6 +29,7 @@ def array_thresh(mcthresh, azvolc, azdiff, mdccm, az, vel):
 
     return igood
 
+
 def beamForm(data, rij, Hz, azPhi, vel=0.340, r=None, wgt=None, refTrace=None,
              M=None, Moffset=None):
     """
