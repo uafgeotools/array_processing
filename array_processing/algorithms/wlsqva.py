@@ -1,8 +1,4 @@
 import numpy as np
-from math import pow, ceil
-from obspy.signal.invsim import cosine_taper
-from numpy import array, diag, empty, correlate, argmax, pi, arctan2, abs, eye, sqrt
-from numpy.linalg import norm, inv
 
 
 def wlsqva(data, rij, hz, wgt=None):
@@ -74,10 +70,6 @@ def wlsqva(data, rij, hz, wgt=None):
     The `data` and `rij` must have a consistent number of sensors. If provided,
     `wgt` must be consistent with the number of sensors.
 
-    This module is self-contained, in the sense that it only requires that
-    the `numpy` package is availble, but need not have been imported into the
-    workspace -- the module imports from `numpy` as required.
-
     Examples
     ~~~~~~~~
     Given an approppriate (m, 4) array ``data``, sampled at 20 Hz, the
@@ -125,11 +117,11 @@ def wlsqva(data, rij, hz, wgt=None):
     # set default wgt, recast as an array, form W array
     if wgt is None:
         # all ones (any constant will do)
-        wgt = array([1 for i in range(nTraces)])
+        wgt = np.array([1 for i in range(nTraces)])
         N_w = nTraces
         # -- no need for an error check since all channels kept
     else:
-        wgt = array(wgt)
+        wgt = np.array(wgt)
         # -- error checks on wgt done here since now in array form
         if len(wgt) != nTraces:
             raise IndexError('len(wgt) != ' + str(nTraces))
@@ -143,159 +135,39 @@ def wlsqva(data, rij, hz, wgt=None):
     # -- co-array is now a one-liner
     xij = rij[:,[i[0] for i in idx]] - rij[:,[j[1] for j in idx]]
     # -- same for generalized weight array
-    W = diag([i[2] for i in idx])
+    W = np.diag([i[2] for i in idx])
     # compute cross correlations across co-array
     N = xij.shape[1]           # number of unique inter-sensor pairs
-    cij = empty((m*2-1, N))    # pre-allocated cross-correlation matrix
+    cij = np.empty((m * 2 - 1, N))    # pre-allocated cross-correlation matrix
     for k in range(N):
         # MATLAB's xcorr w/ 'coeff' normalization: unit auto-correlations
         # and save a little time by only calculating on weighted pairs
         if W[k][k]:
-            cij[:,k] = (correlate(data[:,idx[k][0]], data[:,idx[k][1]],
-               mode='full') / sqrt(sum(data[:,idx[k][0]]*data[:,idx[k][0]]) *
-                sum(data[:,idx[k][1]]*data[:,idx[k][1]])))
+            cij[:,k] = (np.correlate(data[:, idx[k][0]], data[:, idx[k][1]],
+                                        mode='full') / np.sqrt(sum(data[:, idx[k][0]] * data[:, idx[k][0]]) *
+                                                                  sum(data[:,idx[k][1]]*data[:,idx[k][1]])))
     # extract cross correlation maxima and associated delays
     cmax = cij.max(axis=0)
     cmax[[i for i in range(N) if W[i][i] == 0]] = 0  # set to zero if not Wvec
-    delay = argmax(cij, axis=0)+1 # MATLAB-esque +1 offset here for tau
+    delay = np.argmax(cij, axis=0) + 1 # MATLAB-esque +1 offset here for tau
     # form tau vector
     tau = (m - delay)/hz
     # form auxiliary arrays for general weighted LS
     X_p = W@xij.T
     tau_p = W@tau
     # calculate least squares slowness vector
-    s_p = inv(X_p.T@X_p) @ X_p.T @ tau_p
+    s_p = np.linalg.inv(X_p.T@X_p) @ X_p.T @ tau_p
     # re-cast slowness as geographic vel, az (and phi, if req'd)
-    vel = 1/norm(s_p, 2)
+    vel = 1/np.linalg.norm(s_p, 2)
     # this converts az from mathematical CCW from E to geographical CW from N
-    az = (arctan2(s_p[0],s_p[1])*180/pi-360)%360
+    az = (np.arctan2(s_p[0], s_p[1]) * 180 / np.pi - 360) % 360
     if dim == 3:
         # if 3D, tack on elevation angle to azimuth
-        from numpy import hstack
-        az = hstack((az, arctan2(s_p[2], norm(s_p[:2], 2))*180/pi))
+        az = np.hstack((az, np.arctan2(s_p[2], np.linalg.norm(s_p[:2], 2)) * 180 / np.pi))
     # calculate sig_tau (note: moved abs function inside sqrt so that std.
-    # numpy.sqrt can be used; only relevant in 3D case w nearly singular
+    # np.sqrt can be used; only relevant in 3D case w nearly singular
     # solutions, where argument of sqrt is small, but negative)
     N_p = N_w*(N_w-1)/2
-    sig_tau_p = sqrt(abs(tau_p @ (eye(N) - X_p @ inv(X_p.T @ X_p) @ X_p.T) @
-                       tau_p / (N_p - dim)))
+    sig_tau_p = np.sqrt(np.abs(tau_p @ (np.eye(N) - X_p @ np.linalg.inv(X_p.T @ X_p) @ X_p.T) @
+                                     tau_p / (N_p - dim)))
     return vel, az, tau_p, cmax, sig_tau_p, s_p, xij
-
-
-def fk_freq(data, fs, rij, vmin, vmax, fmin, fmax, nvel, ntheta):
-    """
-    f-k beamforming with loop over frequency bands
-
-    @ authors: Jordan W. Bishop and David Fee
-
-    Parameters
-    ~~~~~~~~~~
-    data : array
-        (m, n) time series with `m` samples from `n` traces as columns
-    rij : array
-        (d, n) `n` sensor coordinates as [northing, easting, {elevation}]
-        column vectors in `d` dimensions
-    fs : float or int
-        sample rate
-    vmin: float or int
-        min velocity in km/s, suggest 0.25
-    vmax:float or int
-        max velocity in km/s, suggest 0.45
-    fmin: float or int
-        minimum frequency in Hz
-    fmax:float or int
-        maximum frequency in Hz
-    nvel: float or int
-        number of velocity iterations, suggest 100-200
-    ntheta: float or int
-        number of azimuth iterations, suggest 100-200
-
-    Returns
-    ~~~~~~~
-    pow_map : array
-        (ntheta, nvel))
-        beamformed slowness map, not normalized
-        can find max using: ix,iy = np.unravel_index(bmpwr.argmax(), bmpwr.shape)
-    """
-
-    #reshape rij from standard setup
-    rij = np.transpose(rij)
-    rij[:, 0] = rij[:, 0] - np.mean(rij[:, 0])
-    rij[:, 1] = rij[:, 1] - np.mean(rij[:, 1])
-
-    # Getting the size of the data
-    [m, nsta] = np.shape(data)
-
-    # set up velocity/slowness and theta vectors
-    #vits = np.linspace(vmin, vmax, int(nvel))
-    sits = np.linspace(1/vmax, 1/vmin, int(nvel))
-    theta = np.linspace(0, 2*np.pi, ntheta)
-
-    # Getting initial time shifts
-    # x time delay
-    cost = np.cos(theta)
-    Tx1 = np.outer(sits, np.transpose(cost))
-    Txm = Tx1[:, :, None] * np.transpose(rij[:, 1])
-
-    # y time delay
-    sint = np.sin(theta)
-    Ty1 = np.outer(sits, np.transpose(sint))
-    Tym = Ty1[:, :, None] * np.transpose(rij[:, 0])
-
-    # All possible time delays
-    TT = Txm + Tym
-
-    # Computing the next power of 2 for fft input
-    n2 = ceil(np.log2(m))
-    nfft = int(pow(2, n2))
-
-    # Frequency increment
-    deltaf = fs / nfft
-
-    # Getting frequency bands
-    nlow = int(fmin / float(deltaf) + 0.5)
-    nhigh = int(fmax / float(deltaf) + 0.5)
-    nlow = max(1, nlow)  # avoid using the offset
-    nhigh = min(nfft // 2 - 1, nhigh)  # avoid using Nyquist
-    nf = nhigh - nlow + 1  # include upper and lower frequency
-
-    # Apply a 22% Cosine Taper
-    taper = cosine_taper(m, p=0.22)
-
-    # Calculated the FFT of each trace
-    # ft are complex Fourier coefficients
-    # is this faster in scipy?
-    ft = np.empty((nsta, nf), dtype=np.complex128)
-    for jj in range(nsta):
-        data[:, jj] = data[:, jj] - np.mean(data[:, jj])
-        dat = data[:, jj] * taper
-        ft[jj, :] = np.fft.rfft(dat, nfft)[nlow:nlow + nf]
-
-    # Change data structure for performance boost --> Check this.
-    ft = np.ascontiguousarray(ft, np.complex128)
-
-    # Pre-allocating
-    freqrange = np.linspace(fmin, fmax, nf)
-    pow_mapt = np.zeros((int(nvel), int(ntheta)), dtype=np.float64, order='C')
-    pow_mapb = np.zeros((int(nvel), int(ntheta)), dtype=np.float64, order='C')
-    flen = len(freqrange)
-
-    # loop entire slowness map over frequencies
-    # compute covariance
-    for ii in range(flen):
-        # Generating the exponentials - steering vectors
-        freq = freqrange[ii]
-        expo = -1j * 2 * np.pi * freq * TT
-        Master = np.exp(expo)
-        # Broadcasting the Fourier coefficients at each station
-        fcoeff = ft[:, ii]
-        Master = Master * fcoeff[None, None, :]
-        Top = np.sum(Master, axis=2)
-        Top2 = np.real(np.multiply(Top.conj(), Top))
-        Bot = np.real(np.multiply(Master.conj(), Master))
-        Bot = np.sum(Bot, axis=2)
-        pow_mapt += Top2
-        pow_mapb += Bot
-    pow_map = pow_mapt/pow_mapb
-
-    return pow_map
