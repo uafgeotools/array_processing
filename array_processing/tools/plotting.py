@@ -92,6 +92,7 @@ def arraySigPlt(rij, sig, sigV, sigTh, impResp, vel, th, kvec, figName=None):
     figDpi = 600               # good resolution
 
     # lower RHS is array geometry
+    fig = plt.figure()
     axRij = plt.subplot(2, 2, 4)
     for h in range(rij.shape[1]):
         axRij.plot(rij[0, h], rij[1, h], 'bp')
