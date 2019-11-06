@@ -1,5 +1,5 @@
 import numpy as np
-from .other import phaseAlignIdx, phaseAlignData
+from .generic import phaseAlignIdx, phaseAlignData
 
 
 def MCCMcalc(cmax, wgt=None):
