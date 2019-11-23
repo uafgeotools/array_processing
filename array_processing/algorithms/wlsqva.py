@@ -13,41 +13,39 @@ def wlsqva(data, rij, hz, wgt=None):
     coordinates. Weights may be applied to each trace to either deselect a
     trace or (de)emphasize its contribution to the least squares solution.
 
-    Parameters
-    ~~~~~~~~~~
-    data : array
-        (m, n) time series with `m` samples from `n` traces as columns
-    rij : array
-        (d, n) `n` sensor coordinates as [northing, easting, {elevation}]
-        column vectors in `d` dimensions
-    hz : float or int
-        sample rate
-    wgt : list or array
-        optional list|vector of relative weights of length `n`
-        (0 == exclude trace). Default is None (use all traces with equal
-        relative weights).
+    Args:
+        data : array
+            (m, n) time series with `m` samples from `n` traces as columns
+        rij : array
+            (d, n) `n` sensor coordinates as [northing, easting, {elevation}]
+            column vectors in `d` dimensions
+        hz : float or int
+            sample rate
+        wgt : list or array
+            optional list|vector of relative weights of length `n`
+            (0 == exclude trace). Default is None (use all traces with equal
+            relative weights).
 
-    Returns
-    ~~~~~~~
-    vel : float
-        signal velocity across array
-    az : float or array
-        `d = 2`: back azimuth (float) from co-array coordinate origin (º CW
-        from N); `d = 3`: back azimuth and elevation angle (array) from
-        co-array coordinate origin (º CW from N, º from N-E plane)
-    tau : array
-        (n(n-1)//2, ) time delays of relative signal arrivals (TDOA) for all
-        unique sensor pairings
-    cmax : array
-        (n(n-1)//2, ) cross-correlation maxima (e.g., for use in MCCMcalc) for
-        each sensor pairing in `tau`
-    sig_tau : float
-        uncertainty estimate for `tau`, also estimate of plane wave model
-        assumption violation for non-planar arrivals
-    s : array
-        (d, ) signal slowness vector via generalized weighted least squares
-    xij : array
-        (d, n(n-1)//2) co-array, coordinates of the sensor pairing separations
+    Returns:
+        vel : float
+            signal velocity across array
+        az : float or array
+            `d = 2`: back azimuth (float) from co-array coordinate origin (º CW
+            from N); `d = 3`: back azimuth and elevation angle (array) from
+            co-array coordinate origin (º CW from N, º from N-E plane)
+        tau : array
+            (n(n-1)//2, ) time delays of relative signal arrivals (TDOA) for all
+            unique sensor pairings
+        cmax : array
+            (n(n-1)//2, ) cross-correlation maxima (e.g., for use in MCCMcalc) for
+            each sensor pairing in `tau`
+        sig_tau : float
+            uncertainty estimate for `tau`, also estimate of plane wave model
+            assumption violation for non-planar arrivals
+        s : array
+            (d, ) signal slowness vector via generalized weighted least squares
+        xij : array
+            (d, n(n-1)//2) co-array, coordinates of the sensor pairing separations
 
     Raises
     ~~~~~~
