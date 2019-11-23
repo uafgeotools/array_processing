@@ -361,7 +361,7 @@ def cubicEqn(a, b, c):
         x : list
             Roots of cubic equation in standard form
 
-    See Also:~
+    See Also:
         numpy.roots : generic polynomial root finder
 
     Notes:
