@@ -500,10 +500,6 @@ def quarticEqn(a, b, c, d):
     Tables, 29th ed.
     """
 
-    # (c) 2017 Curt A. L. Szuberla
-    # University of Alaska Fairbanks, all rights reserved
-    #
-
     # find *any* root of resolvent cubic
     a2 = a*a
     y = cubicEqn(-b, a*c - 4*d, (4*b - a2)*d - c*c)
