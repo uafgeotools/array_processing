@@ -13,41 +13,39 @@ def wlsqva(data, rij, hz, wgt=None):
     coordinates. Weights may be applied to each trace to either deselect a
     trace or (de)emphasize its contribution to the least squares solution.
 
-    Parameters
-    ~~~~~~~~~~
-    data : array
-        (m, n) time series with `m` samples from `n` traces as columns
-    rij : array
-        (d, n) `n` sensor coordinates as [northing, easting, {elevation}]
-        column vectors in `d` dimensions
-    hz : float or int
-        sample rate
-    wgt : list or array
-        optional list|vector of relative weights of length `n`
-        (0 == exclude trace). Default is None (use all traces with equal
-        relative weights).
+    Args:
+        data : array
+            (m, n) time series with `m` samples from `n` traces as columns
+        rij : array
+            (d, n) `n` sensor coordinates as [northing, easting, {elevation}]
+            column vectors in `d` dimensions
+        hz : float or int
+            sample rate
+        wgt : list or array
+            optional list|vector of relative weights of length `n`
+            (0 == exclude trace). Default is None (use all traces with equal
+            relative weights).
 
-    Returns
-    ~~~~~~~
-    vel : float
-        signal velocity across array
-    az : float or array
-        `d = 2`: back azimuth (float) from co-array coordinate origin (º CW
-        from N); `d = 3`: back azimuth and elevation angle (array) from
-        co-array coordinate origin (º CW from N, º from N-E plane)
-    tau : array
-        (n(n-1)//2, ) time delays of relative signal arrivals (TDOA) for all
-        unique sensor pairings
-    cmax : array
-        (n(n-1)//2, ) cross-correlation maxima (e.g., for use in MCCMcalc) for
-        each sensor pairing in `tau`
-    sig_tau : float
-        uncertainty estimate for `tau`, also estimate of plane wave model
-        assumption violation for non-planar arrivals
-    s : array
-        (d, ) signal slowness vector via generalized weighted least squares
-    xij : array
-        (d, n(n-1)//2) co-array, coordinates of the sensor pairing separations
+    Returns:
+        vel : float
+            signal velocity across array
+        az : float or array
+            `d = 2`: back azimuth (float) from co-array coordinate origin (º CW
+            from N); `d = 3`: back azimuth and elevation angle (array) from
+            co-array coordinate origin (º CW from N, º from N-E plane)
+        tau : array
+            (n(n-1)//2, ) time delays of relative signal arrivals (TDOA) for all
+            unique sensor pairings
+        cmax : array
+            (n(n-1)//2, ) cross-correlation maxima (e.g., for use in MCCMcalc) for
+            each sensor pairing in `tau`
+        sig_tau : float
+            uncertainty estimate for `tau`, also estimate of plane wave model
+            assumption violation for non-planar arrivals
+        s : array
+            (d, ) signal slowness vector via generalized weighted least squares
+        xij : array
+            (d, n(n-1)//2) co-array, coordinates of the sensor pairing separations
 
     Raises
     ~~~~~~
@@ -98,9 +96,6 @@ def wlsqva(data, rij, hz, wgt=None):
 
     """
 
-    # (c) 2017 Curt A. L. Szuberla
-    # University of Alaska Fairbanks, all rights reserved
-    #
     # -- input error checking cell (no type checking, just dimensions to help
     #    user identify the problem)
     if data.shape[1] != rij.shape[1]:
@@ -129,11 +124,12 @@ def wlsqva(data, rij, hz, wgt=None):
         if N_w < dim+1:
             raise ValueError('sum(wgt != 0) < ' + str(dim+1))
         # --
+
     # very handy list comprehension for array processing
     idx = [(i, j, wgt[i]*wgt[j]) for i in range(rij.shape[1]-1)
-                    for j in range(i+1,rij.shape[1])]
+           for j in range(i+1, rij.shape[1])]
     # -- co-array is now a one-liner
-    xij = rij[:,[i[0] for i in idx]] - rij[:,[j[1] for j in idx]]
+    xij = rij[:, [i[0] for i in idx]] - rij[:, [j[1] for j in idx]]
     # -- same for generalized weight array
     W = np.diag([i[2] for i in idx])
     # compute cross correlations across co-array
@@ -143,9 +139,9 @@ def wlsqva(data, rij, hz, wgt=None):
         # MATLAB's xcorr w/ 'coeff' normalization: unit auto-correlations
         # and save a little time by only calculating on weighted pairs
         if W[k][k]:
-            cij[:,k] = (np.correlate(data[:, idx[k][0]], data[:, idx[k][1]],
-                                        mode='full') / np.sqrt(sum(data[:, idx[k][0]] * data[:, idx[k][0]]) *
-                                                                  sum(data[:,idx[k][1]]*data[:,idx[k][1]])))
+            cij[:, k] = (np.correlate(data[:, idx[k][0]], data[:, idx[k][1]],
+                                      mode='full') / np.sqrt(sum(data[:, idx[k][0]] * data[:, idx[k][0]]) * sum(data[:, idx[k][1]]*data[:, idx[k][1]])))
+
     # extract cross correlation maxima and associated delays
     cmax = cij.max(axis=0)
     cmax[[i for i in range(N) if W[i][i] == 0]] = 0  # set to zero if not Wvec
@@ -155,6 +151,7 @@ def wlsqva(data, rij, hz, wgt=None):
     # form auxiliary arrays for general weighted LS
     X_p = W@xij.T
     tau_p = W@tau
+
     # calculate least squares slowness vector
     s_p = np.linalg.inv(X_p.T@X_p) @ X_p.T @ tau_p
     # re-cast slowness as geographic vel, az (and phi, if req'd)
@@ -164,10 +161,11 @@ def wlsqva(data, rij, hz, wgt=None):
     if dim == 3:
         # if 3D, tack on elevation angle to azimuth
         az = np.hstack((az, np.arctan2(s_p[2], np.linalg.norm(s_p[:2], 2)) * 180 / np.pi))
+
     # calculate sig_tau (note: moved abs function inside sqrt so that std.
     # np.sqrt can be used; only relevant in 3D case w nearly singular
     # solutions, where argument of sqrt is small, but negative)
     N_p = N_w*(N_w-1)/2
-    sig_tau_p = np.sqrt(np.abs(tau_p @ (np.eye(N) - X_p @ np.linalg.inv(X_p.T @ X_p) @ X_p.T) @
-                                     tau_p / (N_p - dim)))
+    sig_tau_p = np.sqrt(np.abs(tau_p @ (np.eye(N) - X_p @ np.linalg.inv(X_p.T @ X_p) @ X_p.T) @       tau_p / (N_p - dim)))
+
     return vel, az, tau_p, cmax, sig_tau_p, s_p, xij

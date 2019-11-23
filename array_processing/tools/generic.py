@@ -3,29 +3,53 @@ from scipy.signal import convolve2d
 from functools import reduce
 from itertools import groupby
 from operator import itemgetter
-from scipy import optimize
 
 
-def array_thresh(mcthresh, azvolc, azdiff, mdccm, az, vel):
+def array_thresh(mcthresh, az_volc, az_diff, mdccm, az, vel):
+    """
+    Find  array processing values above multiple set thresholds for MCCM,
+    back-azimuth, and trace velocity. Ues default 0.25 - 0.45 km/s for trace
+    velocity treshholds. Also finds consecutive segments that meet tresholds,
+    but these values are not current returned.
 
-    #find values above threshold...using numpy for now
-    mcgood=np.where(mdccm>mcthresh)[0]
-    azgood=np.where((az>=azvolc-azdiff) & (az<=azvolc+azdiff))[0]
-    velgood=np.where((vel>=.25) & (vel<=.45))[0]
-    igood=reduce(np.intersect1d,(mcgood,azgood,velgood))
+    Args:
+        mcthresh : float
+            MCCM or MdCCM treshold (0-1)
+        az_volc : float
+            Back-azimuth to target volcano or source (0-359)
+        az_diff : float
+            Tolerance for back-azimuth from az_volc
+        mdccm : array
+            MdCCM or MCCM values from array processing (0-1)
+        az : array
+            Back-azimuth values (0-359)
+        vel : array
+            Trace-velocty values (km/s)
 
-    ranges=[]
-    nconsec=[]
-    for k, g in groupby(enumerate(igood), lambda x:x[0]-x[1]):
+    Returns:
+        igood: array
+            Indices to time segments that meet set thresholds
+    """
+
+    # Use numpy to find where thresholds are exceeded
+    mc_good = np.where(mdccm > mcthresh)[0]
+    az_good = np.where((az >= az_volc - az_diff) & (az <= az_volc + az_diff))[0]
+    vel_good = np.where((vel >= .25) & (vel <= .45))[0]
+    igood = reduce(np.intersect1d, (mc_good, az_good, vel_good))
+
+    # Find find number of consecutive values exceeded.
+    ranges = []
+    nconsec = []
+    for k, g in groupby(enumerate(igood), lambda x: x[0]-x[1]):
         group = list(map(itemgetter(1), g))
         ranges.append((group[0], group[-1]))
         nconsec.append(group[-1]-group[0]+1)
 
-    if len(nconsec)>0:
-        consecmax=max(nconsec)
+    if len(nconsec) > 0:
+        consecmax = max(nconsec)
     else:
-        consecmax=0
-    print('%d above trheshold, %d consecutive\n' % (len(igood),consecmax))
+        consecmax = 0
+    print('%d above trheshold, %d consecutive\n' % (len(igood), consecmax))
 
     return igood
 
@@ -195,7 +219,7 @@ def phaseAlignData(data, delays, wgt, refTrace, M, Moffset, plotFlag=False):
     mp = data_align.shape[0]  # new value for m
     if M is not None and M is not mp:
         alignBounds = [delays[refTrace] + m//2 - M//2,
-                      delays[refTrace] + m//2 + M//2]
+                       delays[refTrace] + m//2 + M//2]
         # trap round-off errors and force (M, nTraces) data_align
         if alignBounds[1]-alignBounds[0] != M:
             alignBounds[1] += 1
@@ -205,7 +229,7 @@ def phaseAlignData(data, delays, wgt, refTrace, M, Moffset, plotFlag=False):
         if alignBounds[0] < 0:
             # pad LHS of traces w zeros or np.nans
             data_align = np.vstack((np.zeros((-alignBounds[0], nTraces)) * nanOrOne,
-                                       data_align))
+                                    data_align))
         elif alignBounds[0] > 0:
             data_align = data_align[alignBounds[0]:]
         #  -- RHS (graphically, but actually bottom in array-land!)
@@ -213,7 +237,7 @@ def phaseAlignData(data, delays, wgt, refTrace, M, Moffset, plotFlag=False):
             # pad RHS of traces w zeros or np.nans
 
             data_align = np.vstack((data_align, np.zeros((alignBounds[1] - mp,
-                                                                nTraces)) * nanOrOne))
+                                                          nTraces)) * nanOrOne))
         elif alignBounds[1] < mp:
             data_align = data_align[:M]
     return data_align
@@ -223,23 +247,21 @@ def phaseAlignIdx(tau, Hz, wgt, refTrace):
     """
     Calculate shifts required to phase align `n` traces in a data matrix
 
-    Parameters
-    ~~~~~~~~~~
-    tau : array
-        (n(n-1)//2, ) time delays of relative signal arrivals (TDOA) for all
-        unique sensor pairings
-    Hz : float or int
-        sample rate
-    wgt : list or array
-       vector of relative weights of length `n` (0 == exclude trace)
-    refTrace : int
-        reference sensor for TDOA information
+    Args:
+        tau : array
+            (n(n-1)//2, ) time delays of relative signal arrivals (TDOA) for all
+            unique sensor pairings
+        Hz : float or int
+            sample rate
+        wgt : list or array
+           vector of relative weights of length `n` (0 == exclude trace)
+        refTrace : int
+            reference sensor for TDOA information
 
-    Returns
-    ~~~~~~~
-    delays : array
-        (n, ) vector of shifts as indicies for embedding traces in an array,
-        such that trace `i` will begin at index ``out[i]``
+    Returns:
+        delays : array
+            (n, ) vector of shifts as indicies for embedding traces in an array,
+            such that trace `i` will begin at index ``out[i]``
 
     Notes
     ~~~~~
@@ -247,9 +269,6 @@ def phaseAlignIdx(tau, Hz, wgt, refTrace):
     `phaseAlignData`.
     """
 
-    # (c) 2017 Curt A. L. Szuberla
-    # University of Alaska Fairbanks, all rights reserved
-    #
     # -- this is low level code w/out error checks or defaults, designed
     # --  to be called by wrappers that make use of the indices provided
     # solve for number of traces from pairings in tau
@@ -257,9 +276,8 @@ def phaseAlignIdx(tau, Hz, wgt, refTrace):
     # calculate delays (samples) relative to refTrace for each trace
     #   -- first pass grabs delays starting with refTrace as i in ij
     delayIdx = (nTraces*refTrace - refTrace*(refTrace+1)//2,
-            nTraces*(refTrace+1) - (refTrace+1)*(refTrace+2)//2)
-    delays = np.hstack((0, (tau[range(delayIdx[0], delayIdx[1])] * Hz))
-                          ).astype(int)
+                nTraces*(refTrace+1) - (refTrace+1)*(refTrace+2)//2)
+    delays = np.hstack((0, (tau[range(delayIdx[0], delayIdx[1])] * Hz))).astype(int)
     # the std. rij list comprehension for unique inter-trace pairs
     tau_ij = [(i, j) for i in range(nTraces) for j in range(i+1, nTraces)]
     #  -- second pass grabs delays with refTrace as j in ij
@@ -277,34 +295,29 @@ def tauCalcPW(vel, azPhi, rij):
     Calculates theoretical tau vector for a plane wave moving across an array
     of `n` elements
 
-    Parameters
-    ~~~~~~~~~~
-    vel : float
-        signal velocity across array
-    azPhi : float or list|array
-        back azimuth (float) from co-array coordinate origin (º CW from N);
-        back azimuth and elevation angle (array) from co-array coordinate
-        origin (º CW from N, º from N-E plane)
-    rij : array
-        (d, n) `n` element coordinates as [easting, northing, {elevation}]
-        column vectors in `d` dimensions
+    Args:
+        vel : float
+            signal velocity across array
+        azPhi : float or list|array
+            back azimuth (float) from co-array coordinate origin (º CW from N);
+            back azimuth and elevation angle (array) from co-array coordinate
+            origin (º CW from N, º from N-E plane)
+        rij : array
+            (d, n) `n` element coordinates as [easting, northing, {elevation}]
+            column vectors in `d` dimensions
 
-    Returns
-    ~~~~~~~
-    tau : array
-        (n(n-1)//2, ) time delays of relative signal arrivals (TDOA) for all
-        unique sensor pairings
+    Returns:
+        tau : array
+            (n(n-1)//2, ) time delays of relative signal arrivals (TDOA) for all
+            unique sensor pairings
     """
 
-    # (c) 2017 Curt A. L. Szuberla
-    # University of Alaska Fairbanks, all rights reserved
-    #
     dim, nTraces = rij.shape
     if dim == 2:
         rij = np.vstack((rij, np.zeros((1, nTraces))))
     idx = [(i, j) for i in range(rij.shape[1]-1)
-                    for j in range(i+1,rij.shape[1])]
-    X = rij[:,[i[0] for i in idx]] - rij[:,[j[1] for j in idx]]
+           for j in range(i+1, rij.shape[1])]
+    X = rij[:, [i[0] for i in idx]] - rij[:, [j[1] for j in idx]]
     if np.isscalar(azPhi):
         phi = 0
         az = azPhi
@@ -314,6 +327,7 @@ def tauCalcPW(vel, azPhi, rij):
     az = np.pi * (-az / 180 + 0.5)
     s = np.array([np.cos(az), np.sin(az), np.sin(phi)])
     s[:-1] *= np.cos(phi)
+
     return X.T@(s/vel)
 
 
@@ -322,28 +336,22 @@ def tauCalcSW(vel, rAzPhi, rij):
     Calculates theoretical tau vector for a spherical wave moving across an
     array of `n` elements
 
-    Parameters
-    ~~~~~~~~~~
-    vel : float
-        signal velocity across array
-    rAzPhi : list|array
-        range to source and back azimuth from co-array coordinate origin
-        (º CW from N); range to source, back azimuth and elevation angle
-        from co-array coordinate origin (º CW from N, º from N-E plane)
-    rij : array
-        (d, n) `n` element coordinates as [easting, northing, {elevation}]
-        column vectors in `d` dimensions
+    Args:
+        vel : float
+            signal velocity across array
+        rAzPhi : list|array
+            range to source and back azimuth from co-array coordinate origin
+            (º CW from N); range to source, back azimuth and elevation angle
+            from co-array coordinate origin (º CW from N, º from N-E plane)
+        rij : array
+            (d, n) `n` element coordinates as [easting, northing, {elevation}]
+            column vectors in `d` dimensions
 
-    Returns
-    ~~~~~~~
-    tau : array
-        (n(n-1)//2, ) time delays of relative signal arrivals (TDOA) for all
-        unique sensor pairings
+    Returns:
+        tau : array
+            (n(n-1)//2, ) time delays of relative signal arrivals (TDOA) for all
+            unique sensor pairings
     """
-
-    # (c) 2017 Curt A. L. Szuberla
-    # University of Alaska Fairbanks, all rights reserved
-    #
 
     dim, nTraces = rij.shape
     if dim == 2:
@@ -353,7 +361,7 @@ def tauCalcSW(vel, rAzPhi, rij):
     else:
         phi = 0
     idx = [(i, j) for i in range(rij.shape[1]-1)
-                    for j in range(i+1,rij.shape[1])]
+           for j in range(i+1, rij.shape[1])]
     # aw, this is so convolutedly elegant that it must be saved in a
     # comment for posterity!, but the line below it is "simpler"
     # az = -( (rAzPhi[1]/180*pi - 2*pi)%(2*pi) - pi/2  )%(2*pi)
@@ -361,7 +369,8 @@ def tauCalcSW(vel, rAzPhi, rij):
     source = rAzPhi[0] * np.array([np.cos(az), np.sin(az), np.sin(phi)])
     source[:-1] *= np.cos(phi)
     tau2sensor = np.linalg.norm(rij - np.tile(source, nTraces).reshape(nTraces, 3).T,
-                      2, axis=0)/vel
+                                2, axis=0)/vel
+
     return tau2sensor[[j[1] for j in idx]] - tau2sensor[[i[0] for i in idx]]
 
 
@@ -370,27 +379,21 @@ def tauCalcSWxy(vel, xy, rij):
     Calculates theoretical tau vector for a spherical wave moving across an
     array of `n` elements
 
-    Parameters
-    ~~~~~~~~~~
-    vel : float
-        signal velocity across array
-    xy : list|array
-        (d, ) source location as 2-D [easting, northing] or 3-D [easting,
-        northing, elevation] coordinates
-    rij : list|array
-        (d, n) `n` element coordinates as [easting, northing, {elevation}]
-        column vectors in `d` dimensions
+    Args:
+        vel : float
+            signal velocity across array
+        xy : list|array
+            (d, ) source location as 2-D [easting, northing] or 3-D [easting,
+            northing, elevation] coordinates
+        rij : list|array
+            (d, n) `n` element coordinates as [easting, northing, {elevation}]
+            column vectors in `d` dimensions
 
-    Returns
-    ~~~~~~~
-    tau : array
-        (n(n-1)//2, ) time delays of relative signal arrivals (TDOA) for all
-        unique sensor pairings
+    Returns:
+        tau : array
+            (n(n-1)//2, ) time delays of relative signal arrivals (TDOA) for all
+            unique sensor pairings
     """
-
-    # (c) 2018 Curt A. L. Szuberla
-    # University of Alaska Fairbanks, all rights reserved
-    #
 
     dim, nTraces = len(rij), len(rij[0])
     if dim == 2:
@@ -403,9 +406,10 @@ def tauCalcSWxy(vel, xy, rij):
         xy0 = []
     source = np.hstack((xy, xy0))
     idx = [(i, j) for i in range(rij.shape[1]-1)
-                    for j in range(i+1,rij.shape[1])]
+           for j in range(i+1, rij.shape[1])]
     tau2sensor = np.linalg.norm(rij - np.tile(source, nTraces).reshape(nTraces, 3).T,
-                      2, axis=0)/vel
+                                2, axis=0)/vel
+
     return tau2sensor[[j[1] for j in idx]] - tau2sensor[[i[0] for i in idx]]
 
 
@@ -417,19 +421,17 @@ def randc(N, beta=0.0):
     proportional to a power of frequency) via fast Fourier inversion of
     the appropriate amplitudes and complex phases.
 
-    Parameters
-    ~~~~~~~~~~
-    N : int or tuple of int
-        Shape of output array
-    beta : float, optional
-        Spectrum of output will be proportional to ``f**(-beta)``.
-        Default is 0.0.
+    Args:
+        N : int or tuple of int
+            Shape of output array
+        beta : float, optional
+            Spectrum of output will be proportional to ``f**(-beta)``.
+            Default is 0.0.
 
-    Returns
-    ~~~~~~~
-    out : array
-        Colored noise sequences as columns with shape `N`, each normalized
-        to zero-mean and unit-variance.  Result is always real valued.
+    Returns:
+        out : array
+            Colored noise sequences as columns with shape `N`, each normalized
+            to zero-mean and unit-variance.  Result is always real valued.
 
     See Also
     ~~~~~~~~
@@ -447,10 +449,6 @@ def randc(N, beta=0.0):
     be identically zero.
     """
 
-    # (c) 2017 Curt A. L. Szuberla
-    # University of Alaska Fairbanks, all rights reserved
-    #
-
     # catch scalar input & form tuple
     if type(N) is int:
         N = (N,)
@@ -461,7 +459,7 @@ def randc(N, beta=0.0):
         c0 = np.inf
     # catch the case of a 1D array in python, so dimensions act like a matrix
     if len(N) == 1:
-        M = (N[0],1) # use M[1] any time # of columns is called for
+        M = (N[0], 1) # use M[1] any time # of columns is called for
     else:
         M = N
     # phase array with size (# of unique complex Fourier components,
@@ -481,8 +479,8 @@ def randc(N, beta=0.0):
     # noise amplitudes are just indices (unit-offset!!) to be normalized
     # later, phases are arranged as Fourier conjugates
     r = np.hstack((c0, np.arange(1, n + 1), cFiller, np.arange(n, 0, -1)))
-    phasor  = np.exp(np.vstack((np.zeros((1, M[1])), 1j * cPhase, pFiller,
-                                      -1j * np.flipud(cPhase))))
+    phasor = np.exp(np.vstack((np.zeros((1, M[1])), 1j * cPhase, pFiller,
+                               -1j * np.flipud(cPhase))))
     # this is like my cols.m function in MATLAB
     r = np.tile(r, M[1]).reshape(M[1], N[0]).T ** (-beta / 2)
     # catch beta = 0 case here to ensure zero DC component
@@ -504,27 +502,25 @@ def psf(x, p=2, w=3, n=3, window=None):
     This function uses a generalized coherence estimator to enhance coherent
     channels in an ensemble of time series.
 
-    Parameters
-    ~~~~~~~~~~
-    x : array
-        (m, d) array of real-valued time series data as columns
-    p : float, optional
-        Level of contrast in filter.  Default is 2.
-    w : int, optional
-        Width of smoothing window in frequency domain.  Default is 3.
-    n : float, optional
-        Number of times to smooth in frequency domain.  Default is 3.
-    window : function, optional
-        Type of smoothing window in frequency domain.  Default is None, which
-        results in a triangular window.
+    Args:
+        x : array
+            (m, d) array of real-valued time series data as columns
+        p : float, optional
+            Level of contrast in filter.  Default is 2.
+        w : int, optional
+            Width of smoothing window in frequency domain.  Default is 3.
+        n : float, optional
+            Number of times to smooth in frequency domain.  Default is 3.
+        window : function, optional
+            Type of smoothing window in frequency domain.  Default is None, which
+            results in a triangular window.
 
-    Returns
-    ~~~~~~~
-    x_ppf : array
-        (m, d) real-valued, pure state-filtered version of `x`
-    P : array
-        (m//2+1, ) degree of polarization (generalized coherence estimate) in
-        frequency components of `x` from DC to the Nyquist
+    Returns:
+        x_ppf : array
+            (m, d) real-valued, pure state-filtered version of `x`
+        P : array
+            (m//2+1, ) degree of polarization (generalized coherence estimate) in
+            frequency components of `x` from DC to the Nyquist
 
     Notes
     ~~~~~
@@ -575,23 +571,18 @@ def psf(x, p=2, w=3, n=3, window=None):
     before computing the inverse transform of :math:`\hat{\mathbf{X}}`.
     """
 
-    # (c) 2017 Curt A. L. Szuberla
-    # University of Alaska Fairbanks, all rights reserved
-    #
     # private functions up front
     def Ssmooth(S, w, n, window):
         # smooth special format of spectral matries as vectors
         for k in range(n):
             # f@#$ing MATLAB treats odd/even differently with mode='full'
             # but the behavior below now matches conv2 exactly
-            S = convolve2d(S, window(w).reshape(-1,1),
-                           mode='full')[w//2:-w//2+1,:]
+            S = convolve2d(S, window(w).reshape(-1, 1),
+                           mode='full')[w//2:-w//2+1, :]
         return S
     def triang(N):
         # for historical reasons, the default window shape
         return np.bartlett(N + 2)[1:-1]
-    # main code block
-
 
     # size up input data
     N, d = x.shape
@@ -610,7 +601,7 @@ def psf(x, p=2, w=3, n=3, window=None):
         # at each freq w, S_w is outer product of raw Fourier transforms
         # of each column at that freq; select unique components to store
         S_w = np.outer(X[i, :], X[i, :].conj())
-        S[i,:] = S_w[[i[0] for i in Sidx], [j[1] for j in Sidx]]
+        S[i, :] = S_w[[i[0] for i in Sidx], [j[1] for j in Sidx]]
     # smooth each column of S (i,e., in freq. domain)
     if not window:
         # use default window
@@ -619,15 +610,15 @@ def psf(x, p=2, w=3, n=3, window=None):
     # trace calculations (notation consistent w traceCalc.m in MATLAB), but
     # since results are positive, semi-definite, real -- return as such
     #  -- diagonal elements
-    didx = [i for i in range(len(Sidx)) if Sidx[i][0]==Sidx[i][1]]
+    didx = [i for i in range(len(Sidx)) if Sidx[i][0] == Sidx[i][1]]
     #  -- traceS**2 of each flapjack (really a vector here)
-    trS = sum(S[:,didx].real.T)**2
+    trS = sum(S[:, didx].real.T)**2
     #  -- trace of each flapjack (ditto, vector), here we recognize that
     #     trace(S@S.T) is just sum square magnitudes of all the
     #     non-redundant components of S, doubling squares of the non-diagonal
     #     elements
     S = (S*(S.conj())*2).real
-    S[:,didx] /= 2
+    S[:, didx] /= 2
     trS2 = sum(S.T)
     # estimate samson-esque polarization estimate (if d==2, same as fowler)
     P = (d*trS2 - trS)/((d-1)*trS)
@@ -645,65 +636,8 @@ def psf(x, p=2, w=3, n=3, window=None):
     X *= np.tile(P ** p, d).reshape(X.shape[::-1]).T
     # inverse transform X and ensure real output
     XX = np.vstack((X[list(range(N // 2 + 1))],
-                    X[list(range(N//2-fudgeIdx,0,-1))].conj()))
+                    X[list(range(N//2-fudgeIdx, 0, -1))].conj()))
     x_psf = np.real(np.fft.ifft(XX, axis=0)*XX.shape[0])
 
     return x_psf, P
 
-
-def srcLoc(rij, tau, nord=2, seedXY_size=0.05, seedV_size=0.3):
-    """
-    Estimate a geopgraphical source location and propagation velocity for an
-    event recorded on an array of sensors
-
-    Parameters
-    ~~~~~~~~~~
-    rij : list|array
-        (d, n) `n` array coordinates as [easting, northing, {elevation}]
-        column vectors in `d` dimensions
-    tau : array
-        (n*(n-1)/2, ) unique intersensor TDOA information (delays)
-    nord : positive int|inf
-        Order of the norm to calculate the cost function (optional, default
-        is 2 for the usual Euclidean L2 norm)
-    seedXY_size : float
-        Geographic seed value (optional, default is 0.05)
-    seedXY_size : float
-        Propagation velocity seed value (optional, default is 0.3)
-
-    Returns
-    ~~~~~~~
-    Sxyc : array
-        (d+1, ) optimized source location as geographic coordinates (same as
-        the columns of `rij`) and propagation speed
-    Srtc : array
-        (d+1, ) optimized source location as [range, azimuth, {elevation},
-        propagation speed]
-
-    Notes
-    ~~~~~
-    This is a Pythonic method for srcLoc that might've been dubbed srcLocLite.
-    It takes a naive approach to the seed, ignoring Dr. Arnoult's spacetime
-    approach, but takes into account the quirks of the Nelder-Mead optimization
-    and prduces a fairly good (if not great) facsimilie of the MATLAB version.
-    """
-
-    # The below line can be removed once we add rij2rTh
-    raise NotImplementedError('rij2rTh not available!')
-
-    # (c) 2018 Curt A. L. Szuberla
-    # University of Alaska Fairbanks, all rights reserved
-    #
-
-    # cost function
-    def minTau(xyv_trial, tau_o, rij):
-        tau_trial = tauCalcSWxy(xyv_trial[-1], xyv_trial[:-1], rij)
-        return np.linalg.norm(tau_o - tau_trial, nord)
-    # copnstruct naive seed
-    xyv_seed = [seedXY_size] * len(rij) + [seedV_size]
-    for k in range(0, len(xyv_seed)-1, 2):
-        xyv_seed[k] = -xyv_seed[k]
-    # perform optimization
-    costFn = lambda xyv_trial: minTau(xyv_trial, tau, rij)
-    xyv_opt = optimize.minimize(costFn, xyv_seed, method='Nelder-Mead')
-    return xyv_opt.x, rij2rTh(xyv_opt.x[:len(rij)])

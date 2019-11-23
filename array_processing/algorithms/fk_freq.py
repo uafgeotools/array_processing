@@ -7,36 +7,32 @@ def fk_freq(data, fs, rij, vmin, vmax, fmin, fmax, nvel, ntheta):
     """
     f-k beamforming with loop over frequency bands
 
-    @ authors: Jordan W. Bishop and David Fee
+    Args:
+        data : array
+            (m, n) time series with `m` samples from `n` traces as columns
+        rij : array
+            (d, n) `n` sensor coordinates as [northing, easting, {elevation}]
+            column vectors in `d` dimensions
+        fs : float or int
+            sample rate
+        vmin: float or int
+            min velocity in km/s, suggest 0.25
+        vmax:float or int
+            max velocity in km/s, suggest 0.45
+        fmin: float or int
+            minimum frequency in Hz
+        fmax:float or int
+            maximum frequency in Hz
+        nvel: float or int
+            number of velocity iterations, suggest 100-200
+        ntheta: float or int
+            number of azimuth iterations, suggest 100-200
 
-    Parameters
-    ~~~~~~~~~~
-    data : array
-        (m, n) time series with `m` samples from `n` traces as columns
-    rij : array
-        (d, n) `n` sensor coordinates as [northing, easting, {elevation}]
-        column vectors in `d` dimensions
-    fs : float or int
-        sample rate
-    vmin: float or int
-        min velocity in km/s, suggest 0.25
-    vmax:float or int
-        max velocity in km/s, suggest 0.45
-    fmin: float or int
-        minimum frequency in Hz
-    fmax:float or int
-        maximum frequency in Hz
-    nvel: float or int
-        number of velocity iterations, suggest 100-200
-    ntheta: float or int
-        number of azimuth iterations, suggest 100-200
-
-    Returns
-    ~~~~~~~
-    pow_map : array
-        (ntheta, nvel))
-        beamformed slowness map, not normalized
-        can find max using: ix,iy = np.unravel_index(bmpwr.argmax(), bmpwr.shape)
+    Returns:
+        pow_map : array
+            (ntheta, nvel))
+            beamformed slowness map, not normalized
+            can find max using: ix,iy = np.unravel_index(bmpwr.argmax(), bmpwr.shape)
     """
 
     #reshape rij from standard setup
@@ -48,7 +44,6 @@ def fk_freq(data, fs, rij, vmin, vmax, fmin, fmax, nvel, ntheta):
     [m, nsta] = np.shape(data)
 
     # set up velocity/slowness and theta vectors
-    #vits = np.linspace(vmin, vmax, int(nvel))
     sits = np.linspace(1/vmax, 1/vmin, int(nvel))
     theta = np.linspace(0, 2*np.pi, ntheta)
 

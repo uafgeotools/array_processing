@@ -3,10 +3,12 @@ array_processing
 
 Various array processing tools for infrasound and seismic data. By default uses
 weighted least-squares to determine the trace velocity and back-azimuth of a
-plane wave crossing an array. More advanced processing (such as least-trimmed
-squares) is easily integrated.
+plane wave crossing an array in sliding time windows. More advanced processing 
+(such as least-trimmed squares) is easily integrated. Also provides tools to 
+characterize the array response, uncertainty, source-location of a spherical 
+wave crossing the array, etc. See docstrings for more info.
 
-**References**
+**General References**
 
 Least squares and array uncertainty:
 
