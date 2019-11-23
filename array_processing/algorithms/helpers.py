@@ -1,7 +1,7 @@
 import sys
 import numpy as np
-from obspy.geodetics.base import calc_vincenty_inverse
 from ..algorithms.wlsqva import wlsqva
+from obspy.geodetics import gps2dist_azimuth
 
 
 def wlsqva_proc(stf, rij, tvec, windur, winover):
@@ -67,9 +67,9 @@ def wlsqva_proc(stf, rij, tvec, windur, winover):
 
 
 def getrij(latlist, lonlist):
-    """
-    Returns the projected geographic positions in X-Y. Points are calculated
-    with the Vicenty inverse from obspy and will have a zero-mean. Typically
+    """Calculate rij from lat-lon
+
+    Returns the projected geographic positions in X-Y with zero-mean. Typically
     used for array locations.
 
     Args:
@@ -79,32 +79,33 @@ def getrij(latlist, lonlist):
     Returns:
         rij : numpy array with the first row corresponding to cartesian
             "X"-coordinates and the second row corresponding to cartesian
-            "Y"-coordinates.
+            "Y"-coordinates, in units of km.
     """
 
-    # Basic error checking
     latsize = len(latlist)
     lonsize = len(lonlist)
+
+    # Basic error checking
     if latsize != lonsize:
         raise ValueError('latsize != lonsize')
 
     xnew = np.zeros((latsize, ))
     ynew = np.zeros((lonsize, ))
-
     for i in range(1, lonsize):
-        # Obspy defaults are set as: a = 6378137.0, f = 0.0033528106647474805
-        # This is apparently the WGS84 ellipsoid.
-        delta, az, __ = calc_vincenty_inverse(latlist[0], lonlist[0], latlist[i], lonlist[i])
-        # Converting azimuth to radians
-        az = (450 - az) % 360
+        # WGS84 ellipsoid
+        dist, az, _ = gps2dist_azimuth(latlist[0], lonlist[0],
+                                       latlist[i], lonlist[i])
+        # Convert azimuth in degrees to angle in radians
+        ang = np.deg2rad((450 - az) % 360)
+        # Convert from m to km, do trig
+        xnew[i] = (dist / 1000) * np.cos(ang)
+        ynew[i] = (dist / 1000) * np.sin(ang)
 
-        xnew[i] = delta/1000*np.cos(az*np.pi/180)
-        ynew[i] = delta/1000*np.sin(az*np.pi/180)
+    # Remove the mean
+    xnew = xnew - xnew.mean()
+    ynew = ynew - ynew.mean()
 
-    # Removing the mean
-    xnew = xnew - np.mean(xnew)
-    ynew = ynew - np.mean(ynew)
-
-    rij = np.array([xnew.tolist(), ynew.tolist()])
+    # Form rij array
+    rij = np.vstack((xnew, ynew))
 
     return rij
