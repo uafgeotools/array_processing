@@ -11,22 +11,20 @@ def MCCMcalc(cmax, wgt=None):
     identical to zero are excluded from the `MCCM` calculation.  Optionally, it
     will calculate `MdCCM` as the weighted median of same.
 
-    Parameters
-    ~~~~~~~~~~
-    cmax : array
-           (n(n-1)//2, ) cross-correlation maxima for `n` channels of data and
-           each channel pairing in `tau` (output of `wlsqva`)
-    wgt : array
-           (n, ) weights corresponding each of the `n` data channels (input to
-           `wlsqva`). Default is an array of ones (all channels equally
-           weighted and included).
+    Args:
+        cmax : array
+               (n(n-1)//2, ) cross-correlation maxima for `n` channels of data and
+               each channel pairing in `tau` (output of `wlsqva`)
+        wgt : array
+               (n, ) weights corresponding each of the `n` data channels (input to
+               `wlsqva`). Default is an array of ones (all channels equally
+               weighted and included).
 
-    Returns
-    ~~~~~~~
-    MCCM : float
-           Weighted arithmetic mean of the cross-correlation maxima
-    MdCCM : float
-           Weighted median of the cross-correlation maxima
+    Returns:
+        MCCM : float
+               Weighted arithmetic mean of the cross-correlation maxima
+        MdCCM : float
+               Weighted median of the cross-correlation maxima
 
     Notes
     ~~~~~
@@ -45,11 +43,6 @@ def MCCMcalc(cmax, wgt=None):
     channels are simply either included or excluded.
     """
 
-    # (c) 2017 Curt A. L. Szuberla
-    # University of Alaska Fairbanks, all rights reserved
-    #
-
-
     if wgt is None:
         # default is to calculate using all channels & unity for weights
         MCCM = np.average(cmax)
@@ -58,68 +51,60 @@ def MCCMcalc(cmax, wgt=None):
 
         # first, standard weighted arithmetic mean, allows for
         # arbitrary weights
-        Wgt = np.array([wgt[i] * wgt[j] for i in range(wgt.size - 1)
-                           for j in range(i+1,wgt.size)])
-        MCCM = np.average(cmax, weights=Wgt)
+        wgt = np.array([wgt[i] * wgt[j] for i in range(wgt.size - 1)
+                        for j in range(i+1, wgt.size)])
+        MCCM = np.average(cmax, weights=wgt)
         # next, weighted median here only allows binary weights, so
         # just use non-zero weighted channels
-        idx = [i for i, e in enumerate(Wgt) if e != 0]
+        idx = [i for i, e in enumerate(wgt) if e != 0]
         MdCCM = np.median(cmax[idx])
+
     return MCCM, MdCCM
 
-
-def fstatbland(dtmp, rij,fs,tau):
+def fstatbland(dtmp, fs, tau):
     """
-    calculates the F-statistic based on Blandford's method.
+    Calculates the F-statistic and SNR based on Blandford's method.
 
-    @author: David Fee, dfee1@alaska.edu using some WATC/Szuberla codes
+    Args:
+        dtmp : array
+            (m, n) time series with `m` samples from `n` traces as columns
+        fs : float or int
+            sample rate [Hz]
+        tau : array
+            (n(n-1)//2) time delays of relative signal arrivals (TDOA) for all
+            unique sensor pairings
 
-
-    Parameters
-    ~~~~~~~~~~
-    dtmp : array
-        (m, n) time series with `m` samples from `n` traces as columns
-    rij : array
-        (d, n) `n` sensor coordinates as [northing, easting, {elevation}]
-        column vectors in `d` dimensions
-    fs : float or int
-        sample rate [Hz]
-    tau : array
-        (n(n-1)//2, ) time delays of relative signal arrivals (TDOA) for all
-        unique sensor pairings
-
-    Returns
-    ~~~~~~~
-    fstat : array
-        f-statistic
-    snr : float
-        SNR
+    Returns:
+        fstat : array
+            F-statistic
+        snr : float
+            SNR
 
     Reference:
       Blandford, R. R., 1974, Geophysics, vol. 39, no. 5, p. 633-643
     """
 
-    m,n=dtmp.shape
-    wgt=np.ones(n)
+    m, n = dtmp.shape
+    wgt = np.ones(n)
 
-    #individual trace offsets from arrival model shifts...zero for this
-    Moffset=[0 for i in range(n)]
+    #individual trace offsets from arrival model shifts. Zeros here
+    m_offset = [0 for i in range(n)]
 
     # calculate beam delays
     beam_delays = phaseAlignIdx(tau, fs, wgt, 0)
 
     # apply shifts, resulting in a zero-padded array
-    beamMatrix = phaseAlignData(dtmp, beam_delays, wgt, 0,m,Moffset)
+    beam = phaseAlignData(dtmp, beam_delays, wgt, 0, m, m_offset)
 
-    fnum = np.sum(np.sum(beamMatrix,axis=1)**2)
-    term1 = np.sum(beamMatrix,axis=1)/n
+    fnum = np.sum(np.sum(beam, axis=1)**2)
+    term1 = np.sum(beam, axis=1)/n
     term1_0 = term1
-    for i in range(1,n):
-        term1 = np.vstack((term1,term1_0))
-    fden = np.sum(np.sum((beamMatrix.T-term1)**2))
-    fstat= (n-1)*fnum/(n*fden)
+    for i in range(1, n):
+        term1 = np.vstack((term1, term1_0))
+    fden = np.sum(np.sum((beam.T - term1)**2))
+    fstat = (n-1) * fnum/(n * fden)
 
     #calculate snr based on fstat
-    snr=np.sqrt((fstat-1)/n)
+    snr = np.sqrt((fstat-1)/n)
 
-    return fstat,snr
+    return fstat, snr
