@@ -98,9 +98,6 @@ def wlsqva(data, rij, hz, wgt=None):
 
     """
 
-    # (c) 2017 Curt A. L. Szuberla
-    # University of Alaska Fairbanks, all rights reserved
-    #
     # -- input error checking cell (no type checking, just dimensions to help
     #    user identify the problem)
     if data.shape[1] != rij.shape[1]:
@@ -129,11 +126,12 @@ def wlsqva(data, rij, hz, wgt=None):
         if N_w < dim+1:
             raise ValueError('sum(wgt != 0) < ' + str(dim+1))
         # --
+
     # very handy list comprehension for array processing
     idx = [(i, j, wgt[i]*wgt[j]) for i in range(rij.shape[1]-1)
-                    for j in range(i+1,rij.shape[1])]
+           for j in range(i+1, rij.shape[1])]
     # -- co-array is now a one-liner
-    xij = rij[:,[i[0] for i in idx]] - rij[:,[j[1] for j in idx]]
+    xij = rij[:, [i[0] for i in idx]] - rij[:, [j[1] for j in idx]]
     # -- same for generalized weight array
     W = np.diag([i[2] for i in idx])
     # compute cross correlations across co-array
@@ -143,9 +141,9 @@ def wlsqva(data, rij, hz, wgt=None):
         # MATLAB's xcorr w/ 'coeff' normalization: unit auto-correlations
         # and save a little time by only calculating on weighted pairs
         if W[k][k]:
-            cij[:,k] = (np.correlate(data[:, idx[k][0]], data[:, idx[k][1]],
-                                        mode='full') / np.sqrt(sum(data[:, idx[k][0]] * data[:, idx[k][0]]) *
-                                                                  sum(data[:,idx[k][1]]*data[:,idx[k][1]])))
+            cij[:, k] = (np.correlate(data[:, idx[k][0]], data[:, idx[k][1]],
+                                      mode='full') / np.sqrt(sum(data[:, idx[k][0]] * data[:, idx[k][0]]) * sum(data[:, idx[k][1]]*data[:, idx[k][1]])))
+
     # extract cross correlation maxima and associated delays
     cmax = cij.max(axis=0)
     cmax[[i for i in range(N) if W[i][i] == 0]] = 0  # set to zero if not Wvec
@@ -155,6 +153,7 @@ def wlsqva(data, rij, hz, wgt=None):
     # form auxiliary arrays for general weighted LS
     X_p = W@xij.T
     tau_p = W@tau
+
     # calculate least squares slowness vector
     s_p = np.linalg.inv(X_p.T@X_p) @ X_p.T @ tau_p
     # re-cast slowness as geographic vel, az (and phi, if req'd)
@@ -164,10 +163,11 @@ def wlsqva(data, rij, hz, wgt=None):
     if dim == 3:
         # if 3D, tack on elevation angle to azimuth
         az = np.hstack((az, np.arctan2(s_p[2], np.linalg.norm(s_p[:2], 2)) * 180 / np.pi))
+
     # calculate sig_tau (note: moved abs function inside sqrt so that std.
     # np.sqrt can be used; only relevant in 3D case w nearly singular
     # solutions, where argument of sqrt is small, but negative)
     N_p = N_w*(N_w-1)/2
-    sig_tau_p = np.sqrt(np.abs(tau_p @ (np.eye(N) - X_p @ np.linalg.inv(X_p.T @ X_p) @ X_p.T) @
-                                     tau_p / (N_p - dim)))
+    sig_tau_p = np.sqrt(np.abs(tau_p @ (np.eye(N) - X_p @ np.linalg.inv(X_p.T @ X_p) @ X_p.T) @       tau_p / (N_p - dim)))
+
     return vel, az, tau_p, cmax, sig_tau_p, s_p, xij
