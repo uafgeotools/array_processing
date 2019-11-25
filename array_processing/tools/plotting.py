@@ -177,7 +177,7 @@ def arraySigPlt(rij, sig, sigV, sigTh, impResp, vel, th, kvec, figName=None):
 
     # Prepare output & display in iPython workspace
     plt.tight_layout()  # IGNORE renderer warning from script! It is fine.
-    if figName is not None:
+     if figName:
         plt.savefig(figName + '.' + figFormat, format=figFormat, dpi=figDpi)
 
 
