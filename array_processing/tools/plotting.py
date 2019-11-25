@@ -3,94 +3,92 @@ from matplotlib import dates
 import numpy as np
 
 
-def array_plot(st, t, mdccm, vel, az, ccmplot=False,
-               sigma_tau=False, mcthresh=None):
+def array_plot(st, t, mdccm, vel, baz, ccmplot=False,
+               mcthresh=None, sigma_tau=None):
     """
-    Generalized plotting script for velocity - back-azimuth array processing.
-
-    @ Author: David Fee
+    Creates plots for velocity - back-azimuth array processing.
 
     Args:
         st: Filtered obspy stream. Assumes response has been removed.
-        t: Array processing time vector
-        mdccm: Median cross-correlation maxima
-        vel: Array of trace velocity estimates
-        baz: Array of back-azimuth estimates
-        ccmplot: Flag to plot the Mean/Median cross-correlation
+        t: Array processing time vector.
+        mdccm: Array of median cross-correlation maxima.
+        vel: Array of trace velocity estimates.
+        baz: Array of back-azimuth estimates.
+        ccmplot: Boolean flag to plot the Mean/Median cross-correlation
             maxima values on the y-axis in addition to the color scale.
-        sigma_tau: Array of sigma_tau values
-            The flag to add the sigma_tau subplot
-        mcthresh: Tuple. Bounds for mdccm.
+        mcthresh: Add a dashed line at the [float] level
+            in the ccmplot subplot.
+        sigma_tau: Array of sigma_tau values.
+            The flag to add the sigma_tau subplot.
 
     Returns:
-        fig1: Output figure
-        axs1: Output figure axes
+        fig1: Output figure.
+        axs1: Output figure axes.
 
     Usage:
-        fig1, axs1= array_plot(st, t, mdccm, vel, az, ccmplot=None,
-                       sigma_tau=None, mcthresh=None)
+        fig1, axs1= array_plot(st, t, mdccm, vel, baz, ccmplot=False,
+                       mcthresh=None, sigma_tau=None)
     """
 
-    # Colormap
+    # Specify the colormap.
     cm = 'RdYlBu_r'
-    # Colorbar/y-axis for MdCCM
-    cax = 0.2, 1
-    # Time vector
-    tvec = dates.date2num(st[0].stats.starttime.datetime)+st[0].times()/86400
+    # Colorbar/y-axis limits for MdCCM.
+    cax = (0.2, 1)
+    # Specify the time vector for plotting the trace.
+    tvec = st[0].times('matplotlib')
 
-    # Determine the number and order of subplots
+    # Determine the number and order of subplots.
     num_subplots = 3
     vplot = 1
     bplot = 2
     splot = bplot
-    if ccmplot is not False:
+    if ccmplot:
         num_subplots += 1
         vplot += 1
         bplot += 1
-        splot = bplot  # I'm curious if this line is necessary.
-    if sigma_tau is not False:
+        splot = bplot
+    if sigma_tau is not None:
         num_subplots += 1
         splot = bplot + 1
 
-    # Start Plotting
-    # Plot Trace
-    fig1, axarr1 = plt.subplots(num_subplots, 1, sharex='col')
+    # Start Plotting.
+    # Plot the trace.
+    fig1, axs1 = plt.subplots(num_subplots, 1, sharex='col')
     fig1.set_size_inches(10, 9)
-    axs1 = axarr1.ravel()
     axs1[0].plot(tvec, st[0].data, 'k')
     axs1[0].axis('tight')
     axs1[0].set_ylabel('Pressure [Pa]')
 
-    # Plot MdCCM on its own plot
-    if ccmplot is not False:
+    # Plot MdCCM on its own plot.
+    if ccmplot:
         sc = axs1[1].scatter(t, mdccm, c=mdccm,
                              edgecolors='k', lw=0.3, cmap=cm)
-        # axs1[1].plot([t[0], t[-1]], [mcthresh[0], mcthresh[1]], 'r--')
+        if mcthresh is not None:
+            axs1[1].plot([t[0], t[-1]], [mcthresh, mcthresh], 'k--')
         axs1[1].axis('tight')
         axs1[1].set_xlim(t[0], t[-1])
         axs1[1].set_ylim(cax)
         sc.set_clim(cax)
         axs1[1].set_ylabel('MdCCM')
 
-    # Plot the velocity
+    # Plot the trace/apparent velocity.
     sc = axs1[vplot].scatter(t, vel, c=mdccm, edgecolors='k', lw=0.3, cmap=cm)
     axs1[vplot].set_ylim(0.25, 0.45)
     axs1[vplot].set_xlim(t[0], t[-1])
     sc.set_clim(cax)
     axs1[vplot].set_ylabel('Trace Velocity\n [km/s]')
 
-    # Plot the back-azimuth
-    sc = axs1[bplot].scatter(t, az, c=mdccm, edgecolors='k', lw=0.3, cmap=cm)
+    # Plot the back-azimuth.
+    sc = axs1[bplot].scatter(t, baz, c=mdccm, edgecolors='k', lw=0.3, cmap=cm)
     axs1[bplot].set_ylim(0, 360)
     axs1[bplot].set_xlim(t[0], t[-1])
     sc.set_clim(cax)
     axs1[bplot].set_ylabel('Back-azimuth\n [deg]')
 
-    # Plot sigma_tau
-    if sigma_tau is not False:
-        sc = axs1[splot].scatter(t, az, c=mdccm,
+    # Plot sigma_tau if given.
+    if sigma_tau is not None:
+        sc = axs1[splot].scatter(t, sigma_tau, c=mdccm,
                                  edgecolors='k', lw=0.3, cmap=cm)
-        axs1[splot].set_ylim(0, 360)
         axs1[splot].set_xlim(t[0], t[-1])
         sc.set_clim(cax)
         axs1[splot].set_ylabel(r'$\sigma_\tau$')
@@ -101,7 +99,7 @@ def array_plot(st, t, mdccm, vel, az, ccmplot=False,
     axs1[splot].xaxis.set_major_formatter(dates.DateFormatter("%d-%H:%M"))
     axs1[splot].set_xlabel('UTC Time')
 
-    # Add the MdCCM colorbar
+    # Add the MdCCM colorbar.
     cbot = axs1[splot].get_position().y0
     ctop = axs1[1].get_position().y1
     cbaxes = fig1.add_axes([0.92, cbot, 0.02, ctop-cbot])
