@@ -47,7 +47,7 @@ def array_plot(st, t, mdccm, vel, baz, ccmplot=False,
         vplot += 1
         bplot += 1
         splot = bplot
-    if sigma_tau is not None:
+    if sigma_tau:
         num_subplots += 1
         splot = bplot + 1
 
