@@ -63,7 +63,7 @@ def array_plot(st, t, mdccm, vel, baz, ccmplot=False,
     if ccmplot:
         sc = axs1[1].scatter(t, mdccm, c=mdccm,
                              edgecolors='k', lw=0.3, cmap=cm)
-        if mcthresh is not None:
+        if mcthresh:
             axs1[1].plot([t[0], t[-1]], [mcthresh, mcthresh], 'k--')
         axs1[1].axis('tight')
         axs1[1].set_xlim(t[0], t[-1])
