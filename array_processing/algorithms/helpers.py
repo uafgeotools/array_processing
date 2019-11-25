@@ -21,9 +21,11 @@ def wlsqva_proc(stf, rij, tvec, windur, winover):
         winover : scalar, array processing window overlap
 
     Returns:
-        vel: vector of trace velocities (km/s)
-        az : vector of back-azimuths (deg from N)
-        mdccm : vector of median of the xcorr max between sensor pairs (0-1)
+        vel: array of trace velocities (km/s)
+        az : array of back-azimuths (deg from N)
+        sig_tau: array of plane wave model assumption violation estimates
+            for non-planar arrivals (0=planar)
+        mdccm : array of median of the xcorr max between sensor pairs (0-1)
         t : vector of time windows (datenum)
     """
 
@@ -40,6 +42,7 @@ def wlsqva_proc(stf, rij, tvec, windur, winover):
     vel = np.zeros(nits)
     az = np.zeros(nits)
     mdccm = np.zeros(nits)
+    sig_tau = np.zeros(nits)
     t = np.zeros(nits)
 
     #put stream data into matrix
@@ -51,7 +54,7 @@ def wlsqva_proc(stf, rij, tvec, windur, winover):
     print('Running wlsqva for %d windows' % nits)
     for j in range(nits):
         ptr = int(its[j]), int(its[j]+winlensamp)
-        vel[j], az[j], tau, cmax, sig_tau, s, xij = wlsqva(data[ptr[0]:ptr[1], :], rij, fs)
+        vel[j], az[j], tau, cmax, sig_tau[j], s, xij = wlsqva(data[ptr[0]:ptr[1], :], rij, fs)
         mdccm[j] = np.median(cmax)
         #keep time value from center of window
         try:
@@ -63,7 +66,7 @@ def wlsqva_proc(stf, rij, tvec, windur, winover):
         sys.stdout.flush()
     print('Done\n')
 
-    return vel, az, mdccm, t, data
+    return vel, az, sig_tau, mdccm, t, data
 
 
 def getrij(latlist, lonlist):
