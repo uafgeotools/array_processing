@@ -1,4 +1,4 @@
-#%% User-defined parameters
+# %% User-defined parameters
 
 from waveform_collection import gather_waveforms
 from obspy.core import UTCDateTime
@@ -26,7 +26,7 @@ st = gather_waveforms(SOURCE, NETWORK, STATION, LOCATION, CHANNEL, START, END,
 
 stf = st.copy()
 stf.filter('bandpass', freqmin=FMIN, freqmax=FMAX, corners=2, zerophase=True)
-stf.taper(max_percentage=.01)
+stf.taper(max_percentage=0.01)
 
 tvec = stf[0].times('matplotlib')
 
@@ -42,7 +42,7 @@ rij = getrij(latlist, lonlist)
 
 vel, az, mdccm, t, data = wlsqva_proc(stf, rij, tvec, WINLEN, WINOVER)
 
-fig1, axs1 = array_plot(tvec, data, t, mdccm, vel, az, .6)
+fig1, axs1 = array_plot(stf, t, mdccm, vel, az, ccmplot=True, sigma_tau=False)
 
 #%% Array uncertainty
 
