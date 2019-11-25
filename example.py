@@ -1,4 +1,4 @@
-# %% User-defined parameters
+#%% User-defined parameters
 
 from waveform_collection import gather_waveforms
 from obspy.core import UTCDateTime
