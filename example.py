@@ -42,7 +42,7 @@ rij = getrij(latlist, lonlist)
 
 vel, az, mdccm, t, data = wlsqva_proc(stf, rij, tvec, WINLEN, WINOVER)
 
-fig1, axs1 = array_plot(stf, t, mdccm, vel, az, ccmplot=True, sigma_tau=False)
+fig1, axs1 = array_plot(stf, t, mdccm, vel, baz, ccmplot=True, sigma_tau=None)
 
 #%% Array uncertainty
 
