@@ -3,10 +3,12 @@ from matplotlib import dates
 import numpy as np
 
 
-def array_plot(st, t, mdccm, vel, az, ccmplot=True,
-               sigma_tau=None, mcthresh=None):
+def array_plot(st, t, mdccm, vel, az, ccmplot=False,
+               sigma_tau=False, mcthresh=None):
     """
     Generalized plotting script for velocity - back-azimuth array processing.
+
+    @ Author: David Fee
 
     Args:
         st: Filtered obspy stream. Assumes response has been removed.
@@ -41,12 +43,12 @@ def array_plot(st, t, mdccm, vel, az, ccmplot=True,
     vplot = 1
     bplot = 2
     splot = bplot
-    if ccmplot is not True:
+    if ccmplot is not False:
         num_subplots += 1
         vplot += 1
         bplot += 1
         splot = bplot  # I'm curious if this line is necessary.
-    if (sigma_tau is not None):
+    if sigma_tau is not False:
         num_subplots += 1
         splot = bplot + 1
 
@@ -60,10 +62,10 @@ def array_plot(st, t, mdccm, vel, az, ccmplot=True,
     axs1[0].set_ylabel('Pressure [Pa]')
 
     # Plot MdCCM on its own plot
-    if ccmplot is not True:
+    if ccmplot is not False:
         sc = axs1[1].scatter(t, mdccm, c=mdccm,
                              edgecolors='k', lw=0.3, cmap=cm)
-        axs1[1].plot([t[0], t[-1]], [mcthresh[0], mcthresh[1]], 'r--')
+        # axs1[1].plot([t[0], t[-1]], [mcthresh[0], mcthresh[1]], 'r--')
         axs1[1].axis('tight')
         axs1[1].set_xlim(t[0], t[-1])
         axs1[1].set_ylim(cax)
@@ -85,8 +87,9 @@ def array_plot(st, t, mdccm, vel, az, ccmplot=True,
     axs1[bplot].set_ylabel('Back-azimuth\n [deg]')
 
     # Plot sigma_tau
-    if (sigma_tau is not None):
-        sc = axs1[splot].scatter(t, az, c=mdccm, edgecolors='k', lw=0.3, cmap=cm)
+    if sigma_tau is not False:
+        sc = axs1[splot].scatter(t, az, c=mdccm,
+                                 edgecolors='k', lw=0.3, cmap=cm)
         axs1[splot].set_ylim(0, 360)
         axs1[splot].set_xlim(t[0], t[-1])
         sc.set_clim(cax)
@@ -99,7 +102,7 @@ def array_plot(st, t, mdccm, vel, az, ccmplot=True,
     axs1[splot].set_xlabel('UTC Time')
 
     # Add the MdCCM colorbar
-    cbot = 0.1
+    cbot = axs1[splot].get_position().y0
     ctop = axs1[1].get_position().y1
     cbaxes = fig1.add_axes([0.92, cbot, 0.02, ctop-cbot])
     hc = plt.colorbar(sc, cax=cbaxes)
