@@ -86,7 +86,7 @@ def array_plot(st, t, mdccm, vel, baz, ccmplot=False,
     axs1[bplot].set_ylabel('Back-azimuth\n [deg]')
 
     # Plot sigma_tau if given.
-    if sigma_tau is not None:
+    if sigma_tau:
         sc = axs1[splot].scatter(t, sigma_tau, c=mdccm,
                                  edgecolors='k', lw=0.3, cmap=cm)
         axs1[splot].set_xlim(t[0], t[-1])
