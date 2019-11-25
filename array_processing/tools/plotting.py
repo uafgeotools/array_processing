@@ -109,37 +109,34 @@ def array_plot(st, t, mdccm, vel, baz, ccmplot=False,
     return fig1, axs1
 
 
-def arraySigPlt(rij, sig, sigV, sigTh, impResp, vel, th, kvec, figName=None):
-    r"""
+def arraySigPlt(rij, sig, sigV, sigTh, impResp, vel, th, kvec):
+    """
     Plots output of arraySig method
 
-    Parameters
-    ----------
-    rij : array
-        Coorindates (km) of sensors as eastings & northings in a (2, N) array
-    sigLevel : float
-        Variance in time delays (s), typically :math:`\sigma_\tau`
-    sigV : array
-        Uncertainties in trace velocity :math:`(^\circ)` as a function of trace
-        velocity and back azimuth as (NgridTh, NgridV) array
-    sigTh : array
-        Uncertainties in trace velocity (km/s) as a function of trace velocity
-        and back azimuth as (NgridTh, NgridV) array
-    impResp : array
-        Impulse response over grid as (NgridK, NgridK) array
-    vel : array
-        Vector of trace velocities (km/s) for axis in (NgridV, ) array
-    th : array
-        Vector of back azimuths :math:`(^\circ)` for axis in (NgridTh, ) array
-    kvec : array
-        Vector wavenumbers for axes in k-space in (NgridK, ) array
-    figName : str
-        Name of output file, will be written as figName.png (optional)
-    """
+    Args:
+        rij : array
+            Coorindates (km) of sensors as eastings & northings in a (2, N) array
+        sigLevel : float
+            Variance in time delays (s), typically :math:`\sigma_\tau`
+        sigV : array
+            Uncertainties in trace velocity :math:`(^\circ)` as a function of trace
+            velocity and back azimuth as (NgridTh, NgridV) array
+        sigTh : array
+            Uncertainties in trace velocity (km/s) as a function of trace velocity
+            and back azimuth as (NgridTh, NgridV) array
+        impResp : array
+            Impulse response over grid as (NgridK, NgridK) array
+        vel : array
+            Vector of trace velocities (km/s) for axis in (NgridV, ) array
+        th : array
+            Vector of back azimuths :math:`(^\circ)` for axis in (NgridTh, ) array
+        kvec : array
+            Vector wavenumbers for axes in k-space in (NgridK, ) array
 
-    # For plotting methods & scripts
-    figFormat = 'png'       # MUCH faster than pdf!!
-    figDpi = 600               # good resolution
+    Returns:
+        fig: figure handle
+
+    """
 
     # Lower RHS is array geometry
     fig = plt.figure()
@@ -177,35 +174,31 @@ def arraySigPlt(rij, sig, sigV, sigTh, impResp, vel, th, kvec, figName=None):
 
     # Prepare output & display in iPython workspace
     plt.tight_layout()  # IGNORE renderer warning from script! It is fine.
-     if figName:
-        plt.savefig(figName + '.' + figFormat, format=figFormat, dpi=figDpi)
+
+    return fig
 
 
 def arraySigContourPlt(sigV, sigTh, vel, th, trace_v):
-    r"""
+    """
     Plots output of arraySig method onto a polar plot for a specified trace
     velocity.
 
-    Parameters
-    ----------
-    sigV : array
-        Uncertainties in trace velocity :math:`(^\circ)` as a function of trace
-        velocity and back azimuth as (NgridTh, NgridV) array
-    sigTh : array
-        Uncertainties in trace velocity (km/s) as a function of trace velocity
-        and back azimuth as (NgridTh, NgridV) array
-    vel : array
-        Vector of trace velocities (km/s) for axis in (NgridV, ) array
-    th : array
-        Vector of back azimuths :math:`(^\circ)` for axis in (NgridTh, ) array
-    trace_v : float
-        Specified trace velocity (km/s) for uncertainy plot
+    Args:
+        sigV : array
+            Uncertainties in trace velocity :math:`(^\circ)` as a function of trace
+            velocity and back azimuth as (NgridTh, NgridV) array
+        sigTh : array
+            Uncertainties in trace velocity (km/s) as a function of trace velocity
+            and back azimuth as (NgridTh, NgridV) array
+        vel : array
+            Vector of trace velocities (km/s) for axis in (NgridV, ) array
+        th : array
+            Vector of back azimuths :math:`(^\circ)` for axis in (NgridTh, ) array
+        trace_v : float
+            Specified trace velocity (km/s) for uncertainy plot
 
-    Returns
-    ~~~~~~~
-    fig : figure handle
-
-    author: D. Fee
+    Returns:
+        fig : figure handle
 
     """
 
