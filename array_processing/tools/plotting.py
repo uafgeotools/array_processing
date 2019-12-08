@@ -239,4 +239,7 @@ def arraySigContourPlt(sigV, sigTh, vel, th, trace_v):
     ax2.set_title('Back-Azimuth Uncertainty,\nV=%.2f' % trace_v,
                   va='bottom', pad=20)
 
+    # Adjust subplot spacing to prevent overlap.
+    fig.subplots_adjust(wspace=0.4)
+
     return fig
