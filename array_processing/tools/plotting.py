@@ -111,37 +111,37 @@ def array_plot(st, t, mdccm, vel, baz, ccmplot=False,
 
 def arraySigPlt(rij, sig, sigV, sigTh, impResp, vel, th, kvec, figName=None):
     r"""
-    Plots output of arraySig method
+    Plots output of arraySig method.
 
     Parameters
     ----------
     rij : array
-        Coorindates (km) of sensors as eastings & northings in a (2, N) array
+        Coordinates (km) of sensors as eastings & northings in a (2, N) array.
     sigLevel : float
-        Variance in time delays (s), typically :math:`\sigma_\tau`
+        Variance in time delays (s), typically :math:`\sigma_\tau`.
     sigV : array
         Uncertainties in trace velocity :math:`(^\circ)` as a function of trace
-        velocity and back azimuth as (NgridTh, NgridV) array
+        velocity and back azimuth as (NgridTh, NgridV) array.
     sigTh : array
         Uncertainties in trace velocity (km/s) as a function of trace velocity
-        and back azimuth as (NgridTh, NgridV) array
+        and back azimuth as (NgridTh, NgridV) array.
     impResp : array
-        Impulse response over grid as (NgridK, NgridK) array
+        Impulse response over grid as (NgridK, NgridK) array.
     vel : array
-        Vector of trace velocities (km/s) for axis in (NgridV, ) array
+        Vector of trace velocities (km/s) for axis in (NgridV, ) array.
     th : array
-        Vector of back azimuths :math:`(^\circ)` for axis in (NgridTh, ) array
+        Vector of back azimuths :math:`(^\circ)` for axis in (NgridTh, ) array.
     kvec : array
-        Vector wavenumbers for axes in k-space in (NgridK, ) array
+        Vector wavenumbers for axes in k-space in (NgridK, ) array.
     figName : str
-        Name of output file, will be written as figName.png (optional)
+        Name of output file, will be written as figName.png (optional).
     """
 
-    # For plotting methods & scripts
-    figFormat = 'png'       # MUCH faster than pdf!!
-    figDpi = 600               # good resolution
+    # Specify output figure file type and plotting resolution.
+    figFormat = 'png'
+    figDpi = 600
 
-    # Lower RHS is array geometry
+    # Plot array geometry in lower RHS.
     fig = plt.figure()
     axRij = plt.subplot(2, 2, 4)
     for h in range(rij.shape[1]):
@@ -151,31 +151,31 @@ def arraySigPlt(rij, sig, sigV, sigTh, impResp, vel, th, kvec, figName=None):
     axRij.axis('square')
     axRij.grid()
 
-    # Upper RHS is impulse reponse
+    # Plot impulse reponse on upper RHS.
     axImp = plt.subplot(2, 2, 2)
     plt.pcolormesh(kvec, kvec, impResp)
     plt.ylabel('k$_y$ (km$^{-1}$)')
     plt.xlabel('k$_x$ (km$^{-1}$)')
     axImp.axis('square')
 
-    # Upper RHS is theta uncertainty
+    # Plot theta uncertainty on upper LHS.
     plt.subplot(2, 2, 1)
     meshTh = plt.pcolormesh(th, vel, sigTh)
     plt.ylabel('vel. (km/s)')
     plt.xlabel(r'$\theta (^\circ)$')
-    cbrTh = plt.colorbar(meshTh, )
     sigStr = str(sig)
-    cbrTh.set_label(r'$\delta\theta\;\;\sigma_\tau = $' + sigStr + ' s')
+    plt.title(r'$\delta\theta\;\;\sigma_\tau = $' + sigStr + ' s')
+    plt.colorbar(meshTh, )
 
-    # Lower RHS is velocity uncertainty
+    # Plot velocity uncertainty on lower LHS.
     plt.subplot(2, 2, 3)
     meshV = plt.pcolormesh(th, vel, sigV)
     plt.ylabel('vel. (km/s)')
     plt.xlabel(r'$\theta (\circ)$')
-    cbrV = plt.colorbar(meshV, )
-    cbrV.set_label(r'$\delta v$')
+    plt.title(r'$\delta v$')
+    plt.colorbar(meshV, )
 
-    # Prepare output & display in iPython workspace
+    # Prepare output & display in iPython workspace.
     plt.tight_layout()  # IGNORE renderer warning from script! It is fine.
     if figName:
         plt.savefig(figName + '.' + figFormat, format=figFormat, dpi=figDpi)
