@@ -177,8 +177,10 @@ def arraySigPlt(rij, sig, sigV, sigTh, impResp, vel, th, kvec, figName=None):
 
     # Prepare output & display in iPython workspace
     plt.tight_layout()  # IGNORE renderer warning from script! It is fine.
-     if figName:
+    if figName:
         plt.savefig(figName + '.' + figFormat, format=figFormat, dpi=figDpi)
+
+    return fig
 
 
 def arraySigContourPlt(sigV, sigTh, vel, th, trace_v):
