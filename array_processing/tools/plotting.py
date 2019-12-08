@@ -121,16 +121,16 @@ def arraySigPlt(rij, sig, sigV, sigTh, impResp, vel, th, kvec, figName=None):
         Variance in time delays (s), typically :math:`\sigma_\tau`.
     sigV : array
         Uncertainties in trace velocity :math:`(^\circ)` as a function of trace
-        velocity and back azimuth as (NgridTh, NgridV) array.
+        velocity and back-azimuth as (NgridTh, NgridV) array.
     sigTh : array
         Uncertainties in trace velocity (km/s) as a function of trace velocity
-        and back azimuth as (NgridTh, NgridV) array.
+        and back-azimuth as (NgridTh, NgridV) array.
     impResp : array
         Impulse response over grid as (NgridK, NgridK) array.
     vel : array
         Vector of trace velocities (km/s) for axis in (NgridV, ) array.
     th : array
-        Vector of back azimuths :math:`(^\circ)` for axis in (NgridTh, ) array.
+        Vector of back-azimuths :math:`(^\circ)` for axis in (NgridTh, ) array.
     kvec : array
         Vector wavenumbers for axes in k-space in (NgridK, ) array.
     figName : str
@@ -192,22 +192,20 @@ def arraySigContourPlt(sigV, sigTh, vel, th, trace_v):
     ----------
     sigV : array
         Uncertainties in trace velocity :math:`(^\circ)` as a function of trace
-        velocity and back azimuth as (NgridTh, NgridV) array
+        velocity and back-azimuth as (NgridTh, NgridV) array.
     sigTh : array
         Uncertainties in trace velocity (km/s) as a function of trace velocity
-        and back azimuth as (NgridTh, NgridV) array
+        and back-azimuth as (NgridTh, NgridV) array.
     vel : array
-        Vector of trace velocities (km/s) for axis in (NgridV, ) array
+        Vector of trace velocities (km/s) for axis in (NgridV, ) array.
     th : array
-        Vector of back azimuths :math:`(^\circ)` for axis in (NgridTh, ) array
+        Vector of back-azimuths :math:`(^\circ)` for axis in (NgridTh, ) array.
     trace_v : float
-        Specified trace velocity (km/s) for uncertainy plot
+        Specified trace velocity (km/s) for uncertainy plot.
 
     Returns
     ~~~~~~~
     fig : figure handle
-
-    author: D. Fee
 
     """
 
@@ -219,6 +217,7 @@ def arraySigContourPlt(sigV, sigTh, vel, th, trace_v):
     fig, (ax1, ax2) = plt.subplots(nrows=1, ncols=2,
                                    subplot_kw={'projection': 'polar'})
 
+    # Plot trace velocity uncertainty.
     ax1.set_theta_direction(-1)
     ax1.set_theta_offset(np.pi/2.0)
     ax1.plot(theta, sigV_cont, color='k', lw=1)
@@ -226,9 +225,10 @@ def arraySigContourPlt(sigV, sigTh, vel, th, trace_v):
     ax1.yaxis.get_major_locator().base.set_params(nbins=6)
     ax1.set_rlabel_position(22.5)
     ax1.grid(True)
-    ax1.set_title('Trace Velocity Uncertainty, V=%.2f' % trace_v,
+    ax1.set_title('Trace Velocity Uncertainty,\nV=%.2f' % trace_v,
                   va='bottom', pad=20)
 
+    # Plot back-azimuth uncertainty.
     ax2.set_theta_direction(-1)
     ax2.set_theta_offset(np.pi/2.0)
     ax2.plot(theta, sigTh_cont, color='b', lw=1)
@@ -236,7 +236,7 @@ def arraySigContourPlt(sigV, sigTh, vel, th, trace_v):
     ax2.yaxis.get_major_locator().base.set_params(nbins=6)
     ax2.set_rlabel_position(22.5)
     ax2.grid(True)
-    ax2.set_title('Back-Azimuth Uncertainty, V=%.2f' % trace_v,
+    ax2.set_title('Back-Azimuth Uncertainty,\nV=%.2f' % trace_v,
                   va='bottom', pad=20)
 
     return fig
