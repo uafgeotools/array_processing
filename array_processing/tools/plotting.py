@@ -163,17 +163,16 @@ def arraySigPlt(rij, sig, sigV, sigTh, impResp, vel, th, kvec, figName=None):
     meshTh = plt.pcolormesh(th, vel, sigTh)
     plt.ylabel('vel. (km/s)')
     plt.xlabel(r'$\theta (^\circ)$')
-    sigStr = str(sig)
-    plt.title(r'$\delta\theta\;\;\sigma_\tau = $' + sigStr + ' s')
-    plt.colorbar(meshTh, )
+    cbrTh = plt.colorbar(meshTh, )
+    cbrTh.set_label(r'$\delta\theta\;\;\sigma_\tau = $' + str(sig) + ' s')
 
     # Plot velocity uncertainty on lower LHS.
     plt.subplot(2, 2, 3)
     meshV = plt.pcolormesh(th, vel, sigV)
     plt.ylabel('vel. (km/s)')
     plt.xlabel(r'$\theta (\circ)$')
-    plt.title(r'$\delta v$')
-    plt.colorbar(meshV, )
+    cbrV = plt.colorbar(meshV, )
+    cbrV.set_label(r'$\delta v$')
 
     # Prepare output & display in iPython workspace.
     plt.tight_layout()  # IGNORE renderer warning from script! It is fine.
