@@ -40,9 +40,9 @@ lonlist = [tr.stats.longitude for tr in st]
 
 rij = getrij(latlist, lonlist)
 
- vel, baz, mdccm, t, data = wlsqva_proc(stf, rij, tvec, WINLEN, WINOVER)
+vel, baz, sig_tau, mdccm, t, data = wlsqva_proc(stf, rij, tvec, WINLEN, WINOVER)
 
-fig1, axs1 = array_plot(stf, t, mdccm, vel, baz, ccmplot=True, sigma_tau=None)
+fig1, axs1 = array_plot(stf, t, mdccm, vel, baz, ccmplot=True, sigma_tau=sig_tau)
 
 #%% Array uncertainty
 
