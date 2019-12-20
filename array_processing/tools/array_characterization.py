@@ -39,21 +39,21 @@ or imported individually and called as::
 Available methods
 -----------------
 arraySig
-    Estimate array uncertainties and impulse response
+    Estimate array uncertainties and impulse response.
 impulseResp
-    Calculate impulse response of an array
+    Calculate impulse response of an array.
 rthEllipse
-    Calculate angles subtending and extremal distances to an ellipse
+    Calculate angles subtending and extremal distances to an ellipse.
 co_array
-    Form co-array coordinates from array coordinates
+    Form co-array coordinates from array coordinates.
 chi2
-    Calculates value of :math:`\chi^2` for given confidence level
+    Calculates value of :math:`\chi^2` for a given confidence level.
 cubicEqn
-    Find roots of :math:`x^3 + ax^2 + bx + c = 0`
+    Find roots of :math:`x^3 + ax^2 + bx + c = 0`.
 quadraticEqn
-    Find roots of :math:`ax^2 + bx + c = 0`
+    Find roots of :math:`ax^2 + bx + c = 0`.
 quarticEqn
-    Find roots of :math:`x^4 + ax^3 + bx^2 + cx + d = 0`
+    Find roots of :math:`x^4 + ax^3 + bx^2 + cx + d = 0`.
 
 Notes
 -----
@@ -70,47 +70,51 @@ parameter estimation in atmospheric infrasound arrays. J. Acoust. Soc. Am.,
 def arraySig(rij, kmax, sigLevel, p=0.9, velLims=(0.27, 0.36), NgridV=100,
              NgridTh=100, NgridK=100):
     """
-    Estimate 2D array uncertainties in trace velocity and back azimuth,
-    calculate impulse response
+    Estimate 2D array uncertainties in trace velocity and back-azimuth,
+    calculate impulse response.
 
     Args:
-        rij :   array
-            Coorindates (km) of sensors as eastings & northings in a (2, N) array
+        rij : array
+            Coorindates (km) of sensors as eastings & northings
+            in a (2, N) array.
         kmax : float
             Impulse response will be calculated over the range [-kmax, kmax]
-            in k-space (1/km)
+            in k-space (1/km).
         sigLevel : float
-            Variance in time delays (s), typically :math:`\sigma_\tau`
+            Variance in time delays (s), typically :math:`\sigma_\tau`.
         p : float
-            Confidence limit in uncertainty estimates (optional, default is 0.9)
+            Confidence limit in uncertainty estimates
+            (optional, default is 0.9).
         velLims : tuple of float(s)
-            Range of trace velocities (km/s) to estimate uncertainty over, single
-            value can be used (optional, default is (0.27, 0.36))
+            Range of trace velocities (km/s) to estimate uncertainty over.
+            A single value can be used, but the optional,
+            default range is (0.27, 0.36).
         NgridV : int
             Number of velocities to estimate uncertainties in range `velLims`
-            (optional, default is 100)
+            (optional, default is 100).
         NgridTh : int
-            Number of angles to estimate uncertainties in range :math:`[0^\circ,
-            360^\circ)` (optional, default is 100)
+            Number of angles to estimate uncertainties in range
+            :math:`[0^\circ, 360^\circ)` (optional, default is 100)
         NgridK : int
-            Number of k-space coordinates to calculate in each dimension (optional,
-            default is 100)
+            Number of k-space coordinates to calculate in each dimension
+             (optional, default is 100)
 
     Returns:
         sigV : array
-            Uncertainties in trace velocity :math:`(^\circ)` as a function of trace
-            velocity and back azimuth as (NgridTh, NgridV) array
+            Uncertainties in trace velocity :math:`(^\circ)` as a function
+            of trace velocity and back-azimuth as (NgridTh, NgridV) array.
         sigTh : array
-            Uncertainties in trace velocity (km/s) as a function of trace velocity
-            and back azimuth as (NgridTh, NgridV) array
+            Uncertainties in trace velocity (km/s) as a function of
+            trace velocity and back-azimuth as (NgridTh, NgridV) array.
         impResp : array
-            Impulse response over grid as (NgridK, NgridK) array
+            Impulse response over grid as (NgridK, NgridK) array.
         vel : array
-            Vector of trace velocities (km/s) for axis in (NgridV, ) array
+            Vector of trace velocities (km/s) for axis in (NgridV, ) array.
         th : array
-            Vector of back azimuths :math:`(^\circ)` for axis in (NgridTh, ) array
+            Vector of back azimuths :math:`(^\circ)` for
+            axis in (NgridTh, ) array.
         kvec : array
-            Vector wavenumbers for axes in k-space in (NgridK, ) array
+            Vector wavenumbers for axes in k-space in (NgridK, ) array.
     """
 
     # calculate uncertainties
@@ -131,7 +135,8 @@ def arraySig(rij, kmax, sigLevel, p=0.9, velLims=(0.27, 0.36), NgridV=100,
     C = dij@dij.T
     cii, Ve = np.linalg.eig(C)
     thEigR = np.arctan2(Ve[1, 0], Ve[0, 0])
-    R = np.array([[np.cos(thEigR), np.sin(thEigR)], [-np.sin(thEigR), np.cos(thEigR)]])
+    R = np.array([[np.cos(thEigR), np.sin(thEigR)],
+                  [-np.sin(thEigR), np.cos(thEigR)]])
     # calculate chi2 for desired confidence level
     x2 = chi2(2, 1-p)
     sigS = sigLevel / np.sqrt(cii)
@@ -150,10 +155,12 @@ def arraySig(rij, kmax, sigLevel, p=0.9, velLims=(0.27, 0.36), NgridV=100,
             eVec = eVec @ R
             # fix up angle calcs
             sigTh[n, m] = np.abs(np.diff(
-                (np.arctan2(eVec[2:, 1], eVec[2:, 0]) * 180 / np.pi - 360) % 360))
+                (np.arctan2(eVec[2:, 1], eVec[2:, 0]) * 180 / np.pi - 360)
+                % 360))
             if sigTh[n, m] > 180:
                 sigTh[n, m] = np.abs(sigTh[n, m] - 360)
             sigV[n, m] = np.abs(np.diff(1 / eExtrm[:2]))
+
     # prepare impulse response
     impResp, kvec = impulseResp(dij, kmax, NgridK)
 
@@ -162,22 +169,22 @@ def arraySig(rij, kmax, sigLevel, p=0.9, velLims=(0.27, 0.36), NgridV=100,
 
 def impulseResp(dij, kmax, NgridK):
     """
-    Calculate impulse response of a 2D array
+    Calculate impulse response of a 2D array.
 
     Args:
         dij : array
-            Coorindates of coarray of N-sensors in a (2, (N*N-1)/2) array
+            Coordinates of co-array of N-sensors in a (2, (N*N-1)/2) array.
         kmax : float
             Impulse response will be calculated over the range [-kmax, kmax]
-            in k-space
+            in k-space.
         NgridK : int
-            Number of k-space coordinates to calculate in each dimension
+            Number of k-space coordinates to calculate in each dimension.
 
     Returns:
         d : array
-            Impulse response over grid as (NgridK, NgridK) array
+            Impulse response over grid as (NgridK, NgridK) array.
         kvec : array
-            Vector wavenumbers for axes in k-space in (NgridK, ) array
+            Vector wavenumbers for axes in k-space in (NgridK, ) array.
     """
 
     # pre-allocate grid for k-space
@@ -187,7 +194,8 @@ def impulseResp(dij, kmax, NgridK):
     K = np.vstack((Ky.flatten(), Kx.flatten())).T
     d = 2 * np.cos(K @ dij)
     # last term adds in fact that cos(0)==1 for ignored self-delay terms
-    d = np.reshape(np.sum(d, axis=1), (NgridK, NgridK)) + (1 + np.sqrt(1 + 8 * N)) / 2
+    d = np.reshape(np.sum(d, axis=1), (NgridK, NgridK))
+    + (1 + np.sqrt(1 + 8 * N)) / 2
 
     return d, kvec
 
@@ -210,7 +218,8 @@ def rthEllipse(a, b, x0, y0):
     Returns:
         eExtrm : array
             Extremal parameters in (4, ) array as
-            [min distance, max distance, min angle (degrees), max angle (degrees)]
+            [min distance, max distance, min angle (degrees),
+            max angle (degrees)].
         eVec : array
             Coordinates of extremal points on ellipse in (4, 2) array as
             [[x min dist., y min dist.], [x max dist., y max dist.],
@@ -257,7 +266,8 @@ def rthEllipse(a, b, x0, y0):
             # use dual solutions of quartics to find best, real-valued results
             # solve quartic for y
             fy = F**2*H
-            y = quarticEqn(-D*F*(2*H+F)/fy, (B**2*(G+F)+E*F**2+D**2*(H+2*F))/fy,
+            y = quarticEqn(-D*F*(2*H+F)/fy,
+                           (B**2*(G+F)+E*F**2+D**2*(H+2*F))/fy,
                            -D*(B**2+2*E*F+D**2)/fy, (D**2*E)/fy)
             y = np.array([y[i] for i in list(np.where(y == np.real(y))[0])])
             xy = B*y / (D-F*y)
@@ -272,8 +282,10 @@ def rthEllipse(a, b, x0, y0):
                 (np.sqrt(x ** 2 + yx ** 2), np.sqrt(xy ** 2 + y ** 2)))
             # trap real, but bogus sol's (esp. near Th = 180)
             distEidx = np.where(
-                (distE <= np.sqrt(x0 ** 2 + y0 ** 2) + np.max([a, b]) * (1 + magTol)) &
-                (distE >= np.sqrt(x0 ** 2 + y0 ** 2) - np.max([a, b]) * (1 + magTol)))
+                (distE <= np.sqrt(x0 ** 2 + y0 ** 2)
+                 + np.max([a, b]) * (1 + magTol))
+                & (distE >= np.sqrt(x0 ** 2 + y0 ** 2)
+                   - np.max([a, b]) * (1 + magTol)))
             coords = np.hstack(((x, yx), (xy, y))).T
             coords = coords[distEidx, :][0]
             distE = distE[distEidx]
@@ -284,10 +296,12 @@ def rthEllipse(a, b, x0, y0):
     # angles subtended
     if x0 < 0:
         x0 = -x0
-        y = -np.array(quadraticEqn(D ** 2 + B ** 2 * H / G, 4 * D * E, 4 * E ** 2 - B ** 2 * E / G))
+        y = -np.array(quadraticEqn(D ** 2 + B ** 2 * H / G, 4 * D * E,
+                                   4 * E ** 2 - B ** 2 * E / G))
         x = -np.sqrt(E / G - H / G * y ** 2)
     else:
-        y = -np.array(quadraticEqn(D ** 2 + B ** 2 * H / G, 4 * D * E, 4 * E ** 2 - B ** 2 * E / G))
+        y = -np.array(quadraticEqn(D ** 2 + B ** 2 * H / G, 4 * D * E,
+                                   4 * E ** 2 - B ** 2 * E / G))
         x = np.sqrt(E / G - H / G * y ** 2)
     eVec[2:, :] = np.vstack((x, y)).T
     # various quadrant fixes
@@ -309,7 +323,8 @@ def co_array(rij):
 
     Returns:
         dij : array
-            (d, n(n-1)//2) co-array, coordinates of the sensor pairing separations
+            (d, n(n-1)//2) co-array, coordinates of the
+            sensor pairing separations.
     """
 
     idx = [(i, j) for i in range(rij.shape[1]-1)
@@ -351,22 +366,23 @@ def chi2(nu, alpha, funcTol=1e-10):
 
 def cubicEqn(a, b, c):
     """
-    Roots of cubic equation in the form :math:`x^3 + ax^2 + bx + c = 0`
+    Roots of cubic equation in the form :math:`x^3 + ax^2 + bx + c = 0`.
 
     Args:
         a, b, c : int or float, can be complex
-            Scalar coefficients of cubic equation in standard form
+            Scalar coefficients of cubic equation in standard form.
 
     Returns:
         x : list
-            Roots of cubic equation in standard form
+            Roots of cubic equation in standard form.
 
     See Also:
-        numpy.roots : generic polynomial root finder
+        numpy.roots : generic polynomial root finder.
 
     Notes:
-        1) Relatively stable solutions, with some tweaks by Dr. Z, per algorithm
-            of NR 2d ed. :math:`\S` 5.6.  Even np.roots can have some (minor) issues;
+        1) Relatively stable solutions, with some tweaks by Dr. Z,
+        per algorithm of Numerical Recipes 2d ed.
+        :math:`\S` 5.6. Even np.roots can have some (minor) issues;
             e.g., :math:`x^3 - 5x^2 + 8x - 4 = 0`.
     """
 
@@ -375,13 +391,14 @@ def cubicEqn(a, b, c):
     Q3 = Q*Q*Q
     R2 = R*R
     ao3 = a/3
+
     # Q & R are real
     if np.isreal([a, b, c]).all():
         # 3 real roots
         if R2 < Q3:
             sqQ = -2 * np.sqrt(Q)
             theta = np.arccos(R / np.sqrt(Q3))
-            # this solution first published in 1615 by Viète!
+            # This solution first published in 1615 by Viète!
             x = [sqQ * np.cos(theta / 3) - ao3,
                  sqQ * np.cos((theta + 2 * np.pi) / 3) - ao3,
                  sqQ * np.cos((theta - 2 * np.pi) / 3) - ao3]
@@ -437,7 +454,7 @@ def quadraticEqn(a, b, c):
 
     Returns:
         x : list
-            Roots of quadratic equation in standard form
+            Roots of quadratic equation in standard form.
 
     See Also
     ~~~~~~~~
@@ -446,7 +463,7 @@ def quadraticEqn(a, b, c):
     Notes
     ~~~~~
     1) Stable solutions, even for :math:`b^2 >> ac` or complex coefficients,
-    per algorithm of NR 2d ed. :math:`\S` 5.6.
+    per algorithm of Numerical Recipes 2d ed. :math:`\S` 5.6.
     """
 
     # real coefficient branch
@@ -505,13 +522,14 @@ def quarticEqn(a, b, c, d):
     y = cubicEqn(-b, a*c - 4*d, (4*b - a2)*d - c*c)
     y = y[0]
     # find R
-    R = np.sqrt(a2 / 4 - (1 + 0j) * b + y) # force complex in sqrt
+    R = np.sqrt(a2 / 4 - (1 + 0j) * b + y)  # force complex in sqrt
     foo = 3*a2/4 - R*R - 2*b
     if R != 0:
-        D = np.sqrt(foo + (a * b - 2 * c - a2 * a / 4) / R) # R is already complex here
-        E = np.sqrt(foo - (a * b - 2 * c - a2 * a / 4) / R) # ...
+        # R is already complex.
+        D = np.sqrt(foo + (a * b - 2 * c - a2 * a / 4) / R)
+        E = np.sqrt(foo - (a * b - 2 * c - a2 * a / 4) / R)  # ...
     else:
-        sqrtTerm = 2 * np.sqrt(y * y - (4 + 0j) * d) # force complex in sqrt
+        sqrtTerm = 2 * np.sqrt(y * y - (4 + 0j) * d)  # force complex in sqrt
         D = np.sqrt(foo + sqrtTerm)
         E = np.sqrt(foo - sqrtTerm)
     x = [-a/4 + R/2 + D/2,

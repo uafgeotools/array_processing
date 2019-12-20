@@ -47,7 +47,7 @@ def array_plot(st, t, mdccm, vel, baz, ccmplot=False,
         vplot += 1
         bplot += 1
         splot = bplot
-    if sigma_tau is not None:
+    if sigma_tau:
         num_subplots += 1
         splot = bplot + 1
 
@@ -86,7 +86,7 @@ def array_plot(st, t, mdccm, vel, baz, ccmplot=False,
     axs1[bplot].set_ylabel('Back-azimuth\n [deg]')
 
     # Plot sigma_tau if given.
-    if sigma_tau is not None:
+    if sigma_tau:
         sc = axs1[splot].scatter(t, sigma_tau, c=mdccm,
                                  edgecolors='k', lw=0.3, cmap=cm)
         axs1[splot].set_xlim(t[0], t[-1])
@@ -109,36 +109,39 @@ def array_plot(st, t, mdccm, vel, baz, ccmplot=False,
     return fig1, axs1
 
 
-def arraySigPlt(rij, sig, sigV, sigTh, impResp, vel, th, kvec):
+def arraySigPlt(rij, sig, sigV, sigTh, impResp, vel, th, kvec, figName=None):
+    r"""
+    Plots output of arraySig method.
+
+    Parameters
+    ----------
+    rij : array
+        Coordinates (km) of sensors as eastings & northings in a (2, N) array.
+    sigLevel : float
+        Variance in time delays (s), typically :math:`\sigma_\tau`.
+    sigV : array
+        Uncertainties in trace velocity :math:`(^\circ)` as a function of trace
+        velocity and back-azimuth as (NgridTh, NgridV) array.
+    sigTh : array
+        Uncertainties in trace velocity (km/s) as a function of trace velocity
+        and back-azimuth as (NgridTh, NgridV) array.
+    impResp : array
+        Impulse response over grid as (NgridK, NgridK) array.
+    vel : array
+        Vector of trace velocities (km/s) for axis in (NgridV, ) array.
+    th : array
+        Vector of back-azimuths :math:`(^\circ)` for axis in (NgridTh, ) array.
+    kvec : array
+        Vector wavenumbers for axes in k-space in (NgridK, ) array.
+    figName : str
+        Name of output file, will be written as figName.png (optional).
     """
-    Plots output of arraySig method
 
-    Args:
-        rij : array
-            Coorindates (km) of sensors as eastings & northings in a (2, N) array
-        sigLevel : float
-            Variance in time delays (s), typically :math:`\sigma_\tau`
-        sigV : array
-            Uncertainties in trace velocity :math:`(^\circ)` as a function of trace
-            velocity and back azimuth as (NgridTh, NgridV) array
-        sigTh : array
-            Uncertainties in trace velocity (km/s) as a function of trace velocity
-            and back azimuth as (NgridTh, NgridV) array
-        impResp : array
-            Impulse response over grid as (NgridK, NgridK) array
-        vel : array
-            Vector of trace velocities (km/s) for axis in (NgridV, ) array
-        th : array
-            Vector of back azimuths :math:`(^\circ)` for axis in (NgridTh, ) array
-        kvec : array
-            Vector wavenumbers for axes in k-space in (NgridK, ) array
+    # Specify output figure file type and plotting resolution.
+    figFormat = 'png'
+    figDpi = 600
 
-    Returns:
-        fig: figure handle
-
-    """
-
-    # Lower RHS is array geometry
+    # Plot array geometry in lower RHS.
     fig = plt.figure()
     axRij = plt.subplot(2, 2, 4)
     for h in range(rij.shape[1]):
@@ -148,23 +151,22 @@ def arraySigPlt(rij, sig, sigV, sigTh, impResp, vel, th, kvec):
     axRij.axis('square')
     axRij.grid()
 
-    # Upper RHS is impulse reponse
+    # Plot impulse reponse on upper RHS.
     axImp = plt.subplot(2, 2, 2)
     plt.pcolormesh(kvec, kvec, impResp)
     plt.ylabel('k$_y$ (km$^{-1}$)')
     plt.xlabel('k$_x$ (km$^{-1}$)')
     axImp.axis('square')
 
-    # Upper RHS is theta uncertainty
+    # Plot theta uncertainty on upper LHS.
     plt.subplot(2, 2, 1)
     meshTh = plt.pcolormesh(th, vel, sigTh)
     plt.ylabel('vel. (km/s)')
     plt.xlabel(r'$\theta (^\circ)$')
     cbrTh = plt.colorbar(meshTh, )
-    sigStr = str(sig)
-    cbrTh.set_label(r'$\delta\theta\;\;\sigma_\tau = $' + sigStr + ' s')
+    cbrTh.set_label(r'$\delta\theta\;\;\sigma_\tau = $' + str(sig) + ' s')
 
-    # Lower RHS is velocity uncertainty
+    # Plot velocity uncertainty on lower LHS.
     plt.subplot(2, 2, 3)
     meshV = plt.pcolormesh(th, vel, sigV)
     plt.ylabel('vel. (km/s)')
@@ -172,33 +174,37 @@ def arraySigPlt(rij, sig, sigV, sigTh, impResp, vel, th, kvec):
     cbrV = plt.colorbar(meshV, )
     cbrV.set_label(r'$\delta v$')
 
-    # Prepare output & display in iPython workspace
+    # Prepare output & display in iPython workspace.
     plt.tight_layout()  # IGNORE renderer warning from script! It is fine.
+    if figName:
+        plt.savefig(figName + '.' + figFormat, format=figFormat, dpi=figDpi)
 
     return fig
 
 
 def arraySigContourPlt(sigV, sigTh, vel, th, trace_v):
-    """
+    r"""
     Plots output of arraySig method onto a polar plot for a specified trace
     velocity.
 
-    Args:
-        sigV : array
-            Uncertainties in trace velocity :math:`(^\circ)` as a function of trace
-            velocity and back azimuth as (NgridTh, NgridV) array
-        sigTh : array
-            Uncertainties in trace velocity (km/s) as a function of trace velocity
-            and back azimuth as (NgridTh, NgridV) array
-        vel : array
-            Vector of trace velocities (km/s) for axis in (NgridV, ) array
-        th : array
-            Vector of back azimuths :math:`(^\circ)` for axis in (NgridTh, ) array
-        trace_v : float
-            Specified trace velocity (km/s) for uncertainy plot
+    Parameters
+    ----------
+    sigV : array
+        Uncertainties in trace velocity :math:`(^\circ)` as a function of trace
+        velocity and back-azimuth as (NgridTh, NgridV) array.
+    sigTh : array
+        Uncertainties in trace velocity (km/s) as a function of trace velocity
+        and back-azimuth as (NgridTh, NgridV) array.
+    vel : array
+        Vector of trace velocities (km/s) for axis in (NgridV, ) array.
+    th : array
+        Vector of back-azimuths :math:`(^\circ)` for axis in (NgridTh, ) array.
+    trace_v : float
+        Specified trace velocity (km/s) for uncertainy plot.
 
-    Returns:
-        fig : figure handle
+    Returns
+    ~~~~~~~
+    fig : figure handle
 
     """
 
@@ -210,6 +216,7 @@ def arraySigContourPlt(sigV, sigTh, vel, th, trace_v):
     fig, (ax1, ax2) = plt.subplots(nrows=1, ncols=2,
                                    subplot_kw={'projection': 'polar'})
 
+    # Plot trace velocity uncertainty.
     ax1.set_theta_direction(-1)
     ax1.set_theta_offset(np.pi/2.0)
     ax1.plot(theta, sigV_cont, color='k', lw=1)
@@ -217,9 +224,10 @@ def arraySigContourPlt(sigV, sigTh, vel, th, trace_v):
     ax1.yaxis.get_major_locator().base.set_params(nbins=6)
     ax1.set_rlabel_position(22.5)
     ax1.grid(True)
-    ax1.set_title('Trace Velocity Uncertainty, V=%.2f' % trace_v,
+    ax1.set_title('Trace Velocity Uncertainty,\nV=%.2f' % trace_v,
                   va='bottom', pad=20)
 
+    # Plot back-azimuth uncertainty.
     ax2.set_theta_direction(-1)
     ax2.set_theta_offset(np.pi/2.0)
     ax2.plot(theta, sigTh_cont, color='b', lw=1)
@@ -227,7 +235,10 @@ def arraySigContourPlt(sigV, sigTh, vel, th, trace_v):
     ax2.yaxis.get_major_locator().base.set_params(nbins=6)
     ax2.set_rlabel_position(22.5)
     ax2.grid(True)
-    ax2.set_title('Back-Azimuth Uncertainty, V=%.2f' % trace_v,
+    ax2.set_title('Back-Azimuth Uncertainty,\nV=%.2f' % trace_v,
                   va='bottom', pad=20)
+
+    # Adjust subplot spacing to prevent overlap.
+    fig.subplots_adjust(wspace=0.4)
 
     return fig

@@ -33,7 +33,7 @@ def wlsqva_proc(stf, rij, tvec, windur, winover):
     npts = len(stf[0].data)
     fs = stf[0].stats.sampling_rate
 
-    #set up windows
+    # set up windows
     winlensamp = windur*fs
     sampinc = int((1-winover) * winlensamp)
     its = np.arange(0, npts, sampinc)
@@ -56,15 +56,15 @@ def wlsqva_proc(stf, rij, tvec, windur, winover):
         ptr = int(its[j]), int(its[j]+winlensamp)
         vel[j], az[j], tau, cmax, sig_tau[j], s, xij = wlsqva(data[ptr[0]:ptr[1], :], rij, fs)
         mdccm[j] = np.median(cmax)
-        #keep time value from center of window
+        # Keep time value from center of window.
         try:
             t[j] = tvec[ptr[0]+int(winlensamp/2)]
         except:
             t[j] = t.max()
-        tmp = int(j/nits*100)
+        tmp = int((j+1)/nits*100)
         sys.stdout.write("\r%d%%" % tmp)
         sys.stdout.flush()
-    print('Done\n')
+    print('\nDone\n')
 
     return vel, az, sig_tau, mdccm, t, data
 
