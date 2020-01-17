@@ -4,19 +4,19 @@ from waveform_collection import gather_waveforms
 from obspy.core import UTCDateTime
 
 SOURCE = 'IRIS'
-NETWORK = 'AV'
-STATION = 'DLL'
+NETWORK = 'IM'
+STATION = 'I53H*'
 LOCATION = '*'
 CHANNEL = '*'
 
-START = UTCDateTime('2019-07-15T16:50:00')
-END = START + 10*60
+START = UTCDateTime('2018-12-19T01:45:00')
+END = START + 20*60
 
-FMIN = 0.5
-FMAX = 5
+FMIN = 0.1
+FMAX = 1
 
 # Array processing parameters
-WINLEN = 30
+WINLEN = 50
 WINOVER = 0.50
 
 #%% Grab and filter waveforms
