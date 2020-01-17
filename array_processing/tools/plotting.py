@@ -47,7 +47,7 @@ def array_plot(st, t, mdccm, vel, baz, ccmplot=False,
         vplot += 1
         bplot += 1
         splot = bplot
-    if sigma_tau:
+    if sigma_tau is not None:
         num_subplots += 1
         splot = bplot + 1
 
@@ -86,7 +86,7 @@ def array_plot(st, t, mdccm, vel, baz, ccmplot=False,
     axs1[bplot].set_ylabel('Back-azimuth\n [deg]')
 
     # Plot sigma_tau if given.
-    if sigma_tau:
+    if sigma_tau is not None:
         sc = axs1[splot].scatter(t, sigma_tau, c=mdccm,
                                  edgecolors='k', lw=0.3, cmap=cm)
         axs1[splot].set_xlim(t[0], t[-1])
