@@ -28,8 +28,6 @@ stf = st.copy()
 stf.filter('bandpass', freqmin=FMIN, freqmax=FMAX, corners=2, zerophase=True)
 stf.taper(max_percentage=0.01)
 
-tvec = stf[0].times('matplotlib')
-
 #%% Array processing and plotting using least squares
 
 from array_processing.algorithms.helpers import getrij, wlsqva_proc
@@ -40,7 +38,7 @@ lonlist = [tr.stats.longitude for tr in st]
 
 rij = getrij(latlist, lonlist)
 
-vel, baz, sig_tau, mdccm, t, data = wlsqva_proc(stf, rij, tvec, WINLEN, WINOVER)
+vel, baz, sig_tau, mdccm, t, data = wlsqva_proc(stf, rij, WINLEN, WINOVER)
 
 fig1, axs1 = array_plot(stf, t, mdccm, vel, baz, ccmplot=True, sigma_tau=sig_tau)
 
