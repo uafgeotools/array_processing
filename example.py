@@ -3,30 +3,30 @@
 from waveform_collection import gather_waveforms
 from obspy.core import UTCDateTime
 
+# Data collection
 SOURCE = 'IRIS'
 NETWORK = 'IM'
-STATION = 'I53H*'
+STATION = 'I53H?'
 LOCATION = '*'
 CHANNEL = '*'
-
 START = UTCDateTime('2018-12-19T01:45:00')
 END = START + 20*60
 
-FMIN = 0.1
-FMAX = 1
+# Filtering
+FMIN = 0.1  # [Hz]
+FMAX = 1    # [Hz]
 
-# Array processing parameters
-WINLEN = 50
-WINOVER = 0.50
+# Array processing
+WINLEN = 50  # [s]
+WINOVER = 0.5
 
 #%% Grab and filter waveforms
 
 st = gather_waveforms(SOURCE, NETWORK, STATION, LOCATION, CHANNEL, START, END,
-                      time_buffer=0, remove_response=True)
+                      remove_response=True)
 
-stf = st.copy()
-stf.filter('bandpass', freqmin=FMIN, freqmax=FMAX, corners=2, zerophase=True)
-stf.taper(max_percentage=0.01)
+st.filter('bandpass', freqmin=FMIN, freqmax=FMAX, corners=2, zerophase=True)
+st.taper(max_percentage=0.01)
 
 #%% Array processing and plotting using least squares
 
@@ -38,9 +38,10 @@ lonlist = [tr.stats.longitude for tr in st]
 
 rij = getrij(latlist, lonlist)
 
-vel, baz, sig_tau, mdccm, t, data = wlsqva_proc(stf, rij, WINLEN, WINOVER)
+vel, baz, sig_tau, mdccm, t, data = wlsqva_proc(st, rij, WINLEN, WINOVER)
 
-fig1, axs1 = array_plot(stf, t, mdccm, vel, baz, ccmplot=True, sigma_tau=sig_tau)
+fig1, axs1 = array_plot(st, t, mdccm, vel, baz, ccmplot=True,
+                        sigma_tau=sig_tau)
 
 #%% Array uncertainty
 
@@ -49,20 +50,20 @@ from array_processing.tools.plotting import arraySigPlt, arraySigContourPlt
 
 SIGLEVEL = 1/st[0].stats.sampling_rate
 KMAX = 400
-TRACE_V = 0.33
+TRACE_VELOCITY = 0.33
 
-sigV, sigTh, impResp, vel, th, kvec = arraySig(rij, kmax=KMAX, sigLevel=SIGLEVEL)
+sigV, sigTh, impResp, vel, th, kvec = arraySig(rij, kmax=KMAX,
+                                               sigLevel=SIGLEVEL)
 
 fig2 = arraySigPlt(rij, SIGLEVEL, sigV, sigTh, impResp, vel, th, kvec)
 
-fig3 = arraySigContourPlt(sigV, sigTh, vel, th, trace_v=TRACE_V)
+fig3 = arraySigContourPlt(sigV, sigTh, vel, th, trace_v=TRACE_VELOCITY)
 
 #%% Delay and sum beam
 
 from array_processing.tools import beamForm
 
-beam = beamForm(data, rij, stf[0].stats.sampling_rate, 50)
-
+beam = beamForm(data, rij, st[0].stats.sampling_rate, 50)
 
 #%% Pure state filter
 
