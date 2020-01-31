@@ -8,9 +8,7 @@ def wlsqva_proc(stf, rij, windur, winover):
     """
     Module to run wlsqva array processing
 
-    example: vel, az, mdccm, t = wlsqva_proc(stf, rij, tvec, windur, winover)
-
-    Note that tau, sig_tau, s, and xij are not currently returned (but should be!)
+    Note that tau, s, and xij are not currently returned (but should be!)
 
     Args:
         stf : (d,n) obspy stream of filtered data for n sensors
@@ -26,6 +24,7 @@ def wlsqva_proc(stf, rij, windur, winover):
             for non-planar arrivals (0=planar)
         mdccm : array of median of the xcorr max between sensor pairs (0-1)
         t : vector of time windows (datenum)
+        data : stf in numpy array format
     """
 
     tvec = stf[0].times('matplotlib')
