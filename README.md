@@ -25,7 +25,7 @@ processing with robust estimators, Geophysical Journal International, p. In prep
 Installation
 ------------
 
-It is recommended to install this package into a new or pre-existing
+We recommend you install this package into a new or pre-existing
 [conda](https://docs.conda.io/projects/conda/en/latest/index.html) environment.
 (Ensure that the environment contains all of the packages listed in the
 [Dependencies](#dependencies) section.)
