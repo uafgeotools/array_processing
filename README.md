@@ -26,10 +26,9 @@ Installation
 ------------
 
 It is recommended to install this package into a new or pre-existing
-environment, such as that provided by 
-[conda](https://docs.conda.io/projects/conda/en/latest/index.html).
-(Ensure that the environment contains all of
-the packages listed in the [Dependencies](#dependencies) section.)
+[conda](https://docs.conda.io/projects/conda/en/latest/index.html) environment.
+(Ensure that the environment contains all of the packages listed in the
+[Dependencies](#dependencies) section.)
 
 To create a new conda environment for use with this and other _uafgeotools_
 packages, execute the following terminal command:
@@ -52,7 +51,6 @@ install command only needs to be run once.
 
 Finally, install _array_processing_ in a similar manner to _waveform_collection_.
 ```
-$ conda activate uafinfra
 $ git clone https://github.com/uafgeotools/array_processing.git
 $ cd array_processing
 $ pip install --editable .
