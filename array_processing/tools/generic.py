@@ -496,63 +496,58 @@ def randc(N, beta=0.0):
 
 
 def psf(x, p=2, w=3, n=3, window=None):
-    """
-    Pure-state filter a data matrix
-
-    This function uses a generalized coherence estimator to enhance coherent
-    channels in an ensemble of time series.
+    r"""
+    Pure-state filter a data matrix. This function uses a generalized coherence
+    estimator to enhance coherent channels in an ensemble of time series.
 
     Args:
-        x : array
-            (m, d) array of real-valued time series data as columns
-        p : float, optional
-            Level of contrast in filter.  Default is 2.
-        w : int, optional
-            Width of smoothing window in frequency domain.  Default is 3.
-        n : float, optional
-            Number of times to smooth in frequency domain.  Default is 3.
-        window : function, optional
-            Type of smoothing window in frequency domain.  Default is None, which
-            results in a triangular window.
+        x: ``(m, d)`` array of real-valued time series data as columns
+        p (float): Level of contrast in filter
+        w (int): Width of smoothing window in frequency domain
+        n (float): Number of times to smooth in frequency domain
+        window: Type of smoothing window in frequency domain. Default is
+            `None`, which results in a triangular window
 
     Returns:
-        x_ppf : array
-            (m, d) real-valued, pure state-filtered version of `x`
-        P : array
-            (m//2+1, ) degree of polarization (generalized coherence estimate) in
-            frequency components of `x` from DC to the Nyquist
+        tuple: Tuple containing:
 
-    Notes
-    ~~~~~
-    See any of Samson & Olson's early 1980s papers, or Szuberla's 1997
-    PhD thesis, for a full description of the underlying theory.  The code
+        - **x_psf** – ``(m, d)`` array; real-valued, pure state-filtered
+          version of `x`
+        - **P** – ``(m//2+1, )`` array; degree of polarization (generalized
+          coherence estimate) in frequency components of `x` from DC to the
+          Nyquist
+
+    **Notes**
+
+    See any of Samson & Olson's early 1980s papers, or Szuberla's 1997 PhD
+    thesis, for a full description of the underlying theory. The code
     implementation's defaults reflect historical values for the smoothing
-    window -- a more realistic `w` would be of order :math:`\sqrt{m}\;`
-    combined with a smoother window, such as `np.hanning`.  Letting `n=3`
-    is a reasonable choice for all window types to ensure confidence in the
-    spectral estimates used to construct the filter.
+    window — a more realistic `w` would be of order :math:`\sqrt{m}` combined
+    with a smoother window, such as :func:`numpy.hanning`. Letting `n=3` is a
+    reasonable choice for all window types to ensure confidence in the spectral
+    estimates used to construct the filter.
 
-    For `m` samples of `d` channels of data, a (d, d) spectral matrix
-    :math:`\mathbf{S}[f]` can be formed at each of the ``m//2+1`` real
-    frequency components from DC to the Nyquist.  The generalized coherence
-    among all of the `d` channels at each frequency is estimated by
-
-    .. math::
-
-        P[f] = \frac{d \left(\text{tr}\mathbf{S}^2[f]\right) -
-        \left(\text{tr}\mathbf{S}[f]\right)^2}
-        {\left(d-1\right)\left(\text{tr}\mathbf{S}[f]\right)^2} \;,
-
-    where :math:`\text{tr}\mathbf{S}[f]` is the trace of the spectral
-    matrix at frequency :math:`f`.  The filter is constructed by applying
-    the following multiplication in the frequency domain
+    For :math:`m` samples of :math:`d` channels of data, a ``(d, d)`` spectral
+    matrix :math:`\mathbf{S}[f]` can be formed at each of the ``m//2+1`` real
+    frequency components from DC to the Nyquist. The generalized coherence
+    among all of the :math:`d` channels at each frequency is estimated by
 
     .. math::
 
-        \hat{\mathbf{X}}[f] = P[f]^p\mathbf{X}[f] \;,
+        P[f] = \frac{d \left(\text{Tr}\,\mathbf{S}^2[f]\right) -
+        \left(\text{Tr}\,\mathbf{S}[f]\right)^2}
+        {\left(d-1\right)\left(\text{Tr}\,\mathbf{S}[f]\right)^2},
+
+    where :math:`\text{Tr}\,\mathbf{S}[f]` is the trace of the spectral matrix
+    at frequency :math:`f`. The filter is constructed by applying the following
+    multiplication in the frequency domain
+
+    .. math::
+
+        \hat{\mathbf{X}}[f] = P[f]^p\mathbf{X}[f],
 
     where :math:`\mathbf{X}[f]` is the Fourier transform component of the all
-    channels at frequency :math:`f` and `p` is the level of contrast.  The
+    channels at frequency :math:`f` and :math:`p` is the level of contrast. The
     inverse Fourier transform of the matrix :math:`\hat{\mathbf{X}}` gives the
     filtered time series.
 
@@ -560,15 +555,15 @@ def psf(x, p=2, w=3, n=3, window=None):
     the spectral domain (a consequence of the variance in the raw Fourier
     components), but it is bound by :math:`\mathbf{P}[f]\in[0,1]` even with
     smoothing, hence its utility as a multiplicative filter in the frequency
-    domain.  Similarly, this bound allows the contrast between channels to be
-    enhanced based on their generalized coherence if :math:`p>1\;`.
+    domain. Similarly, this bound allows the contrast between channels to be
+    enhanced based on their generalized coherence if :math:`p>1`.
 
     Data channels should be pre-processed to have unit-variance, since unlike
-    the traditional two-channel magintude squared coherence estimators, the
+    the traditional two-channel magnitude squared coherence estimators, the
     generalized coherence estimate can be biased by relative amplitude
-    variations among the channels.  To mitigate the effects of smoothing
-    complex values into the DC and Nyquist components, they are set to zero
-    before computing the inverse transform of :math:`\hat{\mathbf{X}}`.
+    variations among the channels. To mitigate the effects of smoothing complex
+    values into the DC and Nyquist components, they are set to zero before
+    computing the inverse transform of :math:`\hat{\mathbf{X}}`.
     """
 
     # private functions up front
@@ -640,4 +635,3 @@ def psf(x, p=2, w=3, n=3, window=None):
     x_psf = np.real(np.fft.ifft(XX, axis=0)*XX.shape[0])
 
     return x_psf, P
-
