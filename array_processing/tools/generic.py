@@ -332,25 +332,22 @@ def tauCalcPW(vel, azPhi, rij):
 
 
 def tauCalcSW(vel, rAzPhi, rij):
-    """
+    r"""
     Calculates theoretical tau vector for a spherical wave moving across an
-    array of `n` elements
+    array of ``n`` elements.
 
     Args:
-        vel : float
-            signal velocity across array
-        rAzPhi : list|array
-            range to source and back azimuth from co-array coordinate origin
-            (º CW from N); range to source, back azimuth and elevation angle
-            from co-array coordinate origin (º CW from N, º from N-E plane)
-        rij : array
-            (d, n) `n` element coordinates as [easting, northing, {elevation}]
-            column vectors in `d` dimensions
+        vel (float): Signal velocity across array
+        rAzPhi: Range to source and back azimuth from co-array coordinate
+            origin (° CW from N); range to source, back azimuth and elevation
+            angle from co-array coordinate origin (° CW from N, ° from N-E
+            plane)
+        rij: ``(d, n)`` array; ``n`` element coordinates as [easting, northing,
+            {elevation}] column vectors in ``d`` dimensions
 
     Returns:
-        tau : array
-            (n(n-1)//2, ) time delays of relative signal arrivals (TDOA) for all
-            unique sensor pairings
+        tau: ``(n(n-1)//2, )`` array; time delays of relative signal arrivals
+        (TDOA) for all unique sensor pairings
     """
 
     dim, nTraces = rij.shape
