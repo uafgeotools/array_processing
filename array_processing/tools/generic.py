@@ -291,25 +291,21 @@ def phaseAlignIdx(tau, Hz, wgt, refTrace):
 
 
 def tauCalcPW(vel, azPhi, rij):
-    """
+    r"""
     Calculates theoretical tau vector for a plane wave moving across an array
-    of `n` elements
+    of ``n`` elements.
 
     Args:
-        vel : float
-            signal velocity across array
-        azPhi : float or list|array
-            back azimuth (float) from co-array coordinate origin (º CW from N);
-            back azimuth and elevation angle (array) from co-array coordinate
-            origin (º CW from N, º from N-E plane)
-        rij : array
-            (d, n) `n` element coordinates as [easting, northing, {elevation}]
-            column vectors in `d` dimensions
+        vel (float): Signal velocity across array
+        azPhi: Back azimuth (float) from co-array coordinate origin (° CW from
+            N); back azimuth and elevation angle (array) from co-array
+            coordinate origin (° CW from N, ° from N-E plane)
+        rij: ``(d, n)`` array; ``n`` element coordinates as [easting, northing,
+            {elevation}] column vectors in ``d`` dimensions
 
     Returns:
-        tau : array
-            (n(n-1)//2, ) time delays of relative signal arrivals (TDOA) for all
-            unique sensor pairings
+        ``(n(n-1)//2, )`` array; time delays of relative signal arrivals (TDOA)
+        for all unique sensor pairings
     """
 
     dim, nTraces = rij.shape
