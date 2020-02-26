@@ -414,39 +414,25 @@ def tauCalcSWxy(vel, xy, rij):
 
 
 def randc(N, beta=0.0):
-    """
-    Colored noise generator
-
-    This function generates pseudo-random colored noise (power spectrum
-    proportional to a power of frequency) via fast Fourier inversion of
-    the appropriate amplitudes and complex phases.
+    r"""
+    Colored noise generator. This function generates pseudo-random colored
+    noise (power spectrum proportional to a power of frequency) via fast
+    Fourier inversion of the appropriate amplitudes and complex phases.
 
     Args:
-        N : int or tuple of int
-            Shape of output array
-        beta : float, optional
-            Spectrum of output will be proportional to ``f**(-beta)``.
-            Default is 0.0.
+        N (int or tuple): Shape of output array
+        beta (float): Spectrum of output will be proportional to ``f**(-beta)``
 
     Returns:
-        out : array
-            Colored noise sequences as columns with shape `N`, each normalized
-            to zero-mean and unit-variance.  Result is always real valued.
+        Colored noise sequences as columns with shape `N`, each normalized to
+        zero-mean and unit-variance.  Result is always real valued
 
-    See Also
-    ~~~~~~~~
-    ift : from `Z.py`, Sentman-like normalization of ifft
-    numpy.fft : master fft functions
+    **Notes**
 
-    Notes
-    ~~~~~
-    Spectrum of output will be :math:`\sim 1/f^\beta`.
-
-    White noise is the default (:math:`\beta` = 0); others as pink
-    (:math:`\beta` = 1) or brown/surf (:math:`\beta` = 2), ....
-
-    Since the output is zero-mean, the DC spectral component(s) will
-    be identically zero.
+    Spectrum of output will be :math:`\sim1/f^\beta`. White noise is the
+    default (:math:`\beta = 0`); others are pink (:math:`\beta = 1`) or
+    brown/surf (:math:`\beta = 2`). Since the output is zero-mean, the DC
+    spectral component(s) will be identically zero.
     """
 
     # catch scalar input & form tuple
