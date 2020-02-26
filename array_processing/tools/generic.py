@@ -481,7 +481,7 @@ def randc(N, beta=0.0):
     return r.reshape(N) / np.std(r, ddof=1)
 
 
-def psf(x, p=2, w=3, n=3, window=None):
+def psf(x, p=2.0, w=3, n=3.0, window=None):
     r"""
     Pure-state filter a data matrix. This function uses a generalized coherence
     estimator to enhance coherent channels in an ensemble of time series.
