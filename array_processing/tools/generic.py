@@ -342,8 +342,8 @@ def tauCalcSW(vel, rAzPhi, rij):
             {elevation}] column vectors in ``d`` dimensions
 
     Returns:
-        tau: ``(n(n-1)//2, )`` array; time delays of relative signal arrivals
-        (TDOA) for all unique sensor pairings
+        ``(n(n-1)//2, )`` array; time delays of relative signal arrivals (TDOA)
+        for all unique sensor pairings
     """
 
     dim, nTraces = rij.shape
