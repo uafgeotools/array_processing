@@ -244,29 +244,24 @@ def phaseAlignData(data, delays, wgt, refTrace, M, Moffset, plotFlag=False):
 
 
 def phaseAlignIdx(tau, Hz, wgt, refTrace):
-    """
-    Calculate shifts required to phase align `n` traces in a data matrix
+    r"""
+    Calculate shifts required to phase align ``n`` traces in a data matrix.
 
     Args:
-        tau : array
-            (n(n-1)//2, ) time delays of relative signal arrivals (TDOA) for all
-            unique sensor pairings
-        Hz : float or int
-            sample rate
-        wgt : list or array
-           vector of relative weights of length `n` (0 == exclude trace)
-        refTrace : int
-            reference sensor for TDOA information
+        tau: ``(n(n-1)//2, )`` array; time delays of relative signal arrivals
+            (TDOA) for all unique sensor pairings
+        Hz (int or float): Sample rate
+        wgt: Vector of relative weights of length ``n`` (0 = exclude trace)
+        refTrace (int): Reference sensor for TDOA information
 
     Returns:
-        delays : array
-            (n, ) vector of shifts as indicies for embedding traces in an array,
-            such that trace `i` will begin at index ``out[i]``
+        ``(n, )`` array; vector of shifts as indices for embedding traces in an
+        array, such that trace ``i`` will begin at index ``out[i]``
 
-    Notes
-    ~~~~~
+    **Notes**
+
     The output of this function is compatible with the inputs of
-    `phaseAlignData`.
+    :func:`phaseAlignData`.
     """
 
     # -- this is low level code w/out error checks or defaults, designed
