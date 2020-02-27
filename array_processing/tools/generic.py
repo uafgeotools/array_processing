@@ -158,8 +158,8 @@ def phaseAlignData(data, delays, wgt, refTrace, M, Moffset, plotFlag=False):
             be same length as input traces)
         Moffset: Individual trace offsets from arrival model shifts (use ``[0
             for i in range(nTraces)]`` to skip this effect)
-        plotFlag (bool): Optional flag to indicate output array will be used
-            for plotting purposes.  Default is `False` (pads shifts with zeros;
+        plotFlag (bool): Flag to indicate output array will be used for
+            plotting purposes.  Default is `False` (pads shifts with zeros;
             pads with :data:`numpy.nan` if `True`)
 
     Returns:
