@@ -7,7 +7,7 @@ from operator import itemgetter
 
 def array_thresh(mcthresh, az_volc, az_diff, mdccm, az, vel):
     """
-    Find  array processing values above multiple set thresholds for MCCM,
+    Find array processing values above multiple set thresholds for MCCM,
     back-azimuth, and trace velocity. Ues default 0.25 - 0.45 km/s for trace
     velocity treshholds. Also finds consecutive segments that meet tresholds,
     but these values are not current returned.
@@ -62,7 +62,7 @@ def beamForm(data, rij, Hz, azPhi, vel=0.340, r=None, wgt=None, refTrace=None,
     Args:
         data: ``(m, n)`` array; time series with ``m`` samples from ``n``
             traces as columns
-        rij: ``(d, n)`` array;  ``n`` sensor coordinates as [easting, northing,
+        rij: ``(d, n)`` array; ``n`` sensor coordinates as [easting, northing,
             {elevation}] column vectors in ``d`` dimensions
         Hz (int or float): Sample rate
         azPhi: Back azimuth (float) from co-array coordinate origin (° CW from
@@ -159,8 +159,8 @@ def phaseAlignData(data, delays, wgt, refTrace, M, Moffset, plotFlag=False):
         Moffset: Individual trace offsets from arrival model shifts (use ``[0
             for i in range(nTraces)]`` to skip this effect)
         plotFlag (bool): Flag to indicate output array will be used for
-            plotting purposes.  Default is `False` (pads shifts with zeros;
-            pads with :data:`numpy.nan` if `True`)
+            plotting purposes. Default is `False` (pads shifts with zeros; pads
+            with :data:`numpy.nan` if `True`)
 
     Returns:
         ``(M, n)`` array of shifted traces as columns
@@ -389,7 +389,7 @@ def randc(N, beta=0.0):
 
     Returns:
         Colored noise sequences as columns with shape `N`, each normalized to
-        zero-mean and unit-variance.  Result is always real valued
+        zero-mean and unit-variance. Result is always real valued
 
     **Notes**
 
