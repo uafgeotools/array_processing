@@ -184,28 +184,21 @@ def arraySigPlt(rij, sig, sigV, sigTh, impResp, vel, th, kvec, figName=None):
 
 def arraySigContourPlt(sigV, sigTh, vel, th, trace_v):
     r"""
-    Plots output of arraySig method onto a polar plot for a specified trace
-    velocity.
+    Plots output of
+    :func:`~array_processing.tools.array_characterization.arraySig` onto a
+    polar plot for a specified trace velocity.
 
-    Parameters
-    ----------
-    sigV : array
-        Uncertainties in trace velocity :math:`(^\circ)` as a function of trace
-        velocity and back-azimuth as (NgridTh, NgridV) array.
-    sigTh : array
-        Uncertainties in trace velocity (km/s) as a function of trace velocity
-        and back-azimuth as (NgridTh, NgridV) array.
-    vel : array
-        Vector of trace velocities (km/s) for axis in (NgridV, ) array.
-    th : array
-        Vector of back-azimuths :math:`(^\circ)` for axis in (NgridTh, ) array.
-    trace_v : float
-        Specified trace velocity (km/s) for uncertainy plot.
+    Args:
+        sigV: Uncertainties in trace velocity (°) as a function of trace
+            velocity and back-azimuth as ``(NgridTh, NgridV)`` array
+        sigTh: Uncertainties in trace velocity (km/s) as a function of trace
+            velocity and back-azimuth as ``(NgridTh, NgridV)`` array
+        vel: Vector of trace velocities (km/s) for axis in ``(NgridV, )`` array
+        th: Vector of back-azimuths (°) for axis in ``(NgridTh, )`` array
+        trace_v (float): Specified trace velocity (km/s) for uncertainty plot
 
-    Returns
-    ~~~~~~~
-    fig : figure handle
-
+    Returns:
+        :class:`~matplotlib.figure.Figure`: Figure handle
     """
 
     tvel_ptr = np.abs(vel - trace_v).argmin()
