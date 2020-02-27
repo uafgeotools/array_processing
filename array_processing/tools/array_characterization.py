@@ -5,52 +5,43 @@ from scipy.special import gammainc
 
 def arraySig(rij, kmax, sigLevel, p=0.9, velLims=(0.27, 0.36), NgridV=100,
              NgridTh=100, NgridK=100):
-    """
-    Estimate 2D array uncertainties in trace velocity and back-azimuth,
+    r"""
+    Estimate 2-D array uncertainties in trace velocity and back-azimuth, and
     calculate impulse response.
 
     Args:
-        rij : array
-            Coorindates (km) of sensors as eastings & northings
-            in a (2, N) array.
-        kmax : float
-            Impulse response will be calculated over the range [-kmax, kmax]
-            in k-space (1/km).
-        sigLevel : float
-            Variance in time delays (s), typically :math:`\sigma_\tau`.
-        p : float
-            Confidence limit in uncertainty estimates
-            (optional, default is 0.9).
-        velLims : tuple of float(s)
-            Range of trace velocities (km/s) to estimate uncertainty over.
-            A single value can be used, but the optional,
-            default range is (0.27, 0.36).
-        NgridV : int
-            Number of velocities to estimate uncertainties in range `velLims`
-            (optional, default is 100).
-        NgridTh : int
-            Number of angles to estimate uncertainties in range
-            :math:`[0^\circ, 360^\circ)` (optional, default is 100)
-        NgridK : int
-            Number of k-space coordinates to calculate in each dimension
-             (optional, default is 100)
+        rij: Coordinates (km) of sensors as eastings & northings in a
+            ``(2, N)`` array
+        kmax (float): Impulse response will be calculated over the range
+            [-`kmax`, `kmax`] in :math:`k`-space (1/km)
+        sigLevel (float): Variance in time delays (s), typically
+            :math:`\sigma_\tau`
+        p (float): Confidence limit in uncertainty estimates
+        velLims (tuple): Range of trace velocities (km/s) to estimate
+            uncertainty over. A single value can be used, but the by default a
+            range is used
+        NgridV (int): Number of velocities to estimate uncertainties in range
+            `velLims`
+        NgridTh (int): Number of angles to estimate uncertainties in range
+            :math:`[0^\circ, 360^\circ]`
+        NgridK (int): Number of :math:`k`-space coordinates to calculate in
+            each dimension
 
     Returns:
-        sigV : array
-            Uncertainties in trace velocity :math:`(^\circ)` as a function
-            of trace velocity and back-azimuth as (NgridTh, NgridV) array.
-        sigTh : array
-            Uncertainties in trace velocity (km/s) as a function of
-            trace velocity and back-azimuth as (NgridTh, NgridV) array.
-        impResp : array
-            Impulse response over grid as (NgridK, NgridK) array.
-        vel : array
-            Vector of trace velocities (km/s) for axis in (NgridV, ) array.
-        th : array
-            Vector of back azimuths :math:`(^\circ)` for
-            axis in (NgridTh, ) array.
-        kvec : array
-            Vector wavenumbers for axes in k-space in (NgridK, ) array.
+        tuple: Tuple containing:
+
+        - **sigV** – Uncertainties in trace velocity (°) as a function of trace
+          velocity and back-azimuth as ``(NgridTh, NgridV)`` array
+        - **sigTh** – Uncertainties in trace velocity (km/s) as a function of
+          trace velocity and back-azimuth as ``(NgridTh, NgridV)`` array
+        - **impResp** – Impulse response over grid as ``(NgridK, NgridK)``
+          array
+        - **vel** – Vector of trace velocities (km/s) for axis in
+          ``(NgridV, )`` array
+        - **th** – Vector of back azimuths (°) for axis in ``(NgridTh, )``
+          array
+        - **kvec** – Vector wavenumbers for axes in :math:`k`-space in
+          ``(NgridK, )`` array
     """
 
     # calculate uncertainties
@@ -104,26 +95,26 @@ def arraySig(rij, kmax, sigLevel, p=0.9, velLims=(0.27, 0.36), NgridV=100,
 
 
 def impulseResp(dij, kmax, NgridK):
-    """
-    Calculate impulse response of a 2D array.
+    r"""
+    Calculate impulse response of a 2-D array.
 
     Args:
-        dij : array
-            Coordinates of co-array of N-sensors in a (2, (N*N-1)/2) array.
-        kmax : float
-            Impulse response will be calculated over the range [-kmax, kmax]
-            in k-space.
-        NgridK : int
-            Number of k-space coordinates to calculate in each dimension.
+        dij: Coordinates of co-array of ``N`` sensors in a ``(2, (N*N-1)/2)``
+            array
+        kmax (float): Impulse response will be calculated over the range
+            [-`kmax`, `kmax`] in :math:`k`-space
+        NgridK (int): Number of :math:`k`-space coordinates to calculate in
+            each dimension
 
     Returns:
-        d : array
-            Impulse response over grid as (NgridK, NgridK) array.
-        kvec : array
-            Vector wavenumbers for axes in k-space in (NgridK, ) array.
+        tuple: Tuple containing:
+
+        - **d** – Impulse response over grid as ``(NgridK, NgridK)`` array
+        - **kvec** - Vector wavenumbers for axes in :math:`k`-space in
+          ``(NgridK, )`` array
     """
 
-    # pre-allocate grid for k-space
+    # pre-allocate grid for :math:`k`-space
     kvec = np.linspace(-kmax, kmax, NgridK)
     Kx, Ky = np.meshgrid(kvec, kvec)
     N = dij.shape[1]
@@ -137,28 +128,32 @@ def impulseResp(dij, kmax, NgridK):
 
 
 def rthEllipse(a, b, x0, y0):
-    """
-    Calculate angles subtending, and extremal distances to, a coordinate-
-    aligned ellipse from the origin
+    r"""
+    Calculate angles subtending, and extremal distances to, a
+    coordinate-aligned ellipse from the origin.
 
     Args:
-        a : float
-            semi-major axis of ellipse
-        b : float
-            semi-minor axis of ellipse
-        x0 : float
-            horizontal center of ellipse
-        y0 : float
-            vertical center of ellipse
+        a (float): Semi-major axis of ellipse
+        b (float): Semi-minor axis of ellipse
+        x0 (float): Horizontal center of ellipse
+        y0 (float): Vertical center of ellipse
 
     Returns:
-        eExtrm : array
-            Extremal parameters in (4, ) array as
-            [min distance, max distance, min angle (degrees),
-            max angle (degrees)].
-        eVec : array
-            Coordinates of extremal points on ellipse in (4, 2) array as
-            [[x min dist., y min dist.], [x max dist., y max dist.],
+        tuple: Tuple containing:
+
+        - **eExtrm** – Extremal parameters in ``(4, )`` array as
+
+          .. code-block:: none
+
+            [min distance, max distance, min angle (degrees), max angle (degrees)]
+
+        - **eVec** – Coordinates of extremal points on ellipse in ``(4, 2)``
+          array as
+
+          .. code-block:: none
+
+            [[x min dist., y min dist.],
+             [x max dist., y max dist.],
              [x max angle tangency, y max angle tangency],
              [x min angle tangency, y min angle tangency]]
     """
@@ -249,18 +244,16 @@ def rthEllipse(a, b, x0, y0):
 
 
 def co_array(rij):
-    """
-    Form co-array coordinates for given array coordinates
+    r"""
+    Form co-array coordinates for given array coordinates.
 
     Args:
-        rij : array
-            (d, n) `n` sensor coordinates as [northing, easting, {elevation}]
-            column vectors in `d` dimensions
+        rij: ``(d, n)`` array; ``n`` sensor coordinates as [northing, easting,
+            {elevation}] column vectors in ``d`` dimensions
 
     Returns:
-        dij : array
-            (d, n(n-1)//2) co-array, coordinates of the
-            sensor pairing separations.
+        ``(d, n(n-1)//2)`` co-array, coordinates of the sensor pairing
+        separations
     """
 
     idx = [(i, j) for i in range(rij.shape[1]-1)
@@ -270,24 +263,21 @@ def co_array(rij):
 
 
 def chi2(nu, alpha, funcTol=1e-10):
-    """
+    r"""
     Calculate value of a :math:`\chi^2` such that a :math:`\nu`-dimensional
     confidence ellipsoid encloses a fraction :math:`1 - \alpha` of normally
-    distributed variable
+    distributed variable.
 
     Args:
-        nu : int
-            degrees of freedom (typically embedding dimension of variable)
-        alpha : float
-            confidence interval such that :math:`\alpha \in [0, 1]`
-        funcTol : float (optional)
-            optimzation function evaluation tolerance for :math:`\nu \ne 2`,
-            defaults to 1e-10
+        nu (int): Degrees of freedom (typically embedding dimension of
+            variable)
+        alpha (float): Confidence interval such that :math:`\alpha \in [0, 1]`
+        funcTol (float): Optimization function evaluation tolerance for
+            :math:`\nu \ne 2`
 
     Returns:
-        chi2val : float
-            value of a :math:`\chi^2` enclosing :math:`1 - \alpha` confidence
-            region
+        float: Value of a :math:`\chi^2` enclosing :math:`1 - \alpha`
+        confidence region
     """
 
     if nu == 2:
@@ -301,25 +291,26 @@ def chi2(nu, alpha, funcTol=1e-10):
 
 
 def cubicEqn(a, b, c):
-    """
+    r"""
     Roots of cubic equation in the form :math:`x^3 + ax^2 + bx + c = 0`.
 
     Args:
-        a, b, c : int or float, can be complex
-            Scalar coefficients of cubic equation in standard form.
+        a (int or float): Scalar coefficient of cubic equation, can be
+            complex
+        b (int or float): Same as above
+        c (int or float): Same as above
 
     Returns:
-        x : list
-            Roots of cubic equation in standard form.
+        list: Roots of cubic equation in standard form
 
     See Also:
-        numpy.roots : generic polynomial root finder.
+        :func:`numpy.roots` — Generic polynomial root finder
 
     Notes:
-        1) Relatively stable solutions, with some tweaks by Dr. Z,
-        per algorithm of Numerical Recipes 2d ed.
-        :math:`\S` 5.6. Even np.roots can have some (minor) issues;
-            e.g., :math:`x^3 - 5x^2 + 8x - 4 = 0`.
+        Relatively stable solutions, with some tweaks by Dr. Z,
+        per algorithm of Numerical Recipes 2nd ed., :math:`\S` 5.6. Even
+        :func:`numpy.roots` can have some (minor) issues; e.g.,
+        :math:`x^3 - 5x^2 + 8x - 4 = 0`.
     """
 
     Q = a*a/9 - b/3
@@ -381,25 +372,24 @@ def cubicEqn(a, b, c):
 
 
 def quadraticEqn(a, b, c):
-    """
-    Roots of quadratic equation in the form :math:`ax^2 + bx + c = 0`
+    r"""
+    Roots of quadratic equation in the form :math:`ax^2 + bx + c = 0`.
 
     Args:
-        a, b, c : int or float, can be complex
-            Scalar coefficients of quadratic equation in standard form
+        a (int or float): Scalar coefficient of quadratic equation, can be
+            complex
+        b (int or float): Same as above
+        c (int or float): Same as above
 
     Returns:
-        x : list
-            Roots of quadratic equation in standard form.
+        list: Roots of quadratic equation in standard form
 
-    See Also
-    ~~~~~~~~
-    numpy.roots : generic polynomial root finder
+    See Also:
+        :func:`numpy.roots` — Generic polynomial root finder
 
-    Notes
-    ~~~~~
-    1) Stable solutions, even for :math:`b^2 >> ac` or complex coefficients,
-    per algorithm of Numerical Recipes 2d ed. :math:`\S` 5.6.
+    Notes:
+        Stable solutions, even for :math:`b^2 >> ac` or complex coefficients,
+        per algorithm of Numerical Recipes 2nd ed., :math:`\S` 5.6.
     """
 
     # real coefficient branch
@@ -429,28 +419,26 @@ def quadraticEqn(a, b, c):
 
 
 def quarticEqn(a, b, c, d):
-    """
+    r"""
     Roots of quartic equation in the form :math:`x^4 + ax^3 + bx^2 +
-    cx + d = 0`
+    cx + d = 0`.
 
-    Parameters
-    ~~~~~~~~~~
-    a, b, c, d : int or float, can be complex
-        Scalar coefficients of quartic equation in standard form
+    Args:
+        a (int or float): Scalar coefficient of quartic equation, can be
+            complex
+        b (int or float): Same as above
+        c (int or float): Same as above
+        d (int or float): Same as above
 
-    Returns
-    ~~~~~~~
-    x : list
-        Roots of quartic equation in standard form
+    Returns:
+        list: Roots of quartic equation in standard form
 
-    See Also
-    ~~~~~~~~
-    numpy.roots : generic polynomial root finder
+    See Also:
+        :func:`numpy.roots` — Generic polynomial root finder
 
-    Notes
-    ~~~~~
-    1) Stable solutions per algorithm of CRC  Std. Mathematical
-    Tables, 29th ed.
+    Notes:
+        Stable solutions per algorithm of CRC Std. Mathematical Tables, 29th
+        ed.
     """
 
     # find *any* root of resolvent cubic

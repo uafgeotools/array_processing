@@ -126,7 +126,7 @@ def arraySigPlt(rij, sig, sigV, sigTh, impResp, vel, th, kvec, figName=None):
         vel: Vector of trace velocities (km/s) for axis in ``(NgridV, )``
             array
         th: Vector of back-azimuths (°) for axis in ``(NgridTh, )`` array
-        kvec: Vector wavenumbers for axes in k-space in ``(NgridK, )`` array
+        kvec: Vector wavenumbers for axes in :math:`k`-space in ``(NgridK, )`` array
         figName (str): Name of output file, will be written as ``figName.png``
     """
 
