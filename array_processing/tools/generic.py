@@ -155,40 +155,33 @@ def beamForm(data, rij, Hz, azPhi, vel=0.340, r=None, wgt=None, refTrace=None,
 
 
 def phaseAlignData(data, delays, wgt, refTrace, M, Moffset, plotFlag=False):
-    """
-    Embeds `n` phase aligned traces in a data matrix
+    r"""
+    Embeds ``n`` phase aligned traces in a data matrix.
 
-    Parameters
-    ~~~~~~~~~~
-    data : array
-        (m, n) time series with `m` samples from `n` traces as columns
-    delays : array
-        (n, ) vector of shifts as indicies for embedding traces in an array,
-        such that trace `i` will begin at index ``out[i]``
-    wgt : list or array
-       vector of relative weights of length `n` (0 == exclude trace by setting
-       to padding value, see `plotFlag`)
-    refTrace : int
-        reference sensor for TDOA information
-    M : int
-        length of best beam result in samples (use `m` to let beam be same
-        length as inpout traces)
-    Moffset : list or array
-        individual trace offsets from arrival model shifts (use
-        ``[0 for i in range(nTraces)]`` to skip this effect)
-    plotFlag : Boolean
-        optional flag to indicate output array will be used for plotting
-        purposes.  Default is False (pads shifts with zeros; pads with
-        np.nan if True).
+    Args:
+        data: ``(m, n)`` array; time series with ``m`` samples from ``n``
+            traces as columns
+        delays: ``(n, )`` array; vector of shifts as indices for embedding
+            traces in an array, such that trace ``i`` will begin at index
+            ``out[i]``
+        wgt: Vector of relative weights of length ``n`` (0 == exclude trace by
+            setting to padding value, see `plotFlag`)
+        refTrace (int): Reference sensor for TDOA information
+        M (int): Length of best beam result in samples (use ``m`` to let beam
+            be same length as input traces)
+        Moffset: Individual trace offsets from arrival model shifts (use ``[0
+            for i in range(nTraces)]`` to skip this effect)
+        plotFlag (bool): Optional flag to indicate output array will be used
+            for plotting purposes.  Default is `False` (pads shifts with zeros;
+            pads with :data:`numpy.nan` if `True`)
 
-    Returns
-    ~~~~~~~
-    data_align : array
-        (M, n) array of shifted traces as columns
+    Returns:
+        ``(M, n)`` array of shifted traces as columns
 
-    Notes
-    ~~~~~
-    The output of `phaseAlignIdx` is used to calculate the input `delays`.
+    **Notes**
+
+    The output of :func:`phaseAlignIdx` is used to calculate the input
+    `delays`.
     """
 
     # (c) 2017 Curt A. L. Szuberla
