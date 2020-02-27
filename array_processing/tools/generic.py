@@ -6,29 +6,22 @@ from operator import itemgetter
 
 
 def array_thresh(mcthresh, az_volc, az_diff, mdccm, az, vel):
-    """
+    r"""
     Find array processing values above multiple set thresholds for MCCM,
-    back-azimuth, and trace velocity. Ues default 0.25 - 0.45 km/s for trace
-    velocity treshholds. Also finds consecutive segments that meet tresholds,
-    but these values are not current returned.
+    back-azimuth, and trace velocity. Uses default 0.25–0.45 km/s for trace
+    velocity thresholds. Also finds consecutive segments that meet thresholds,
+    but these values are not currently returned.
 
     Args:
-        mcthresh : float
-            MCCM or MdCCM treshold (0-1)
-        az_volc : float
-            Back-azimuth to target volcano or source (0-359)
-        az_diff : float
-            Tolerance for back-azimuth from az_volc
-        mdccm : array
-            MdCCM or MCCM values from array processing (0-1)
-        az : array
-            Back-azimuth values (0-359)
-        vel : array
-            Trace-velocty values (km/s)
+        mcthresh (float): MCCM or MdCCM threshold (0–1)
+        az_volc (float): Back-azimuth to target volcano or source (0–359)
+        az_diff (float): Tolerance for back-azimuth from `az_volc`
+        mdccm: MdCCM or MCCM values from array processing (0–1)
+        az: Back-azimuth values (0–359)
+        vel: Trace-velocity values (km/s)
 
     Returns:
-        igood: array
-            Indices to time segments that meet set thresholds
+        Indices to time segments that meet set thresholds
     """
 
     # Use numpy to find where thresholds are exceeded
