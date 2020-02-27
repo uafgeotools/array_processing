@@ -82,12 +82,11 @@ def beamForm(data, rij, Hz, azPhi, vel=0.340, r=None, wgt=None, refTrace=None,
     Raises:
         IndexError: If the input argument dimensions are not consistent
 
-    **Notes**
-
-    This beamformer handles planar- or spherical-model arrivals from
-    arbitrarily elevated sources incident on 2- or 3-D arrays. Weights are
-    relative and normalized upon beam output. The default value for `vel`
-    assumes that `rij` is in units of km (e.g., the speed is in km/s).
+    Notes:
+        This beamformer handles planar- or spherical-model arrivals from
+        arbitrarily elevated sources incident on 2- or 3-D arrays. Weights are
+        relative and normalized upon beam output. The default value for `vel`
+        assumes that `rij` is in units of km (e.g., the speed is in km/s).
     """
 
     # (c) 2017 Curt A. L. Szuberla
@@ -158,10 +157,9 @@ def phaseAlignData(data, delays, wgt, refTrace, M, Moffset, plotFlag=False):
     Returns:
         ``(M, n)`` array of shifted traces as columns
 
-    **Notes**
-
-    The output of :func:`phaseAlignIdx` is used to calculate the input
-    `delays`.
+    Notes:
+        The output of :func:`phaseAlignIdx` is used to calculate the input
+        `delays`.
     """
 
     # (c) 2017 Curt A. L. Szuberla
@@ -231,10 +229,9 @@ def phaseAlignIdx(tau, Hz, wgt, refTrace):
         ``(n, )`` array; vector of shifts as indices for embedding traces in an
         array, such that trace ``i`` will begin at index ``out[i]``
 
-    **Notes**
-
-    The output of this function is compatible with the inputs of
-    :func:`phaseAlignData`.
+    Notes:
+        The output of this function is compatible with the inputs of
+        :func:`phaseAlignData`.
     """
 
     # -- this is low level code w/out error checks or defaults, designed
@@ -384,12 +381,11 @@ def randc(N, beta=0.0):
         Colored noise sequences as columns with shape `N`, each normalized to
         zero-mean and unit-variance. Result is always real valued
 
-    **Notes**
-
-    Spectrum of output will be :math:`\sim1/f^\beta`. White noise is the
-    default (:math:`\beta = 0`); others are pink (:math:`\beta = 1`) or
-    brown/surf (:math:`\beta = 2`). Since the output is zero-mean, the DC
-    spectral component(s) will be identically zero.
+    Notes:
+        Spectrum of output will be :math:`\sim1/f^\beta`. White noise is the
+        default (:math:`\beta = 0`); others are pink (:math:`\beta = 1`) or
+        brown/surf (:math:`\beta = 2`). Since the output is zero-mean, the DC
+        spectral component(s) will be identically zero.
     """
 
     # catch scalar input & form tuple
@@ -460,53 +456,55 @@ def psf(x, p=2.0, w=3, n=3.0, window=None):
           coherence estimate) in frequency components of `x` from DC to the
           Nyquist
 
-    **Notes**
+    Notes:
+        See any of Samson & Olson's early 1980s papers, or Szuberla's 1997 PhD
+        thesis, for a full description of the underlying theory. The code
+        implementation's defaults reflect historical values for the smoothing
+        window — a more realistic `w` would be of order :math:`\sqrt{m}`
+        combined with a smoother window, such as :func:`numpy.hanning`. Letting
+        `n=3` is a reasonable choice for all window types to ensure confidence
+        in the spectral estimates used to construct the filter.
 
-    See any of Samson & Olson's early 1980s papers, or Szuberla's 1997 PhD
-    thesis, for a full description of the underlying theory. The code
-    implementation's defaults reflect historical values for the smoothing
-    window — a more realistic `w` would be of order :math:`\sqrt{m}` combined
-    with a smoother window, such as :func:`numpy.hanning`. Letting `n=3` is a
-    reasonable choice for all window types to ensure confidence in the spectral
-    estimates used to construct the filter.
+        For :math:`m` samples of :math:`d` channels of data, a ``(d, d)``
+        spectral matrix :math:`\mathbf{S}[f]` can be formed at each of the
+        ``m//2+1`` real frequency components from DC to the Nyquist. The
+        generalized coherence among all of the :math:`d` channels at each
+        frequency is estimated by
 
-    For :math:`m` samples of :math:`d` channels of data, a ``(d, d)`` spectral
-    matrix :math:`\mathbf{S}[f]` can be formed at each of the ``m//2+1`` real
-    frequency components from DC to the Nyquist. The generalized coherence
-    among all of the :math:`d` channels at each frequency is estimated by
+        .. math::
 
-    .. math::
+            P[f] = \frac{d \left(\text{Tr}\,\mathbf{S}^2[f]\right) -
+            \left(\text{Tr}\,\mathbf{S}[f]\right)^2}
+            {\left(d-1\right)\left(\text{Tr}\,\mathbf{S}[f]\right)^2},
 
-        P[f] = \frac{d \left(\text{Tr}\,\mathbf{S}^2[f]\right) -
-        \left(\text{Tr}\,\mathbf{S}[f]\right)^2}
-        {\left(d-1\right)\left(\text{Tr}\,\mathbf{S}[f]\right)^2},
+        where :math:`\text{Tr}\,\mathbf{S}[f]` is the trace of the spectral
+        matrix at frequency :math:`f`. The filter is constructed by applying
+        the following multiplication in the frequency domain
 
-    where :math:`\text{Tr}\,\mathbf{S}[f]` is the trace of the spectral matrix
-    at frequency :math:`f`. The filter is constructed by applying the following
-    multiplication in the frequency domain
+        .. math::
 
-    .. math::
+            \hat{\mathbf{X}}[f] = P[f]^p\mathbf{X}[f],
 
-        \hat{\mathbf{X}}[f] = P[f]^p\mathbf{X}[f],
+        where :math:`\mathbf{X}[f]` is the Fourier transform component of the
+        all channels at frequency :math:`f` and :math:`p` is the level of
+        contrast. The inverse Fourier transform of the matrix
+        :math:`\hat{\mathbf{X}}` gives the filtered time series.
 
-    where :math:`\mathbf{X}[f]` is the Fourier transform component of the all
-    channels at frequency :math:`f` and :math:`p` is the level of contrast. The
-    inverse Fourier transform of the matrix :math:`\hat{\mathbf{X}}` gives the
-    filtered time series.
+        The estimator :math:`\mathbf{P}[f] = 1`, identically, without smoothing
+        in the spectral domain (a consequence of the variance in the raw
+        Fourier components), but it is bound by
+        :math:`\mathbf{P}[f]\in[0,1]` even withn smoothing, hence its
+        utility as a multiplicative filter in the frequency domain. Similarly,
+        this bound allows the contrast between channels to be enhanced based on
+        their generalized coherence if :math:`p>1`.
 
-    The estimator :math:`\mathbf{P}[f] = 1`, identically, without smoothing in
-    the spectral domain (a consequence of the variance in the raw Fourier
-    components), but it is bound by :math:`\mathbf{P}[f]\in[0,1]` even with
-    smoothing, hence its utility as a multiplicative filter in the frequency
-    domain. Similarly, this bound allows the contrast between channels to be
-    enhanced based on their generalized coherence if :math:`p>1`.
-
-    Data channels should be pre-processed to have unit-variance, since unlike
-    the traditional two-channel magnitude squared coherence estimators, the
-    generalized coherence estimate can be biased by relative amplitude
-    variations among the channels. To mitigate the effects of smoothing complex
-    values into the DC and Nyquist components, they are set to zero before
-    computing the inverse transform of :math:`\hat{\mathbf{X}}`.
+        Data channels should be pre-processed to have unit-variance, since
+        unlike the traditional two-channel magnitude squared coherence
+        estimators, the generalized coherence estimate can be biased by
+        relative amplitude variations among the channels. To mitigate the
+        effects of smoothing complex values into the DC and Nyquist components,
+        they are set to zero before computing the inverse transform of
+        :math:`\hat{\mathbf{X}}`.
     """
 
     # private functions up front
