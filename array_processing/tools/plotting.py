@@ -5,29 +5,28 @@ import numpy as np
 
 def array_plot(st, t, mdccm, vel, baz, ccmplot=False,
                mcthresh=None, sigma_tau=None):
-    """
-    Creates plots for velocity - back-azimuth array processing.
+    r"""
+    Creates plots for velocity—back-azimuth array processing.
 
     Args:
-        st: Filtered obspy stream. Assumes response has been removed.
-        t: Array processing time vector.
-        mdccm: Array of median cross-correlation maxima.
-        vel: Array of trace velocity estimates.
-        baz: Array of back-azimuth estimates.
-        ccmplot: Boolean flag to plot the Mean/Median cross-correlation
-            maxima values on the y-axis in addition to the color scale.
-        mcthresh: Add a dashed line at the [float] level
-            in the ccmplot subplot.
-        sigma_tau: Array of sigma_tau values.
-            The flag to add the sigma_tau subplot.
+        st (:class:`~obspy.core.stream.Stream`): Filtered data. Assumes
+            response has been removed
+        t: Array processing time vector
+        mdccm: Array of median cross-correlation maxima
+        vel: Array of trace velocity estimates
+        baz: Array of back-azimuth estimates
+        ccmplot (bool): Toggle plotting the mean/median cross-correlation
+            maxima values on a separate subplot in addition to the color scale
+        mcthresh (float): Add a dashed line at this level in the ccmplot
+            subplot
+        sigma_tau: Array of :math:`\sigma_\tau` values. If provided, will plot
+            the values on a separate subplot
 
     Returns:
-        fig1: Output figure.
-        axs1: Output figure axes.
+        tuple: Tuple containing:
 
-    Usage:
-        fig1, axs1= array_plot(st, t, mdccm, vel, baz, ccmplot=False,
-                       mcthresh=None, sigma_tau=None)
+        - **fig** (:class:`~matplotlib.figure.Figure`) – Figure handle
+        - **axes** (Array of :class:`~matplotlib.axes.Axes`) – Axis handles
     """
 
     # Specify the colormap.
@@ -53,88 +52,82 @@ def array_plot(st, t, mdccm, vel, baz, ccmplot=False,
 
     # Start Plotting.
     # Plot the trace.
-    fig1, axs1 = plt.subplots(num_subplots, 1, sharex='col')
-    fig1.set_size_inches(10, 9)
-    axs1[0].plot(tvec, st[0].data, 'k')
-    axs1[0].axis('tight')
-    axs1[0].set_ylabel('Pressure [Pa]')
+    fig, axes = plt.subplots(num_subplots, 1, sharex='col')
+    fig.set_size_inches(10, 9)
+    axes[0].plot(tvec, st[0].data, 'k')
+    axes[0].axis('tight')
+    axes[0].set_ylabel('Pressure [Pa]')
 
     # Plot MdCCM on its own plot.
     if ccmplot:
-        sc = axs1[1].scatter(t, mdccm, c=mdccm,
+        sc = axes[1].scatter(t, mdccm, c=mdccm,
                              edgecolors='k', lw=0.3, cmap=cm)
         if mcthresh:
-            axs1[1].plot([t[0], t[-1]], [mcthresh, mcthresh], 'k--')
-        axs1[1].axis('tight')
-        axs1[1].set_xlim(t[0], t[-1])
-        axs1[1].set_ylim(cax)
+            axes[1].plot([t[0], t[-1]], [mcthresh, mcthresh], 'k--')
+        axes[1].axis('tight')
+        axes[1].set_xlim(t[0], t[-1])
+        axes[1].set_ylim(cax)
         sc.set_clim(cax)
-        axs1[1].set_ylabel('MdCCM')
+        axes[1].set_ylabel('MdCCM')
 
     # Plot the trace/apparent velocity.
-    sc = axs1[vplot].scatter(t, vel, c=mdccm, edgecolors='k', lw=0.3, cmap=cm)
-    axs1[vplot].set_ylim(0.25, 0.45)
-    axs1[vplot].set_xlim(t[0], t[-1])
+    sc = axes[vplot].scatter(t, vel, c=mdccm, edgecolors='k', lw=0.3, cmap=cm)
+    axes[vplot].set_ylim(0.25, 0.45)
+    axes[vplot].set_xlim(t[0], t[-1])
     sc.set_clim(cax)
-    axs1[vplot].set_ylabel('Trace Velocity\n [km/s]')
+    axes[vplot].set_ylabel('Trace Velocity\n [km/s]')
 
     # Plot the back-azimuth.
-    sc = axs1[bplot].scatter(t, baz, c=mdccm, edgecolors='k', lw=0.3, cmap=cm)
-    axs1[bplot].set_ylim(0, 360)
-    axs1[bplot].set_xlim(t[0], t[-1])
+    sc = axes[bplot].scatter(t, baz, c=mdccm, edgecolors='k', lw=0.3, cmap=cm)
+    axes[bplot].set_ylim(0, 360)
+    axes[bplot].set_xlim(t[0], t[-1])
     sc.set_clim(cax)
-    axs1[bplot].set_ylabel('Back-azimuth\n [deg]')
+    axes[bplot].set_ylabel('Back-azimuth\n [deg]')
 
     # Plot sigma_tau if given.
     if sigma_tau is not None:
-        sc = axs1[splot].scatter(t, sigma_tau, c=mdccm,
+        sc = axes[splot].scatter(t, sigma_tau, c=mdccm,
                                  edgecolors='k', lw=0.3, cmap=cm)
-        axs1[splot].set_xlim(t[0], t[-1])
+        axes[splot].set_xlim(t[0], t[-1])
         sc.set_clim(cax)
-        axs1[splot].set_ylabel(r'$\sigma_\tau$')
+        axes[splot].set_ylabel(r'$\sigma_\tau$')
 
-    axs1[splot].xaxis_date()
-    axs1[splot].tick_params(axis='x', labelbottom='on')
-    axs1[splot].fmt_xdata = dates.DateFormatter('%HH:%MM')
-    axs1[splot].xaxis.set_major_formatter(dates.DateFormatter("%d-%H:%M"))
-    axs1[splot].set_xlabel('UTC Time')
+    axes[splot].xaxis_date()
+    axes[splot].tick_params(axis='x', labelbottom='on')
+    axes[splot].fmt_xdata = dates.DateFormatter('%HH:%MM')
+    axes[splot].xaxis.set_major_formatter(dates.DateFormatter("%d-%H:%M"))
+    axes[splot].set_xlabel('UTC Time')
 
     # Add the MdCCM colorbar.
-    cbot = axs1[splot].get_position().y0
-    ctop = axs1[1].get_position().y1
-    cbaxes = fig1.add_axes([0.92, cbot, 0.02, ctop-cbot])
+    cbot = axes[splot].get_position().y0
+    ctop = axes[1].get_position().y1
+    cbaxes = fig.add_axes([0.92, cbot, 0.02, ctop-cbot])
     hc = plt.colorbar(sc, cax=cbaxes)
     hc.set_label('MdCCM')
 
-    return fig1, axs1
+    return fig, axes
 
 
 def arraySigPlt(rij, sig, sigV, sigTh, impResp, vel, th, kvec, figName=None):
     r"""
-    Plots output of arraySig method.
+    Plots output of
+    :func:`~array_processing.tools.array_characterization.arraySig`.
 
-    Parameters
-    ----------
-    rij : array
-        Coordinates (km) of sensors as eastings & northings in a (2, N) array.
-    sigLevel : float
-        Variance in time delays (s), typically :math:`\sigma_\tau`.
-    sigV : array
-        Uncertainties in trace velocity :math:`(^\circ)` as a function of trace
-        velocity and back-azimuth as (NgridTh, NgridV) array.
-    sigTh : array
-        Uncertainties in trace velocity (km/s) as a function of trace velocity
-        and back-azimuth as (NgridTh, NgridV) array.
-    impResp : array
-        Impulse response over grid as (NgridK, NgridK) array.
-    vel : array
-        Vector of trace velocities (km/s) for axis in (NgridV, ) array.
-    th : array
-        Vector of back-azimuths :math:`(^\circ)` for axis in (NgridTh, ) array.
-    kvec : array
-        Vector wavenumbers for axes in k-space in (NgridK, ) array.
-    figName : str
-        Name of output file, will be written as figName.png (optional).
+    Args:
+        rij: Coordinates (km) of sensors as eastings & northings in a
+            ``(2, N)`` array
+        sigLevel (float): Variance in time delays (s), typically
+            :math:`\sigma_\tau`
+        sigV: Uncertainties in trace velocity (°) as a function of trace
+            velocity and back-azimuth as ``(NgridTh, NgridV)`` array
+        sigTh: Uncertainties in trace velocity (km/s) as a function of trace
+            velocity and back-azimuth as ``(NgridTh, NgridV)`` array
+        impResp: Impulse response over grid as ``(NgridK, NgridK)`` array
+        vel: Vector of trace velocities (km/s) for axis in ``(NgridV, )``
+            array
+        th: Vector of back-azimuths (°) for axis in ``(NgridTh, )`` array
+        kvec: Vector wavenumbers for axes in k-space in ``(NgridK, )`` array
+        figName (str): Name of output file, will be written as ``figName.png``
     """
 
     # Specify output figure file type and plotting resolution.
