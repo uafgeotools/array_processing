@@ -56,59 +56,46 @@ def array_thresh(mcthresh, az_volc, az_diff, mdccm, az, vel):
 
 def beamForm(data, rij, Hz, azPhi, vel=0.340, r=None, wgt=None, refTrace=None,
              M=None, Moffset=None):
-    """
-    Form a "best beam" from the traces of an array
+    r"""
+    Form a "best beam" from the traces of an array.
 
-    Parameters
-    ~~~~~~~~~~
-    data : array
-        (m, n) time series with `m` samples from `n` traces as columns
-    rij : array
-        (d, n) `n` sensor coordinates as [easting, northing, {elevation}]
-        column vectors in `d` dimensions
-    Hz : float or int
-        sample rate
-    azPhi : float or list|array
-        back azimuth (float) from co-array coordinate origin (º CW from N);
-        back azimuth and elevation angle (list) from co-array coordinate
-        origin (º CW from N, º from N-E plane)
-    vel : float
-        optional estimated signal velocity across array. Default is 0.340.
-    r : float
-        optional range to source from co-array origin. Default is None
-        (use plane wave arrival model), If not None, use spherical wave
-        arrival model.
-    wgt : list or array
-        optional list|vector of relative weights of length `n`
-        (0 == exclude trace). Default is None (use all traces with equal
-        relative weights ``[1 for i in range(nTraces)]``).
-    refTrace : int
-        optional reference sensor for TDOA information. Default is None
-        (use first non-zero-weighted trace).
-    M : int
-        optional length of best beam result in samples. Default is None
-        (use `m` samples, same as input `data`)
-    Moffset : list or array
-        optional individual trace offsets from arrival model shifts. Default
-        is None (use ``[0 for i in range(nTraces)]``)
+    Args:
+        data: ``(m, n)`` array; time series with ``m`` samples from ``n``
+            traces as columns
+        rij: ``(d, n)`` array;  ``n`` sensor coordinates as [easting, northing,
+            {elevation}] column vectors in ``d`` dimensions
+        Hz (int or float): Sample rate
+        azPhi: Back azimuth (float) from co-array coordinate origin (° CW from
+            N); back azimuth and elevation angle (list) from co-array
+            coordinate origin (° CW from N, ° from N-E plane)
+        vel (float): Estimated signal velocity across array
+        r (float): Range to source from co-array origin. Default is `None` (use
+            plane wave arrival model), If not `None`, use spherical wave
+            arrival model
+        wgt: Vector of relative weights of length ``n`` (0 == exclude trace).
+            Default is `None` (use all traces with equal relative weights ``[1
+            for i in range(nTraces)]``)
+        refTrace (int): Reference sensor for TDOA information. Default is
+            `None` (use first non-zero-weighted trace)
+        M (int): Length of best beam result in samples. Default is `None` (use
+            ``m`` samples, same as input `data`)
+        Moffset: Individual trace offsets from arrival model shifts. Default is
+            `None` (use ``[0 for i in range(nTraces)]``)
 
-    Returns
-    ~~~~~~~
-    beam : array
-        (M, ) vector of summed and weighted shifted traces to form a best beam
+    Returns:
+        ``(M, )`` array of summed and weighted shifted traces to form a best
+        beam
 
-    Raises
-    ~~~~~~
-    IndexError
-        If the input argument dimensions are not consistent.
+    Raises:
+        IndexError: If the input argument dimensions are not consistent
 
-    Notes
-    ~~~~~
+    **Notes**
+
     This beamformer handles planar- or spherical-model arrivals from
-    arbitrarily elevated sources incident on 2- or 3D arrays.  Weights are
-    relative and normalized upon beam output.  The default value for `vel`
-    assumes rij is in units of km (e.g., the speed is in km/s).
-"""
+    arbitrarily elevated sources incident on 2- or 3-D arrays. Weights are
+    relative and normalized upon beam output. The default value for `vel`
+    assumes that `rij` is in units of km (e.g., the speed is in km/s).
+    """
 
     # (c) 2017 Curt A. L. Szuberla
     # University of Alaska Fairbanks, all rights reserved
