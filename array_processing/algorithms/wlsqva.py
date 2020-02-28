@@ -2,9 +2,9 @@ import numpy as np
 
 
 def wlsqva(data, rij, hz, wgt=None):
-    """
-    Weighted least squares solution for slowness of a plane wave crossing
-    an array of sensors
+    r"""
+    Weighted least squares solution for slowness of a plane wave crossing an
+    array of sensors.
 
     This function estimates the slowness vector associated with a signal
     passing across an array of sensors under the model assumption that the
@@ -14,86 +14,76 @@ def wlsqva(data, rij, hz, wgt=None):
     trace or (de)emphasize its contribution to the least squares solution.
 
     Args:
-        data : array
-            (m, n) time series with `m` samples from `n` traces as columns
-        rij : array
-            (d, n) `n` sensor coordinates as [northing, easting, {elevation}]
-            column vectors in `d` dimensions
-        hz : float or int
-            sample rate
-        wgt : list or array
-            optional list|vector of relative weights of length `n`
-            (0 == exclude trace). Default is None (use all traces with equal
-            relative weights).
+        data: ``(m, n)`` array; time series with ``m`` samples from ``n``
+            traces as columns
+        rij: ``(d, n)`` array; ``n`` sensor coordinates as [northing, easting,
+            {elevation}] column vectors in ``d`` dimensions
+        hz (int or float): Sample rate [Hz]
+        wgt: Array of relative weights of length ``n`` (0 = exclude trace).
+            Default is `None` (use all traces with equal relative weights)
 
     Returns:
-        vel : float
-            signal velocity across array
-        az : float or array
-            `d = 2`: back azimuth (float) from co-array coordinate origin (º CW
-            from N); `d = 3`: back azimuth and elevation angle (array) from
-            co-array coordinate origin (º CW from N, º from N-E plane)
-        tau : array
-            (n(n-1)//2, ) time delays of relative signal arrivals (TDOA) for all
-            unique sensor pairings
-        cmax : array
-            (n(n-1)//2, ) cross-correlation maxima (e.g., for use in MCCMcalc) for
-            each sensor pairing in `tau`
-        sig_tau : float
-            uncertainty estimate for `tau`, also estimate of plane wave model
-            assumption violation for non-planar arrivals
-        s : array
-            (d, ) signal slowness vector via generalized weighted least squares
-        xij : array
-            (d, n(n-1)//2) co-array, coordinates of the sensor pairing separations
+        tuple: Tuple containing:
 
-    Raises
-    ~~~~~~
-    ValueError
-        If the input arguments are not consistent with least squares.
-    IndexError
-        If the input argument dimensions are not consistent.
+        - **vel** – Signal velocity across array
+        - **az** – ``d = 2`` – Back azimuth from co-array coordinate origin (°
+          CW from N); ``d = 3`` — Back azimuth and elevation angle (array) from
+          co-array coordinate origin (° CW from N, ° from N-E plane)
+        - **tau** – ``(n(n-1)//2, )`` array; time delays of relative signal
+          arrivals (TDOA) for all unique sensor pairings
+        - **cmax** – ``(n(n-1)//2, )`` array; cross-correlation maxima (e.g.,
+          for use in :func:`~array_processing.tools.detection.MCCMcalc`) for
+          each sensor pairing in `tau`
+        - **sig_tau** – Uncertainty estimate for `tau`, also estimate of plane
+          wave model assumption violation for non-planar arrivals
+        - **s** – ``(d, )`` array; signal slowness vector via generalized
+          weighted least squares
+        - **xij** – ``(d, n(n-1)//2)`` co-array, coordinates of the sensor
+          pairing separations
 
-    Notes
-    ~~~~~
-    Typical use provides sensor coordinates in km and sample rate in Hz.  This
-    will give `vel` in km/s and `s` in s/km; `az` is always in º; `sig_tau`
-    and `tau` in s; `xij` in km.
+    Raises:
+        ValueError: If the input arguments are not consistent with least
+            squares
+        IndexError:
+            If the input argument dimensions are not consistent
 
-    Cross-correlation maxima in `cij` are normalized to unity for auto-
-    correlations at zero lag and set to zero for any pairing with a zero-
-    weight trace.
+    Notes:
+        Typical use provides sensor coordinates in km and sample rate in Hz.
+        This will give `vel` in km/s and `s` in s/km; `az` is always in °;
+        `sig_tau` and `tau` in s; `xij` in km.
 
-    For a 2D array, a minimum of 3 sensors are required; for 3D, 4 sensors.
-    The `data` and `rij` must have a consistent number of sensors. If provided,
-    `wgt` must be consistent with the number of sensors.
+        Cross-correlation maxima in `cij` are normalized to unity for
+        auto-correlations at zero lag and set to zero for any pairing with a
+        zero-weight trace.
 
-    Examples
-    ~~~~~~~~
-    Given an approppriate (m, 4) array ``data``, sampled at 20 Hz, the
-    following would estimate the slowness using the entire array.
+        For a 2-D array, a minimum of 3 sensors are required; for 3-D, 4
+        sensors. The `data` and `rij` must have a consistent number of sensors.
+        If provided, `wgt` must be consistent with the number of sensors.
 
-    >>> rij = np.array([[0, 1, 0.5, 0], [1, 0, 0.5, -1]])
-    >>> vel, az, tau, cmax, sig_tau, s, xij = wlsqva(data, rij, 20)
+    Examples:
+        Given an appropriate ``(m, 4)`` array ``data``, sampled at 20 Hz, the
+        following would estimate the slowness using the entire array.
 
-    To eliminate the 3d trace from the slowness  estimation, a ``wgt`` list
-    can be passed as an argument.
+        >>> rij = np.array([[0, 1, 0.5, 0], [1, 0, 0.5, -1]])
+        >>> vel, az, tau, cmax, sig_tau, s, xij = wlsqva(data, rij, 20)
 
-    >>> wgt = [1, 1, 0, 1]
-    >>> vel, az, tau, cmax, sig_tau, s, xij = wlsqva(data, rij, 20, wgt)
+        To eliminate the 3rd trace from the slowness estimation, a ``wgt`` list
+        can be passed as an argument.
 
-    Similarly, if the 3d trace is suspect, but should not be completely removed
-    from the slowness estimation, it can be given a smaller, relative, weight
-    to the other traces.
+        >>> wgt = [1, 1, 0, 1]
+        >>> vel, az, tau, cmax, sig_tau, s, xij = wlsqva(data, rij, 20, wgt)
 
-    >>> wgt = [1, 1, 0.3, 1]
-    >>> vel, az, tau, cmax, sig_tau, s, xij = wlsqva(data, rij, 20, wgt)
+        Similarly, if the 3rd trace is suspect, but should not be completely
+        removed from the slowness estimation, it can be given a smaller,
+        relative, weight to the other traces.
 
-    Often, only `vel`, `az` are required, so the other returns may be combined
-    with extended sequence unpacking in Python 3.X.
+        >>> wgt = [1, 1, 0.3, 1]
+        >>> vel, az, tau, cmax, sig_tau, s, xij = wlsqva(data, rij, 20, wgt)
 
-    >>> vel, az, *aux_vars = wlsqva(data, rij, 20)
+        Often, only `vel`, `az` are required, so the other returns may be
+        combined with extended sequence unpacking in Python 3.X.
 
+        >>> vel, az, *aux_vars = wlsqva(data, rij, 20)
     """
 
     # -- input error checking cell (no type checking, just dimensions to help
