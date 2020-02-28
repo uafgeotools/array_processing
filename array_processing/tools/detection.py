@@ -84,8 +84,11 @@ def fstatbland(dtmp, fs, tau):
         - **fstat** – F-statistic
         - **snr** – SNR
 
-    Notes:
-        Blandford, R. R., 1974, Geophysics, vol. 39, no. 5, p. 633–643.
+    References:
+        Blandford, R. R., 1974. An automatic event detector at the Tonto
+        Forest Seismic Observatory. Geophysics, vol. 39, no. 5,
+        p. 633–643. `https://library.seg.org/doi/abs/10.1190/1.1440453
+        <https://library.seg.org/doi/abs/10.1190/1.1440453>`__
     """
 
     m, n = dtmp.shape
