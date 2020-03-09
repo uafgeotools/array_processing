@@ -39,8 +39,7 @@ This creates a new environment called `uafinfra` with ObsPy and its dependencies
 installed.
 
 
-
-Next, install the packages from Github. Execute the following terminal commands to install _waveform_collection_:
+Install the required packages from Github. Execute the following terminal commands to install _waveform_collection_:
 ```
 $ conda activate uafinfra
 $ git clone https://github.com/uafgeotools/waveform_collection.git
