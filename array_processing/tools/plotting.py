@@ -2,9 +2,12 @@ import matplotlib.pyplot as plt
 from matplotlib import dates
 import numpy as np
 
+from copy import deepcopy
+from collections import Counter
+
 
 def array_plot(st, t, mdccm, vel, baz, ccmplot=False,
-               mcthresh=None, sigma_tau=None):
+               mcthresh=None, sigma_tau=None, stdict=None):
     """
     Creates plots for velocity - back-azimuth array processing.
 
@@ -20,6 +23,8 @@ def array_plot(st, t, mdccm, vel, baz, ccmplot=False,
             in the ccmplot subplot.
         sigma_tau: Array of sigma_tau values.
             The flag to add the sigma_tau subplot.
+        stdict: Array of dropped station pairs from LTS processing.
+            The flag to add the stdict subplot.
 
     Returns:
         fig1: Output figure.
@@ -27,7 +32,7 @@ def array_plot(st, t, mdccm, vel, baz, ccmplot=False,
 
     Usage:
         fig1, axs1= array_plot(st, t, mdccm, vel, baz, ccmplot=False,
-                       mcthresh=None, sigma_tau=None)
+                       mcthresh=None, sigma_tau=None, stdict=None)
     """
 
     # Specify the colormap.
@@ -47,12 +52,12 @@ def array_plot(st, t, mdccm, vel, baz, ccmplot=False,
         vplot += 1
         bplot += 1
         splot = bplot
-    if sigma_tau is not None:
+    if sigma_tau is not None or stdict is not None:
         num_subplots += 1
         splot = bplot + 1
 
     # Start Plotting.
-    # Plot the trace.
+    # Initiate and plot the trace.
     fig1, axs1 = plt.subplots(num_subplots, 1, sharex='col')
     fig1.set_size_inches(10, 9)
     axs1[0].plot(tvec, st[0].data, 'k')
@@ -92,6 +97,46 @@ def array_plot(st, t, mdccm, vel, baz, ccmplot=False,
         axs1[splot].set_xlim(t[0], t[-1])
         sc.set_clim(cax)
         axs1[splot].set_ylabel(r'$\sigma_\tau$')
+
+    # Plot dropped station pairs from LTS if given.
+    if stdict is not None:
+        ndict = deepcopy(stdict)
+        n = ndict['size']
+        ndict.pop('size', None)
+        tstamps = list(ndict.keys())
+        tstampsfloat = [float(ii) for ii in tstamps]
+
+        # Set the second colormap for station pairs.
+        cm2 = plt.get_cmap('binary', (n-1))
+        initplot = np.empty(len(t))
+        initplot.fill(1)
+
+        axs1[splot].scatter(np.array([t[0], t[-1]]),
+                            np.array([0.01, 0.01]), c='w')
+        axs1[splot].axis('tight')
+        axs1[splot].set_ylabel('Element [#]')
+        axs1[splot].set_xlabel('UTC Time')
+        axs1[splot].set_xlim(t[0], t[-1])
+        axs1[splot].set_ylim(0.5, n+0.5)
+        axs1[splot].xaxis_date()
+        axs1[splot].tick_params(axis='x', labelbottom='on')
+
+        # Loop through the stdict for each flag and plot
+        for jj in range(len(tstamps)):
+            z = Counter(list(ndict[tstamps[jj]]))
+            keys, vals = z.keys(), z.values()
+            keys, vals = np.array(list(keys)), np.array(list(vals))
+            pts = np.tile(tstampsfloat[jj], len(keys))
+            sc2 = axs1[splot].scatter(pts, keys, c=vals, edgecolors='k',
+                                      lw=0.1, cmap=cm2, vmin=0.5, vmax=n-0.5)
+
+        # Add the horizontal colorbar for station pairs.
+        p3 = axs1[splot].get_position().get_points().flatten()
+        cbaxes2 = fig1.add_axes([p3[0], 0.05, p3[2]-p3[0], 0.02])
+        hc2 = plt.colorbar(sc2, orientation="horizontal",
+                           cax=cbaxes2, ax=axs1[splot])
+        hc2.set_label('Number of Flagged Element Pairs')
+        plt.subplots_adjust(right=0.87, hspace=0.12)
 
     axs1[splot].xaxis_date()
     axs1[splot].tick_params(axis='x', labelbottom='on')
