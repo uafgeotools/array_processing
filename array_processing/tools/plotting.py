@@ -92,8 +92,13 @@ def array_plot(st, t, mdccm, vel, baz, ccmplot=False,
 
     # Plot sigma_tau if given.
     if sigma_tau is not None:
-        sc = axs1[splot].scatter(t, sigma_tau, c=mdccm,
-                                 edgecolors='k', lw=0.3, cmap=cm)
+        if np.isnan(np.sum(sigma_tau)):
+            print(r'Sigma_tau values are NaN!')
+            axs1[splot].scatter(np.array([t[0], t[-1]]),
+                                np.array([0.01, 0.01]), c='w')
+        else:
+            sc = axs1[splot].scatter(t, sigma_tau, c=mdccm,
+                                     edgecolors='k', lw=0.3, cmap=cm)
         axs1[splot].set_xlim(t[0], t[-1])
         sc.set_clim(cax)
         axs1[splot].set_ylabel(r'$\sigma_\tau$')
