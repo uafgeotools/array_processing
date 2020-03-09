@@ -15,3 +15,7 @@ dist/
 **/*~
 **/*.swp
 **/._*
+
+# Dependency package directories
+waveform_collection
+lts_array
