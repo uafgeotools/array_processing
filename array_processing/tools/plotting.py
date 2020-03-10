@@ -2,31 +2,37 @@ import matplotlib.pyplot as plt
 from matplotlib import dates
 import numpy as np
 
+from copy import deepcopy
+from collections import Counter
+
 
 def array_plot(st, t, mdccm, vel, baz, ccmplot=False,
-               mcthresh=None, sigma_tau=None):
-    r"""
-    Creates plots for velocity—back-azimuth array processing.
+               mcthresh=None, sigma_tau=None, stdict=None):
+    """
+    Creates plots for velocity - back-azimuth array processing.
 
     Args:
-        st (:class:`~obspy.core.stream.Stream`): Filtered data. Assumes
-            response has been removed
-        t: Array processing time vector
-        mdccm: Array of median cross-correlation maxima
-        vel: Array of trace velocity estimates
-        baz: Array of back-azimuth estimates
-        ccmplot (bool): Toggle plotting the mean/median cross-correlation
-            maxima values on a separate subplot in addition to the color scale
-        mcthresh (float): Add a dashed line at this level in the ccmplot
-            subplot
-        sigma_tau: Array of :math:`\sigma_\tau` values. If provided, will plot
-            the values on a separate subplot
+        st: Filtered obspy stream. Assumes response has been removed.
+        t: Array processing time vector.
+        mdccm: Array of median cross-correlation maxima.
+        vel: Array of trace velocity estimates.
+        baz: Array of back-azimuth estimates.
+        ccmplot: Boolean flag to plot the Mean/Median cross-correlation
+            maxima values on the y-axis in addition to the color scale.
+        mcthresh: Add a dashed line at the [float] level
+            in the ccmplot subplot.
+        sigma_tau: Array of sigma_tau values, a measure of wave planarity.
+            The flag to add the sigma_tau subplot.
+        stdict: Array of dropped station pairs from LTS processing.
+            The flag to add the stdict subplot.
 
     Returns:
-        tuple: Tuple containing:
+        fig: Output figure.
+        axs: Output figure axes.
 
-        - **fig** (:class:`~matplotlib.figure.Figure`) – Figure handle
-        - **axes** (Array of :class:`~matplotlib.axes.Axes`) – Axis handles
+    Usage:
+        fig, axs= array_plot(st, t, mdccm, vel, baz, ccmplot=False,
+                       mcthresh=None, sigma_tau=None, stdict=None)
     """
 
     # Specify the colormap.
@@ -46,66 +52,111 @@ def array_plot(st, t, mdccm, vel, baz, ccmplot=False,
         vplot += 1
         bplot += 1
         splot = bplot
-    if sigma_tau is not None:
+    if sigma_tau is not None or stdict is not None:
         num_subplots += 1
         splot = bplot + 1
 
     # Start Plotting.
-    # Plot the trace.
-    fig, axes = plt.subplots(num_subplots, 1, sharex='col')
+    # Initiate and plot the trace.
+    fig, axs = plt.subplots(num_subplots, 1, sharex='col')
     fig.set_size_inches(10, 9)
-    axes[0].plot(tvec, st[0].data, 'k')
-    axes[0].axis('tight')
-    axes[0].set_ylabel('Pressure [Pa]')
+    axs[0].plot(tvec, st[0].data, 'k')
+    axs[0].axis('tight')
+    axs[0].set_ylabel('Pressure [Pa]')
 
     # Plot MdCCM on its own plot.
     if ccmplot:
-        sc = axes[1].scatter(t, mdccm, c=mdccm,
+        sc = axs[1].scatter(t, mdccm, c=mdccm,
                              edgecolors='k', lw=0.3, cmap=cm)
         if mcthresh:
-            axes[1].plot([t[0], t[-1]], [mcthresh, mcthresh], 'k--')
-        axes[1].axis('tight')
-        axes[1].set_xlim(t[0], t[-1])
-        axes[1].set_ylim(cax)
+            axs[1].plot([t[0], t[-1]], [mcthresh, mcthresh], 'k--')
+        axs[1].axis('tight')
+        axs[1].set_xlim(t[0], t[-1])
+        axs[1].set_ylim(cax)
         sc.set_clim(cax)
-        axes[1].set_ylabel('MdCCM')
+        axs[1].set_ylabel('MdCCM')
 
     # Plot the trace/apparent velocity.
-    sc = axes[vplot].scatter(t, vel, c=mdccm, edgecolors='k', lw=0.3, cmap=cm)
-    axes[vplot].set_ylim(0.25, 0.45)
-    axes[vplot].set_xlim(t[0], t[-1])
+    sc = axs[vplot].scatter(t, vel, c=mdccm, edgecolors='k', lw=0.3, cmap=cm)
+    axs[vplot].set_ylim(0.25, 0.45)
+    axs[vplot].set_xlim(t[0], t[-1])
     sc.set_clim(cax)
-    axes[vplot].set_ylabel('Trace Velocity\n [km/s]')
+    axs[vplot].set_ylabel('Trace Velocity\n [km/s]')
 
     # Plot the back-azimuth.
-    sc = axes[bplot].scatter(t, baz, c=mdccm, edgecolors='k', lw=0.3, cmap=cm)
-    axes[bplot].set_ylim(0, 360)
-    axes[bplot].set_xlim(t[0], t[-1])
+    sc = axs[bplot].scatter(t, baz, c=mdccm, edgecolors='k', lw=0.3, cmap=cm)
+    axs[bplot].set_ylim(0, 360)
+    axs[bplot].set_xlim(t[0], t[-1])
     sc.set_clim(cax)
-    axes[bplot].set_ylabel('Back-azimuth\n [deg]')
+    axs[bplot].set_ylabel('Back-azimuth\n [deg]')
 
     # Plot sigma_tau if given.
     if sigma_tau is not None:
-        sc = axes[splot].scatter(t, sigma_tau, c=mdccm,
-                                 edgecolors='k', lw=0.3, cmap=cm)
-        axes[splot].set_xlim(t[0], t[-1])
+        if np.isnan(np.sum(sigma_tau)):
+            print(r'Sigma_tau values are NaN!')
+            axs[splot].scatter(np.array([t[0], t[-1]]),
+                                np.array([0.01, 0.01]), c='w')
+        else:
+            sc = axs[splot].scatter(t, sigma_tau, c=mdccm,
+                                     edgecolors='k', lw=0.3, cmap=cm)
+        axs[splot].set_xlim(t[0], t[-1])
         sc.set_clim(cax)
-        axes[splot].set_ylabel(r'$\sigma_\tau$')
+        axs[splot].set_ylabel(r'$\sigma_\tau$')
 
-    axes[splot].xaxis_date()
-    axes[splot].tick_params(axis='x', labelbottom='on')
-    axes[splot].fmt_xdata = dates.DateFormatter('%HH:%MM')
-    axes[splot].xaxis.set_major_formatter(dates.DateFormatter("%d-%H:%M"))
-    axes[splot].set_xlabel('UTC Time')
+    # Plot dropped station pairs from LTS if given.
+    if stdict is not None:
+        ndict = deepcopy(stdict)
+        n = ndict['size']
+        ndict.pop('size', None)
+        tstamps = list(ndict.keys())
+        tstampsfloat = [float(ii) for ii in tstamps]
+
+        # Set the second colormap for station pairs.
+        cm2 = plt.get_cmap('binary', (n-1))
+        initplot = np.empty(len(t))
+        initplot.fill(1)
+
+        axs[splot].scatter(np.array([t[0], t[-1]]),
+                            np.array([0.01, 0.01]), c='w')
+        axs[splot].axis('tight')
+        axs[splot].set_ylabel('Element [#]')
+        axs[splot].set_xlabel('UTC Time')
+        axs[splot].set_xlim(t[0], t[-1])
+        axs[splot].set_ylim(0.5, n+0.5)
+        axs[splot].xaxis_date()
+        axs[splot].tick_params(axis='x', labelbottom='on')
+
+        # Loop through the stdict for each flag and plot
+        for jj in range(len(tstamps)):
+            z = Counter(list(ndict[tstamps[jj]]))
+            keys, vals = z.keys(), z.values()
+            keys, vals = np.array(list(keys)), np.array(list(vals))
+            pts = np.tile(tstampsfloat[jj], len(keys))
+            sc2 = axs[splot].scatter(pts, keys, c=vals, edgecolors='k',
+                                      lw=0.1, cmap=cm2, vmin=0.5, vmax=n-0.5)
+
+        # Add the horizontal colorbar for station pairs.
+        p3 = axs[splot].get_position().get_points().flatten()
+        cbaxes2 = fig.add_axes([p3[0], 0.05, p3[2]-p3[0], 0.02])
+        hc2 = plt.colorbar(sc2, orientation="horizontal",
+                           cax=cbaxes2, ax=axs[splot])
+        hc2.set_label('Number of Flagged Element Pairs')
+        plt.subplots_adjust(right=0.87, hspace=0.12)
+
+    axs[splot].xaxis_date()
+    axs[splot].tick_params(axis='x', labelbottom='on')
+    axs[splot].fmt_xdata = dates.DateFormatter('%HH:%MM')
+    axs[splot].xaxis.set_major_formatter(dates.DateFormatter("%d-%H:%M"))
+    axs[splot].set_xlabel('UTC Time')
 
     # Add the MdCCM colorbar.
-    cbot = axes[splot].get_position().y0
-    ctop = axes[1].get_position().y1
+    cbot = axs[splot].get_position().y0
+    ctop = axs[1].get_position().y1
     cbaxes = fig.add_axes([0.92, cbot, 0.02, ctop-cbot])
     hc = plt.colorbar(sc, cax=cbaxes)
     hc.set_label('MdCCM')
 
-    return fig, axes
+    return fig, axs
 
 
 def arraySigPlt(rij, sig, sigV, sigTh, impResp, vel, th, kvec, figName=None):
