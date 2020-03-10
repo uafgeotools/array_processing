@@ -32,7 +32,7 @@ st.taper(max_percentage=0.01)
 
 from array_processing.algorithms.helpers import getrij, wlsqva_proc
 from array_processing.tools.plotting import array_plot
-import lts_array
+from lts_array import ltsva
 
 latlist = [tr.stats.latitude for tr in st]
 lonlist = [tr.stats.longitude for tr in st]
@@ -42,7 +42,7 @@ rij = getrij(latlist, lonlist)
 #%% Array processing. ALPHA = 1.0: least squares processing.
 # 0.5 <= ALPHA < 1.0: least trimmed squares processing.
 ALPHA = 1.0
-stdict, t, mdccm, vel, baz, sig_tau = lts_array.ltsva(st, rij, WINLEN,
+stdict, t, mdccm, vel, baz, sig_tau = ltsva(st, rij, WINLEN,
                                                       WINOVER, ALPHA)
 
 fig1, axs1 = array_plot(st, t, mdccm, vel, baz,
