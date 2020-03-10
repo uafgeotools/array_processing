@@ -5,26 +5,33 @@ from obspy.geodetics import gps2dist_azimuth
 
 
 def wlsqva_proc(stf, rij, windur, winover):
-    """
-    Module to run wlsqva array processing
-
-    Note that tau, s, and xij are not currently returned (but should be!)
+    r"""
+    Module to run :func:`~array_processing.algorithms.wlsqva.wlsqva` array
+    processing.
 
     Args:
-        stf : (d,n) obspy stream of filtered data for n sensors
-        rij : (d,n) array of `n` sensor coordinates as [easting, northing, {elevation}]
-            column vectors in `d` dimension, units are km
-        windur : scalar, array processing window length in seconds
-        winover : scalar, array processing window overlap
+        stf (:class:`~obspy.core.stream.Stream`): Filtered data for ``n``
+            sensors
+        rij: ``(d,n)`` array of ``n`` sensor coordinates as [easting, northing,
+            {elevation}] column vectors in ``d`` dimension, units are km
+        windur (int or float): Array processing window length [s]
+        winover (int or float): Array processing window overlap
 
     Returns:
-        vel: array of trace velocities (km/s)
-        az : array of back-azimuths (deg from N)
-        sig_tau: array of plane wave model assumption violation estimates
-            for non-planar arrivals (0=planar)
-        mdccm : array of median of the xcorr max between sensor pairs (0-1)
-        t : vector of time windows (datenum)
-        data : stf in numpy array format
+        tuple: Tuple containing:
+
+        - **vel** – Array of trace velocities (km/s)
+        - **az** – Array of back-azimuths (deg. from N)
+        - **sig_tau** – Array of plane wave model assumption violation
+          estimates for non-planar arrivals (0 = planar)
+        - **mdccm** – Array of median of the xcorr max between sensor pairs,
+          defined on :math:`[0,1]`
+        - **t** – Vector of time windows as `Matplotlib dates
+          <https://matplotlib.org/3.1.3/api/dates_api.html>`__
+        - **data** – `stf` as a :class:`numpy.ndarray`
+
+    Warning:
+        `tau`, `s`, and `xij` are not currently returned!
     """
 
     tvec = stf[0].times('matplotlib')
@@ -70,19 +77,18 @@ def wlsqva_proc(stf, rij, windur, winover):
 
 
 def getrij(latlist, lonlist):
-    """Calculate rij from lat-lon
-
-    Returns the projected geographic positions in X-Y with zero-mean. Typically
-    used for array locations.
+    r"""
+    Calculate ``rij`` from lat-lon. Returns the projected geographic positions
+    in :math:`x`–:math:`y` with zero-mean. Typically used for array locations.
 
     Args:
-        latlist : list of latitude points
-        lonlist : list of longitude points
+        latlist (list): List of latitude points
+        lonlist (list): List of longitude points
 
     Returns:
-        rij : numpy array with the first row corresponding to cartesian
-            "X"-coordinates and the second row corresponding to cartesian
-            "Y"-coordinates, in units of km.
+        :class:`numpy.ndarray` with the first row corresponding to Cartesian
+        :math:`x`-coordinates and the second row corresponding to Cartesian
+        :math:`y`-coordinates, in units of km
     """
 
     latsize = len(latlist)

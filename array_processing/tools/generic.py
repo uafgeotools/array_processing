@@ -6,29 +6,22 @@ from operator import itemgetter
 
 
 def array_thresh(mcthresh, az_volc, az_diff, mdccm, az, vel):
-    """
-    Find  array processing values above multiple set thresholds for MCCM,
-    back-azimuth, and trace velocity. Ues default 0.25 - 0.45 km/s for trace
-    velocity treshholds. Also finds consecutive segments that meet tresholds,
-    but these values are not current returned.
+    r"""
+    Find array processing values above multiple set thresholds for MCCM,
+    back-azimuth, and trace velocity. Uses default 0.25–0.45 km/s for trace
+    velocity thresholds. Also finds consecutive segments that meet thresholds,
+    but these values are not currently returned.
 
     Args:
-        mcthresh : float
-            MCCM or MdCCM treshold (0-1)
-        az_volc : float
-            Back-azimuth to target volcano or source (0-359)
-        az_diff : float
-            Tolerance for back-azimuth from az_volc
-        mdccm : array
-            MdCCM or MCCM values from array processing (0-1)
-        az : array
-            Back-azimuth values (0-359)
-        vel : array
-            Trace-velocty values (km/s)
+        mcthresh (float): MCCM or MdCCM threshold (0–1)
+        az_volc (float): Back-azimuth to target volcano or source (0–359)
+        az_diff (float): Tolerance for back-azimuth from `az_volc`
+        mdccm: MdCCM or MCCM values from array processing (0–1)
+        az: Back-azimuth values (0–359)
+        vel: Trace-velocity values (km/s)
 
     Returns:
-        igood: array
-            Indices to time segments that meet set thresholds
+        Indices to time segments that meet set thresholds
     """
 
     # Use numpy to find where thresholds are exceeded
@@ -56,59 +49,45 @@ def array_thresh(mcthresh, az_volc, az_diff, mdccm, az, vel):
 
 def beamForm(data, rij, Hz, azPhi, vel=0.340, r=None, wgt=None, refTrace=None,
              M=None, Moffset=None):
+    r"""
+    Form a "best beam" from the traces of an array.
+
+    Args:
+        data: ``(m, n)`` array; time series with ``m`` samples from ``n``
+            traces as columns
+        rij: ``(d, n)`` array; ``n`` sensor coordinates as [easting, northing,
+            {elevation}] column vectors in ``d`` dimensions
+        Hz (int or float): Sample rate
+        azPhi: Back azimuth (float) from co-array coordinate origin (° CW from
+            N); back azimuth and elevation angle (list) from co-array
+            coordinate origin (° CW from N, ° from N-E plane)
+        vel (float): Estimated signal velocity across array
+        r (float): Range to source from co-array origin. Default is `None` (use
+            plane wave arrival model), If not `None`, use spherical wave
+            arrival model
+        wgt: Vector of relative weights of length ``n`` (0 == exclude trace).
+            Default is `None` (use all traces with equal relative weights ``[1
+            for i in range(nTraces)]``)
+        refTrace (int): Reference sensor for TDOA information. Default is
+            `None` (use first non-zero-weighted trace)
+        M (int): Length of best beam result in samples. Default is `None` (use
+            ``m`` samples, same as input `data`)
+        Moffset: Individual trace offsets from arrival model shifts. Default is
+            `None` (use ``[0 for i in range(nTraces)]``)
+
+    Returns:
+        ``(M, )`` array of summed and weighted shifted traces to form a best
+        beam
+
+    Raises:
+        IndexError: If the input argument dimensions are not consistent
+
+    Notes:
+        This beamformer handles planar- or spherical-model arrivals from
+        arbitrarily elevated sources incident on 2- or 3-D arrays. Weights are
+        relative and normalized upon beam output. The default value for `vel`
+        assumes that `rij` is in units of km (e.g., the speed is in km/s).
     """
-    Form a "best beam" from the traces of an array
-
-    Parameters
-    ~~~~~~~~~~
-    data : array
-        (m, n) time series with `m` samples from `n` traces as columns
-    rij : array
-        (d, n) `n` sensor coordinates as [easting, northing, {elevation}]
-        column vectors in `d` dimensions
-    Hz : float or int
-        sample rate
-    azPhi : float or list|array
-        back azimuth (float) from co-array coordinate origin (º CW from N);
-        back azimuth and elevation angle (list) from co-array coordinate
-        origin (º CW from N, º from N-E plane)
-    vel : float
-        optional estimated signal velocity across array. Default is 0.340.
-    r : float
-        optional range to source from co-array origin. Default is None
-        (use plane wave arrival model), If not None, use spherical wave
-        arrival model.
-    wgt : list or array
-        optional list|vector of relative weights of length `n`
-        (0 == exclude trace). Default is None (use all traces with equal
-        relative weights ``[1 for i in range(nTraces)]``).
-    refTrace : int
-        optional reference sensor for TDOA information. Default is None
-        (use first non-zero-weighted trace).
-    M : int
-        optional length of best beam result in samples. Default is None
-        (use `m` samples, same as input `data`)
-    Moffset : list or array
-        optional individual trace offsets from arrival model shifts. Default
-        is None (use ``[0 for i in range(nTraces)]``)
-
-    Returns
-    ~~~~~~~
-    beam : array
-        (M, ) vector of summed and weighted shifted traces to form a best beam
-
-    Raises
-    ~~~~~~
-    IndexError
-        If the input argument dimensions are not consistent.
-
-    Notes
-    ~~~~~
-    This beamformer handles planar- or spherical-model arrivals from
-    arbitrarily elevated sources incident on 2- or 3D arrays.  Weights are
-    relative and normalized upon beam output.  The default value for `vel`
-    assumes rij is in units of km (e.g., the speed is in km/s).
-"""
 
     # (c) 2017 Curt A. L. Szuberla
     # University of Alaska Fairbanks, all rights reserved
@@ -155,40 +134,32 @@ def beamForm(data, rij, Hz, azPhi, vel=0.340, r=None, wgt=None, refTrace=None,
 
 
 def phaseAlignData(data, delays, wgt, refTrace, M, Moffset, plotFlag=False):
-    """
-    Embeds `n` phase aligned traces in a data matrix
+    r"""
+    Embeds ``n`` phase aligned traces in a data matrix.
 
-    Parameters
-    ~~~~~~~~~~
-    data : array
-        (m, n) time series with `m` samples from `n` traces as columns
-    delays : array
-        (n, ) vector of shifts as indicies for embedding traces in an array,
-        such that trace `i` will begin at index ``out[i]``
-    wgt : list or array
-       vector of relative weights of length `n` (0 == exclude trace by setting
-       to padding value, see `plotFlag`)
-    refTrace : int
-        reference sensor for TDOA information
-    M : int
-        length of best beam result in samples (use `m` to let beam be same
-        length as inpout traces)
-    Moffset : list or array
-        individual trace offsets from arrival model shifts (use
-        ``[0 for i in range(nTraces)]`` to skip this effect)
-    plotFlag : Boolean
-        optional flag to indicate output array will be used for plotting
-        purposes.  Default is False (pads shifts with zeros; pads with
-        np.nan if True).
+    Args:
+        data: ``(m, n)`` array; time series with ``m`` samples from ``n``
+            traces as columns
+        delays: ``(n, )`` array; vector of shifts as indices for embedding
+            traces in an array, such that trace ``i`` will begin at index
+            ``out[i]``
+        wgt: Vector of relative weights of length ``n`` (0 == exclude trace by
+            setting to padding value, see `plotFlag`)
+        refTrace (int): Reference sensor for TDOA information
+        M (int): Length of best beam result in samples (use ``m`` to let beam
+            be same length as input traces)
+        Moffset: Individual trace offsets from arrival model shifts (use ``[0
+            for i in range(nTraces)]`` to skip this effect)
+        plotFlag (bool): Flag to indicate output array will be used for
+            plotting purposes. Default is `False` (pads shifts with zeros; pads
+            with :data:`numpy.nan` if `True`)
 
-    Returns
-    ~~~~~~~
-    data_align : array
-        (M, n) array of shifted traces as columns
+    Returns:
+        ``(M, n)`` array of shifted traces as columns
 
-    Notes
-    ~~~~~
-    The output of `phaseAlignIdx` is used to calculate the input `delays`.
+    Notes:
+        The output of :func:`phaseAlignIdx` is used to calculate the input
+        `delays`.
     """
 
     # (c) 2017 Curt A. L. Szuberla
@@ -244,29 +215,23 @@ def phaseAlignData(data, delays, wgt, refTrace, M, Moffset, plotFlag=False):
 
 
 def phaseAlignIdx(tau, Hz, wgt, refTrace):
-    """
-    Calculate shifts required to phase align `n` traces in a data matrix
+    r"""
+    Calculate shifts required to phase align ``n`` traces in a data matrix.
 
     Args:
-        tau : array
-            (n(n-1)//2, ) time delays of relative signal arrivals (TDOA) for all
-            unique sensor pairings
-        Hz : float or int
-            sample rate
-        wgt : list or array
-           vector of relative weights of length `n` (0 == exclude trace)
-        refTrace : int
-            reference sensor for TDOA information
+        tau: ``(n(n-1)//2, )`` array; time delays of relative signal arrivals
+            (TDOA) for all unique sensor pairings
+        Hz (int or float): Sample rate
+        wgt: Vector of relative weights of length ``n`` (0 = exclude trace)
+        refTrace (int): Reference sensor for TDOA information
 
     Returns:
-        delays : array
-            (n, ) vector of shifts as indicies for embedding traces in an array,
-            such that trace `i` will begin at index ``out[i]``
+        ``(n, )`` array; vector of shifts as indices for embedding traces in an
+        array, such that trace ``i`` will begin at index ``out[i]``
 
-    Notes
-    ~~~~~
-    The output of this function is compatible with the inputs of
-    `phaseAlignData`.
+    Notes:
+        The output of this function is compatible with the inputs of
+        :func:`phaseAlignData`.
     """
 
     # -- this is low level code w/out error checks or defaults, designed
@@ -291,25 +256,21 @@ def phaseAlignIdx(tau, Hz, wgt, refTrace):
 
 
 def tauCalcPW(vel, azPhi, rij):
-    """
+    r"""
     Calculates theoretical tau vector for a plane wave moving across an array
-    of `n` elements
+    of ``n`` elements.
 
     Args:
-        vel : float
-            signal velocity across array
-        azPhi : float or list|array
-            back azimuth (float) from co-array coordinate origin (º CW from N);
-            back azimuth and elevation angle (array) from co-array coordinate
-            origin (º CW from N, º from N-E plane)
-        rij : array
-            (d, n) `n` element coordinates as [easting, northing, {elevation}]
-            column vectors in `d` dimensions
+        vel (float): Signal velocity across array
+        azPhi: Back azimuth (float) from co-array coordinate origin (° CW from
+            N); back azimuth and elevation angle (array) from co-array
+            coordinate origin (° CW from N, ° from N-E plane)
+        rij: ``(d, n)`` array; ``n`` element coordinates as [easting, northing,
+            {elevation}] column vectors in ``d`` dimensions
 
     Returns:
-        tau : array
-            (n(n-1)//2, ) time delays of relative signal arrivals (TDOA) for all
-            unique sensor pairings
+        ``(n(n-1)//2, )`` array; time delays of relative signal arrivals (TDOA)
+        for all unique sensor pairings
     """
 
     dim, nTraces = rij.shape
@@ -332,25 +293,22 @@ def tauCalcPW(vel, azPhi, rij):
 
 
 def tauCalcSW(vel, rAzPhi, rij):
-    """
+    r"""
     Calculates theoretical tau vector for a spherical wave moving across an
-    array of `n` elements
+    array of ``n`` elements.
 
     Args:
-        vel : float
-            signal velocity across array
-        rAzPhi : list|array
-            range to source and back azimuth from co-array coordinate origin
-            (º CW from N); range to source, back azimuth and elevation angle
-            from co-array coordinate origin (º CW from N, º from N-E plane)
-        rij : array
-            (d, n) `n` element coordinates as [easting, northing, {elevation}]
-            column vectors in `d` dimensions
+        vel (float): Signal velocity across array
+        rAzPhi: Range to source and back azimuth from co-array coordinate
+            origin (° CW from N); range to source, back azimuth and elevation
+            angle from co-array coordinate origin (° CW from N, ° from N-E
+            plane)
+        rij: ``(d, n)`` array; ``n`` element coordinates as [easting, northing,
+            {elevation}] column vectors in ``d`` dimensions
 
     Returns:
-        tau : array
-            (n(n-1)//2, ) time delays of relative signal arrivals (TDOA) for all
-            unique sensor pairings
+        ``(n(n-1)//2, )`` array; time delays of relative signal arrivals (TDOA)
+        for all unique sensor pairings
     """
 
     dim, nTraces = rij.shape
@@ -375,24 +333,20 @@ def tauCalcSW(vel, rAzPhi, rij):
 
 
 def tauCalcSWxy(vel, xy, rij):
-    """
+    r"""
     Calculates theoretical tau vector for a spherical wave moving across an
-    array of `n` elements
+    array of ``n`` elements.
 
     Args:
-        vel : float
-            signal velocity across array
-        xy : list|array
-            (d, ) source location as 2-D [easting, northing] or 3-D [easting,
-            northing, elevation] coordinates
-        rij : list|array
-            (d, n) `n` element coordinates as [easting, northing, {elevation}]
-            column vectors in `d` dimensions
+        vel (float): Signal velocity across array
+        xy: ``(d, )`` array; source location as 2-D [easting, northing] or 3-D
+            [easting, northing, elevation] coordinates
+        rij: ``(d, n)`` array; ``n`` element coordinates as [easting, northing,
+            {elevation}] column vectors in ``d`` dimensions
 
     Returns:
-        tau : array
-            (n(n-1)//2, ) time delays of relative signal arrivals (TDOA) for all
-            unique sensor pairings
+        ``(n(n-1)//2, )`` array; time delays of relative signal arrivals (TDOA)
+        for all unique sensor pairings
     """
 
     dim, nTraces = len(rij), len(rij[0])
@@ -414,39 +368,24 @@ def tauCalcSWxy(vel, xy, rij):
 
 
 def randc(N, beta=0.0):
-    """
-    Colored noise generator
-
-    This function generates pseudo-random colored noise (power spectrum
-    proportional to a power of frequency) via fast Fourier inversion of
-    the appropriate amplitudes and complex phases.
+    r"""
+    Colored noise generator. This function generates pseudo-random colored
+    noise (power spectrum proportional to a power of frequency) via fast
+    Fourier inversion of the appropriate amplitudes and complex phases.
 
     Args:
-        N : int or tuple of int
-            Shape of output array
-        beta : float, optional
-            Spectrum of output will be proportional to ``f**(-beta)``.
-            Default is 0.0.
+        N (int or tuple): Shape of output array
+        beta (float): Spectrum of output will be proportional to ``f**(-beta)``
 
     Returns:
-        out : array
-            Colored noise sequences as columns with shape `N`, each normalized
-            to zero-mean and unit-variance.  Result is always real valued.
+        Colored noise sequences as columns with shape `N`, each normalized to
+        zero-mean and unit-variance. Result is always real valued
 
-    See Also
-    ~~~~~~~~
-    ift : from `Z.py`, Sentman-like normalization of ifft
-    numpy.fft : master fft functions
-
-    Notes
-    ~~~~~
-    Spectrum of output will be :math:`\sim 1/f^\beta`.
-
-    White noise is the default (:math:`\beta` = 0); others as pink
-    (:math:`\beta` = 1) or brown/surf (:math:`\beta` = 2), ....
-
-    Since the output is zero-mean, the DC spectral component(s) will
-    be identically zero.
+    Notes:
+        Spectrum of output will be :math:`\sim1/f^\beta`. White noise is the
+        default (:math:`\beta = 0`); others are pink (:math:`\beta = 1`) or
+        brown/surf (:math:`\beta = 2`). Since the output is zero-mean, the DC
+        spectral component(s) will be identically zero.
     """
 
     # catch scalar input & form tuple
@@ -495,80 +434,77 @@ def randc(N, beta=0.0):
     return r.reshape(N) / np.std(r, ddof=1)
 
 
-def psf(x, p=2, w=3, n=3, window=None):
-    """
-    Pure-state filter a data matrix
-
-    This function uses a generalized coherence estimator to enhance coherent
-    channels in an ensemble of time series.
+def psf(x, p=2.0, w=3, n=3.0, window=None):
+    r"""
+    Pure-state filter a data matrix. This function uses a generalized coherence
+    estimator to enhance coherent channels in an ensemble of time series.
 
     Args:
-        x : array
-            (m, d) array of real-valued time series data as columns
-        p : float, optional
-            Level of contrast in filter.  Default is 2.
-        w : int, optional
-            Width of smoothing window in frequency domain.  Default is 3.
-        n : float, optional
-            Number of times to smooth in frequency domain.  Default is 3.
-        window : function, optional
-            Type of smoothing window in frequency domain.  Default is None, which
-            results in a triangular window.
+        x: ``(m, d)`` array of real-valued time series data as columns
+        p (float): Level of contrast in filter
+        w (int): Width of smoothing window in frequency domain
+        n (float): Number of times to smooth in frequency domain
+        window: Type of smoothing window in frequency domain. Default is
+            `None`, which results in a triangular window
 
     Returns:
-        x_ppf : array
-            (m, d) real-valued, pure state-filtered version of `x`
-        P : array
-            (m//2+1, ) degree of polarization (generalized coherence estimate) in
-            frequency components of `x` from DC to the Nyquist
+        tuple: Tuple containing:
 
-    Notes
-    ~~~~~
-    See any of Samson & Olson's early 1980s papers, or Szuberla's 1997
-    PhD thesis, for a full description of the underlying theory.  The code
-    implementation's defaults reflect historical values for the smoothing
-    window -- a more realistic `w` would be of order :math:`\sqrt{m}\;`
-    combined with a smoother window, such as `np.hanning`.  Letting `n=3`
-    is a reasonable choice for all window types to ensure confidence in the
-    spectral estimates used to construct the filter.
+        - **x_psf** – ``(m, d)`` array; real-valued, pure state-filtered
+          version of `x`
+        - **P** – ``(m//2+1, )`` array; degree of polarization (generalized
+          coherence estimate) in frequency components of `x` from DC to the
+          Nyquist
 
-    For `m` samples of `d` channels of data, a (d, d) spectral matrix
-    :math:`\mathbf{S}[f]` can be formed at each of the ``m//2+1`` real
-    frequency components from DC to the Nyquist.  The generalized coherence
-    among all of the `d` channels at each frequency is estimated by
+    Notes:
+        See any of Samson & Olson's early 1980s papers, or Szuberla's 1997 PhD
+        thesis, for a full description of the underlying theory. The code
+        implementation's defaults reflect historical values for the smoothing
+        window — a more realistic `w` would be of order :math:`\sqrt{m}`
+        combined with a smoother window, such as :func:`numpy.hanning`. Letting
+        `n=3` is a reasonable choice for all window types to ensure confidence
+        in the spectral estimates used to construct the filter.
 
-    .. math::
+        For :math:`m` samples of :math:`d` channels of data, a ``(d, d)``
+        spectral matrix :math:`\mathbf{S}[f]` can be formed at each of the
+        ``m//2+1`` real frequency components from DC to the Nyquist. The
+        generalized coherence among all of the :math:`d` channels at each
+        frequency is estimated by
 
-        P[f] = \frac{d \left(\text{tr}\mathbf{S}^2[f]\right) -
-        \left(\text{tr}\mathbf{S}[f]\right)^2}
-        {\left(d-1\right)\left(\text{tr}\mathbf{S}[f]\right)^2} \;,
+        .. math::
 
-    where :math:`\text{tr}\mathbf{S}[f]` is the trace of the spectral
-    matrix at frequency :math:`f`.  The filter is constructed by applying
-    the following multiplication in the frequency domain
+            P[f] = \frac{d \left(\text{Tr}\,\mathbf{S}^2[f]\right) -
+            \left(\text{Tr}\,\mathbf{S}[f]\right)^2}
+            {\left(d-1\right)\left(\text{Tr}\,\mathbf{S}[f]\right)^2},
 
-    .. math::
+        where :math:`\text{Tr}\,\mathbf{S}[f]` is the trace of the spectral
+        matrix at frequency :math:`f`. The filter is constructed by applying
+        the following multiplication in the frequency domain
 
-        \hat{\mathbf{X}}[f] = P[f]^p\mathbf{X}[f] \;,
+        .. math::
 
-    where :math:`\mathbf{X}[f]` is the Fourier transform component of the all
-    channels at frequency :math:`f` and `p` is the level of contrast.  The
-    inverse Fourier transform of the matrix :math:`\hat{\mathbf{X}}` gives the
-    filtered time series.
+            \hat{\mathbf{X}}[f] = P[f]^p\mathbf{X}[f],
 
-    The estimator :math:`\mathbf{P}[f] = 1`, identically, without smoothing in
-    the spectral domain (a consequence of the variance in the raw Fourier
-    components), but it is bound by :math:`\mathbf{P}[f]\in[0,1]` even with
-    smoothing, hence its utility as a multiplicative filter in the frequency
-    domain.  Similarly, this bound allows the contrast between channels to be
-    enhanced based on their generalized coherence if :math:`p>1\;`.
+        where :math:`\mathbf{X}[f]` is the Fourier transform component of the
+        all channels at frequency :math:`f` and :math:`p` is the level of
+        contrast. The inverse Fourier transform of the matrix
+        :math:`\hat{\mathbf{X}}` gives the filtered time series.
 
-    Data channels should be pre-processed to have unit-variance, since unlike
-    the traditional two-channel magintude squared coherence estimators, the
-    generalized coherence estimate can be biased by relative amplitude
-    variations among the channels.  To mitigate the effects of smoothing
-    complex values into the DC and Nyquist components, they are set to zero
-    before computing the inverse transform of :math:`\hat{\mathbf{X}}`.
+        The estimator :math:`\mathbf{P}[f] = 1`, identically, without smoothing
+        in the spectral domain (a consequence of the variance in the raw
+        Fourier components), but it is bound by
+        :math:`\mathbf{P}[f]\in[0,1]` even withn smoothing, hence its
+        utility as a multiplicative filter in the frequency domain. Similarly,
+        this bound allows the contrast between channels to be enhanced based on
+        their generalized coherence if :math:`p>1`.
+
+        Data channels should be pre-processed to have unit-variance, since
+        unlike the traditional two-channel magnitude squared coherence
+        estimators, the generalized coherence estimate can be biased by
+        relative amplitude variations among the channels. To mitigate the
+        effects of smoothing complex values into the DC and Nyquist components,
+        they are set to zero before computing the inverse transform of
+        :math:`\hat{\mathbf{X}}`.
     """
 
     # private functions up front
@@ -640,4 +576,3 @@ def psf(x, p=2, w=3, n=3, window=None):
     x_psf = np.real(np.fft.ifft(XX, axis=0)*XX.shape[0])
 
     return x_psf, P
-

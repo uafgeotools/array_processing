@@ -14,7 +14,8 @@ Least squares and array uncertainty:
 
 Szuberla, C. A. L., & Olson, J. V. (2004). Uncertainties associated with
 parameter estimation in atmospheric infrasound arrays. J. Acoust. Soc. Am.,
-115(1), 253–258. doi: https://doi.org/doi:10.1121/1.1635407
+115(1), 253–258. [https://doi.org/doi:10.1121/1.1635407](https://doi.org/doi:10.1121/1.1635407)
+
 
 Least-trimmed squares:
 
@@ -90,15 +91,16 @@ $ python
 >>> import array_processing
 ```
 Currently, documentation only exists in function docstrings. For a
-usage example, see [`example.py`](example.py).
+usage example, see
+[`example.py`](https://github.com/uafgeotools/array_processing/blob/master/example.py).
 
 Authors
 -------
 
 (_Alphabetical order by last name._)
 
-Jordan Bishop  
-David Fee  
-Curt Szuberla  
-Liam Toney  
+Jordan Bishop<br>
+David Fee<br>
+Curt Szuberla<br>
+Liam Toney<br>
 Andrew Winkelman
