@@ -30,7 +30,7 @@ st.taper(max_percentage=0.01)
 
 #%% Array processing and plotting using least squares
 
-from array_processing.algorithms.helpers import getrij, wlsqva_proc
+from array_processing.algorithms.helpers import getrij
 from array_processing.tools.plotting import array_plot
 from lts_array import ltsva
 
@@ -53,7 +53,8 @@ stdict_lts, t_lts, mdccm_lts, vel_lts, baz_lts, sig_tau_lts = ltsva(st, rij, WIN
                                                       WINOVER, ALPHA_LTS)
 
 fig1_lts, axs1_lts = array_plot(st, t_lts, mdccm_lts, vel_lts, baz_lts,
-                        ccmplot=True, mcthresh=0.6, sigma_tau=sig_tau_lts)
+                        ccmplot=True, mcthresh=0.6, sigma_tau=None,
+                        stdict=stdict_lts)
 
 #%% Array uncertainty
 
