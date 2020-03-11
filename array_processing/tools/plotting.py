@@ -261,7 +261,7 @@ def arraySigContourPlt(sigV, sigTh, vel, th, trace_v):
     ax1.yaxis.get_major_locator().base.set_params(nbins=6)
     ax1.set_rlabel_position(22.5)
     ax1.grid(True)
-    ax1.set_title('Trace Velocity Uncertainty,\nV=%.2f' % trace_v,
+    ax1.set_title('Trace Velocity\n Uncertainty [km/s]\n v=%.2f km/s' % trace_v,
                   va='bottom', pad=20)
 
     # Plot back-azimuth uncertainty.
@@ -272,7 +272,7 @@ def arraySigContourPlt(sigV, sigTh, vel, th, trace_v):
     ax2.yaxis.get_major_locator().base.set_params(nbins=6)
     ax2.set_rlabel_position(22.5)
     ax2.grid(True)
-    ax2.set_title('Back-Azimuth Uncertainty,\nV=%.2f' % trace_v,
+    ax2.set_title('Back-Azimuth\n Uncertainty [$^\circ$]\n v=%.2f km/s' % trace_v,
                   va='bottom', pad=20)
 
     # Adjust subplot spacing to prevent overlap.
