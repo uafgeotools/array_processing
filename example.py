@@ -2,6 +2,7 @@
 
 from waveform_collection import gather_waveforms
 from obspy.core import UTCDateTime
+import numpy as np
 
 # Data collection
 SOURCE = 'IRIS'
@@ -76,6 +77,7 @@ fig3 = arraySigContourPlt(sigV, sigTh, vel, th, trace_v=TRACE_VELOCITY)
 
 from array_processing.tools import beamForm
 
+data = np.array([tr.data for tr in st]).transpose()
 beam = beamForm(data, rij, st[0].stats.sampling_rate, 50)
 
 #%% Pure state filter
