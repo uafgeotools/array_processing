@@ -1,7 +1,5 @@
 import matplotlib.pyplot as plt
-from matplotlib import dates
 import numpy as np
-
 from copy import deepcopy
 from collections import Counter
 
@@ -144,9 +142,6 @@ def array_plot(st, t, mdccm, vel, baz, ccmplot=False,
         hc2.set_label('Number of Flagged Element Pairs')
 
     axs[splot].xaxis_date()
-    axs[splot].tick_params(axis='x', labelbottom='on')
-    axs[splot].fmt_xdata = dates.DateFormatter('%HH:%MM')
-    axs[splot].xaxis.set_major_formatter(dates.DateFormatter("%d-%H:%M"))
     axs[splot].set_xlabel('UTC Time')
 
     # Add the MdCCM colorbar.
