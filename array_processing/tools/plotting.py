@@ -13,25 +13,25 @@ def array_plot(st, t, mdccm, vel, baz, ccmplot=False,
 
     Args:
         st (:class:`~obspy.core.stream.Stream`): Filtered data. Assumes
-            response has been removed
-        t: Array processing time vector
-        mdccm: Array of median cross-correlation maxima
-        vel: Array of trace velocity estimates
-        baz: Array of back-azimuth estimates
+            response has been removed.
+        t: Array processing time vector.
+        mdccm: Array of median cross-correlation maxima.
+        vel: Array of trace velocity estimates.
+        baz: Array of back-azimuth estimates.
         ccmplot (bool): Toggle plotting the mean/median cross-correlation
-            maxima values on a separate subplot in addition to the color scale
+            maxima values on a separate subplot in addition to the color scale.
         mcthresh (float): Add a dashed line at this level in the ccmplot
-            subplot
+            subplot.
         sigma_tau: Array of :math:`\sigma_\tau` values. If provided, will plot
-            the values on a separate subplot
+            the values on a separate subplot.
         stdict (dict): Dropped station pairs from LTS processing. If provided, will plot
-            the dropped station pairs on a separate subplot
+            the dropped station pairs on a separate subplot.
 
     Returns:
         tuple: Tuple containing:
 
-        - **fig** (:class:`~matplotlib.figure.Figure`) – Figure handle
-        - **axs** (Array of :class:`~matplotlib.axes.Axes`) – Axis handles
+        - **fig** (:class:`~matplotlib.figure.Figure`) – Figure handle.
+        - **axs** (Array of :class:`~matplotlib.axes.Axes`) – Axis handles.
     """
 
     # Specify the colormap.
