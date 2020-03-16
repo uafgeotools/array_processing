@@ -1,7 +1,5 @@
 import matplotlib.pyplot as plt
-from matplotlib import dates
 import numpy as np
-
 from copy import deepcopy
 from collections import Counter
 
@@ -136,16 +134,13 @@ def array_plot(st, t, mdccm, vel, baz, ccmplot=False,
 
         # Add the horizontal colorbar for station pairs.
         p3 = axs[splot].get_position().get_points().flatten()
-        cbaxes2 = fig.add_axes([p3[0], 0.05, p3[2]-p3[0], 0.02])
+        p3 = axs[splot].get_position()
+        cbaxes2 = fig.add_axes([p3.x0, p3.y0-.08, p3.width, 0.02])
         hc2 = plt.colorbar(sc2, orientation="horizontal",
                            cax=cbaxes2, ax=axs[splot])
         hc2.set_label('Number of Flagged Element Pairs')
-        plt.subplots_adjust(right=0.87, hspace=0.12)
 
     axs[splot].xaxis_date()
-    axs[splot].tick_params(axis='x', labelbottom='on')
-    axs[splot].fmt_xdata = dates.DateFormatter('%HH:%MM')
-    axs[splot].xaxis.set_major_formatter(dates.DateFormatter("%d-%H:%M"))
     axs[splot].set_xlabel('UTC Time')
 
     # Add the MdCCM colorbar.
