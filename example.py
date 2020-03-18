@@ -42,20 +42,21 @@ rij = getrij(latlist, lonlist)
 
 #%% Array processing. ALPHA = 1.0: least squares processing.
 ALPHA = 1.0
-stdict, t, mdccm, vel, baz, sig_tau = ltsva(st, rij, WINLEN,
-                                                      WINOVER, ALPHA)
+vel, baz, t, mdccm, stdict, sig_tau = ltsva(st, rij, WINLEN, WINOVER, ALPHA)
 
-fig1, axs1 = array_plot(st, t, mdccm, vel, baz,
-                        ccmplot=True, mcthresh=0.6, sigma_tau=sig_tau)
+fig1, axs1 = array_plot(st, t, mdccm, vel, baz, ccmplot=True, mcthresh=0.6,
+                        sigma_tau=sig_tau)
 
 #%% Array processing. 0.5 <= ALPHA < 1.0: least trimmed squares processing.
 ALPHA_LTS = 0.75
-stdict_lts, t_lts, mdccm_lts, vel_lts, baz_lts, sig_tau_lts = ltsva(st, rij, WINLEN,
-                                                      WINOVER, ALPHA_LTS)
+vel_lts, baz_lts, t_lts, mdccm_lts, stdict_lts, sig_tau_lts = ltsva(st, rij,
+                                                                    WINLEN,
+                                                                    WINOVER,
+                                                                    ALPHA_LTS)
 
 fig1_lts, axs1_lts = array_plot(st, t_lts, mdccm_lts, vel_lts, baz_lts,
-                        ccmplot=True, mcthresh=0.6, sigma_tau=None,
-                        stdict=stdict_lts)
+                                ccmplot=True, mcthresh=0.6, sigma_tau=None,
+                                stdict=stdict_lts)
 
 #%% Array uncertainty
 
