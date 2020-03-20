@@ -25,7 +25,8 @@ master_doc = 'index'
 
 autodoc_mock_imports = ['numpy',
                         'obspy',
-                        'scipy'
+                        'scipy',
+                        'matplotlib'
                         ]
 
 apidoc_module_dir = '../array_processing'
