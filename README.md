@@ -1,6 +1,8 @@
 array_processing
 ================
 
+[![](https://readthedocs.org/projects/uaf-array-processing/badge/?version=master)](https://uaf-array-processing.readthedocs.io/)
+
 Various array processing tools for infrasound and seismic data. By default uses
 least-squares to determine the trace velocity and back-azimuth of a plane wave
 crossing an array in sliding time windows. More advanced processing (such as
@@ -27,11 +29,10 @@ processing with robust estimators, Geophys. J. Int., Vol(num) p. ###-### doi: [h
 Installation
 ------------
 
-It is recommended to install this package into a new or pre-existing
-environment, such as that provided by
-[conda](https://docs.conda.io/projects/conda/en/latest/index.html).
-(Ensure that the environment contains all of
-the packages listed in the [Dependencies](#dependencies) section.)
+We recommend that you install this package into a new or pre-existing
+[conda](https://docs.conda.io/projects/conda/en/latest/index.html) environment.
+(Ensure that the environment contains all of the packages listed in the
+[Dependencies](#dependencies) section.)
 
 To create a new conda environment for use with this and other _uafgeotools_
 packages, execute the following terminal command:
@@ -40,7 +41,6 @@ $ conda create --name uafinfra --channel conda-forge obspy
 ```
 This creates a new environment called `uafinfra` with ObsPy and its dependencies
 installed.
-
 
 Install the required packages from Github. Execute the following terminal commands to install _waveform_collection_:
 ```
@@ -84,15 +84,15 @@ Python packages:
 Usage
 -----
 
-Import the package like any other python package, ensuring the correct environment
+Import the package like any other Python package, ensuring the correct environment
 is active. For example,
 ```
 $ conda activate uafinfra
 $ python
 >>> import array_processing
 ```
-Currently, documentation only exists in function docstrings. For a
-usage example, see
+Documentation is available online
+[here](https://uaf-array-processing.readthedocs.io/). For a usage example, see
 [`example.py`](https://github.com/uafgeotools/array_processing/blob/master/example.py).
 
 Authors
