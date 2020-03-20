@@ -23,7 +23,7 @@ napoleon_numpy_docstring = False
 
 master_doc = 'index'
 
-autodoc_mock_imports = []
+autodoc_mock_imports = ['numpy']
 
 apidoc_module_dir = '../array_processing'
 
