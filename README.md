@@ -8,7 +8,8 @@ least-squares to determine the trace velocity and back-azimuth of a plane wave
 crossing an array in sliding time windows. More advanced processing (such as
 least-trimmed squares) is easily integrated. Also provides tools to characterize
 the array response, uncertainty, source-location of a spherical wave crossing
-the array, etc. See docstrings and
+the array, etc. See
+[documentation](https://uaf-array-processing.readthedocs.io/) and
 [`example.py`](https://github.com/uafgeotools/array_processing/blob/master/example.py)
 for more info.
 
@@ -18,13 +19,14 @@ Least squares and array uncertainty:
 
 Szuberla, C. A. L., & Olson, J. V. (2004). Uncertainties associated with
 parameter estimation in atmospheric infrasound arrays. J. Acoust. Soc. Am.,
-115(1), 253–258. [https://doi.org/doi:10.1121/1.1635407](https://doi.org/doi:10.1121/1.1635407)
-
+115(1), 253–258.
+[https://doi.org/doi:10.1121/1.1635407](https://doi.org/doi:10.1121/1.1635407)
 
 Least-trimmed squares:
 
 Bishop, J.W., Fee, D., & Szuberla, C. A. L., (2020). Improved infrasound array
-processing with robust estimators, Geophys. J. Int., Vol(num) p. ###-### doi: [https://doi.org/10.1093/gji/ggaa110](https://doi.org/10.1093/gji/ggaa110).
+processing with robust estimators, Geophys. J. Int., Vol(num) p. ###-###.
+[https://doi.org/10.1093/gji/ggaa110](https://doi.org/10.1093/gji/ggaa110)
 
 Installation
 ------------
@@ -42,7 +44,8 @@ $ conda create --name uafinfra --channel conda-forge obspy
 This creates a new environment called `uafinfra` with ObsPy and its dependencies
 installed.
 
-Install the required packages from Github. Execute the following terminal commands to install _waveform_collection_:
+Install the required packages from Github. Execute the following terminal
+commands to install _waveform_collection_:
 ```
 $ conda activate uafinfra
 $ git clone https://github.com/uafgeotools/waveform_collection.git
@@ -84,8 +87,8 @@ Python packages:
 Usage
 -----
 
-Import the package like any other Python package, ensuring the correct environment
-is active. For example,
+Import the package like any other Python package, ensuring the correct
+environment is active. For example,
 ```
 $ conda activate uafinfra
 $ python
