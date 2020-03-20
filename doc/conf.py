@@ -24,7 +24,8 @@ napoleon_numpy_docstring = False
 master_doc = 'index'
 
 autodoc_mock_imports = ['numpy',
-                        'obspy'
+                        'obspy',
+                        'scipy'
                         ]
 
 apidoc_module_dir = '../array_processing'
