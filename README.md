@@ -15,17 +15,17 @@ for more info.
 
 **General References and Suggested Citations**
 
-Least squares and array uncertainty:
+_Least squares and array uncertainty:_
 
 Szuberla, C. A. L., & Olson, J. V. (2004). Uncertainties associated with
-parameter estimation in atmospheric infrasound arrays. J. Acoust. Soc. Am.,
+parameter estimation in atmospheric infrasound arrays, J. Acoust. Soc. Am.,
 115(1), 253–258.
 [https://doi.org/doi:10.1121/1.1635407](https://doi.org/doi:10.1121/1.1635407)
 
-Least-trimmed squares:
+_Least-trimmed squares:_
 
-Bishop, J.W., Fee, D., & Szuberla, C. A. L., (2020). Improved infrasound array
-processing with robust estimators, Geophys. J. Int., Vol(num) p. ###-###.
+Bishop, J. W., Fee, D., & Szuberla, C. A. L. (2020). Improved infrasound array
+processing with robust estimators, Geophys. J. Int., vol(num), ###–###.
 [https://doi.org/10.1093/gji/ggaa110](https://doi.org/10.1093/gji/ggaa110)
 
 Installation
