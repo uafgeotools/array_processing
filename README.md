@@ -20,7 +20,7 @@ parameter estimation in atmospheric infrasound arrays. J. Acoust. Soc. Am.,
 Least-trimmed squares:
 
 Bishop, J.W., Fee, D., & Szuberla, C. A. L., (2020). Improved infrasound array
-processing with robust estimators, Geophys. J. Int., Vol(num) p. ###-### doi: https://doi.org/10.1093/gji/ggaa110.
+processing with robust estimators, Geophys. J. Int., Vol(num) p. ###-### doi: [https://doi.org/10.1093/gji/ggaa110](https://doi.org/10.1093/gji/ggaa110).
 
 Installation
 ------------
@@ -73,7 +73,6 @@ Dependencies
 _uafgeotools_ packages:
 
 * [_waveform_collection_](https://github.com/uafgeotools/waveform_collection)
-
 * [_lts_array_](https://github.com/uafgeotools/lts_array)
 
 Python packages:
