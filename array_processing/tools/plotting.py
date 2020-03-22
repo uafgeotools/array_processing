@@ -22,8 +22,9 @@ def array_plot(st, t, mdccm, vel, baz, ccmplot=False,
             subplot.
         sigma_tau: Array of :math:`\sigma_\tau` values. If provided, will plot
             the values on a separate subplot.
-        stdict (dict): Dropped station pairs from LTS processing. If provided, will plot
-            the dropped station pairs on a separate subplot.
+        stdict (dict): Dropped station pairs from
+            :func:`~lts_array.ltsva.ltsva`. If provided, will plot the dropped
+            station pairs on a separate subplot.
 
     Returns:
         tuple: Tuple containing:

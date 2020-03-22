@@ -42,5 +42,5 @@ intersphinx_mapping = {
     'numpy': ('https://docs.scipy.org/doc/numpy', None),
     'obspy': ('https://docs.obspy.org/', None),
     'matplotlib': ('https://matplotlib.org/', None),
-    'waveform_collection': ('https://uaf-waveform-collection.readthedocs.io/en/master/', None),
+    'lts_array': ('https://uaf-lts-array.readthedocs.io/en/latest/', None)
 }
