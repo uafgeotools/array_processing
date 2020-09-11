@@ -25,7 +25,7 @@ parameter estimation in atmospheric infrasound arrays, J. Acoust. Soc. Am.,
 _Least-trimmed squares:_
 
 Bishop, J. W., Fee, D., & Szuberla, C. A. L. (2020). Improved infrasound array
-processing with robust estimators, Geophys. J. Int., vol(num), ###–###.
+processing with robust estimators, Geophys. J. Int., 221 p. 2058-2074.
 [https://doi.org/10.1093/gji/ggaa110](https://doi.org/10.1093/gji/ggaa110)
 
 Installation
