@@ -1,0 +1,12 @@
+name: uafinfra
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - ipython
+  - obspy
+  - pip
+  - pip:
+    - git+https://github.com/uafgeotools/waveform_collection.git
+    - git+https://github.com/uafgeotools/lts_array.git
+    - -e .

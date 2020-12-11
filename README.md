@@ -31,46 +31,29 @@ processing with robust estimators, Geophys. J. Int., 221 p. 2058-2074.
 Installation
 ------------
 
-We recommend that you install this package into a new or pre-existing
+We recommend you install this package into a new
 [conda](https://docs.conda.io/projects/conda/en/latest/index.html) environment.
-(Ensure that the environment contains all of the packages listed in the
-[Dependencies](#dependencies) section.)
+(Please install [Anaconda](https://www.anaconda.com/products/individual) or
+[Miniconda](https://docs.conda.io/en/latest/miniconda.html) before proceeding.)
+The environment must contain all of the packages listed in the
+[Dependencies](#dependencies) section. For ease of installation, we've provided
+an
+[`environment.yml`](https://github.com/uafgeotools/array_processing/blob/master/environment.yml)
+file which specifies all of these dependencies as well as instructions for
+installing _array_processing_ itself. To install _array_processing_ in this
+manner, execute the following commands:
+```
+git clone https://github.com/uafgeotools/array_processing.git
+cd array_processing
+conda env create -f environment.yml
+```
+This creates a new conda environment named `uafinfra` and installs
+_array_processing_ and all of its dependencies there.
 
-To create a new conda environment for use with this and other _uafgeotools_
-packages, execute the following terminal command:
-```
-$ conda create --name uafinfra --channel conda-forge obspy
-```
-This creates a new environment called `uafinfra` with ObsPy and its dependencies
-installed.
-
-Install the required packages from Github. Execute the following terminal
-commands to install _waveform_collection_:
-```
-$ conda activate uafinfra
-$ git clone https://github.com/uafgeotools/waveform_collection.git
-$ cd waveform_collection
-$ pip install --editable .
-```
-The final command installs the package in "editable" mode, which enables the
-installed package to be updated with a `git pull` in the local repository. This
-install command only needs to be run once.
-
-Next, install _lts_array_ in a similar manner to _waveform_collection_.
-```
-$ cd ..
-$ git clone https://github.com/uafgeotools/lts_array.git
-$ cd lts_array
-$ pip install --editable .
-```
-
-Finally, install _array_processing_.
-```
-$ cd ..
-$ git clone https://github.com/uafgeotools/array_processing.git
-$ cd array_processing
-$ pip install --editable .
-```
+The final command above installs _array_processing_ in "editable" mode, which
+means that you can update it with a simple `git pull` in your local repository.
+We recommend you do this often, since this code is still under rapid
+development.
 
 Dependencies
 ------------
