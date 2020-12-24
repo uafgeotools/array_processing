@@ -55,6 +55,25 @@ means that you can update it with a simple `git pull` in your local repository.
 We recommend you do this often, since this code is still under rapid
 development.
 
+<details>
+<summary>
+For installation into a pre-existing conda environment, click here.
+</summary>
+<br>
+First ensure you have ObsPy installed (<code>conda install -c conda-forge
+obspy</code>) and then download and install the <em>uafgeotools</em>
+dependencies and this package with:
+<br>
+<br>
+
+```
+pip install git+https://github.com/uafgeotools/waveform_collection.git
+pip install git+https://github.com/uafgeotools/lts_array.git
+pip install git+https://github.com/uafgeotools/array_processing.git
+```
+(Note that this option does not produce a local clone of the repository.)
+</details>
+
 Dependencies
 ------------
 
