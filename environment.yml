@@ -3,6 +3,7 @@ channels:
   - conda-forge
   - defaults
 dependencies:
+  - fastkml
   - ipython
   - obspy
   - pip
