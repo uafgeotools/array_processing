@@ -1,6 +1,7 @@
 import numpy as np
 from scipy import optimize
 from scipy.special import gammainc
+from fastkml import kml
 
 
 def arraySig(rij, kmax, sigLevel, p=0.9, velLims=(0.27, 0.36), NgridV=100,
@@ -468,3 +469,28 @@ def quarticEqn(a, b, c, d):
                 x[k] = int(x[k])
 
     return x
+
+
+def read_kml(kml_file):
+    r"""Parse an array KML file into a list of element latitudes and longitudes.
+
+    KML file must contain a single folder containing the array element points.
+
+    Args:
+        kml_file (str): Full path to input KML file (extension ``.kml``)
+
+    Returns:
+        tuple: ``(latlist, lonlist)`` for input to :func:`~array_processing.algorithms.helpers.getrij`
+    """
+
+    # Read in KML file
+    k = kml.KML()
+    with open(kml_file, mode='rb') as f:
+        k.from_string(f.read())
+
+    # Extract coordinates
+    elements = list(list(list(k.features())[0].features())[0].features())
+    lonlist = [element.geometry.x for element in elements]
+    latlist = [element.geometry.y for element in elements]
+
+    return latlist, lonlist

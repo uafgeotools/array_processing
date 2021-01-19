@@ -60,8 +60,8 @@ development.
 For installation into a pre-existing conda environment, click here.
 </summary>
 <br>
-First ensure you have ObsPy installed (<code>conda install -c conda-forge
-obspy</code>) and then download and install the <em>uafgeotools</em>
+First ensure you have ObsPy and FastKML installed (<code>conda install -c conda-forge
+obspy fastkml</code>) and then download and install the <em>uafgeotools</em>
 dependencies and this package with:
 <br>
 <br>
@@ -84,7 +84,8 @@ _uafgeotools_ packages:
 
 Python packages:
 
-* [ObsPy](http://docs.obspy.org/)
+* [ObsPy](https://docs.obspy.org/)
+* [FastKML](https://fastkml.readthedocs.io/)
 
 Usage
 -----
