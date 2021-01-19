@@ -50,10 +50,7 @@ conda env create -f environment.yml
 This creates a new conda environment named `uafinfra` and installs
 _array_processing_ and all of its dependencies there.
 
-The final command above installs _array_processing_ in "editable" mode, which
-means that you can update it with a simple `git pull` in your local repository.
-We recommend you do this often, since this code is still under rapid
-development.
+The final command in the `environment.yml` file installs _array_processing_ in "editable" mode, which means that you can update it with a simple `git pull` in your local repository. We recommend you do this often, since this code is still under rapid development.
 
 <details>
 <summary>
@@ -100,6 +97,15 @@ $ python
 Documentation is available online
 [here](https://uaf-array-processing.readthedocs.io/). For a usage example, see
 [`example.py`](https://github.com/uafgeotools/array_processing/blob/master/example.py).
+
+Note: The `array_plot()` function does not allow both `sigma_tau` and dropped elements from least trimmed squares to be plotted.
+
+The `sigma_tau` variable is an indicator of nonplanar propagation across an array (using all elements), and least trimmed squares drops element pairs that appear "too far" from planar. In this way, having a large `sigma_tau` value and having consistently dropped element pairs (while not the same) suggest a departure from the plane wave model.
+
+`sigma_tau` is only calculated when ordinary least squares (`ALPHA=1.0`) is used. The ability to plot one or the other was intended as a safeguard against potentially conflicting processing assumptions. To maintain a consistent output data structure, the `sigma_tau` key returns a `np.nan` in the case that subset pairs are trimmed (0.5 <= ALPHA < 1.0).
+
+If `ALPHA = 1.0`, the dropped stations are not plotted since least trimmed squares is not used, and `sigma_tau` may be plotted if specified. If ALPHA < 1.0, then `sigma_tau` is not plotted or calculated.
+
 
 Authors
 -------
