@@ -105,7 +105,7 @@ Note: The `array_plot()` function does not allow both `sigma_tau` and dropped el
 
 The `sigma_tau` variable is an indicator of nonplanar propagation across an array (using all elements), and least trimmed squares drops element pairs that appear "too far" from planar. In this way, having a large `sigma_tau` value and having consistently dropped element pairs (while not the same) suggest a departure from the plane wave model.
 
-`sigma_tau` is only calculated when ordinary least squares (`ALPHA=1.0`) is used. The ability to plot one or the other was intended as a safeguard against potentially conflicting processing assumptions. To maintain a consistent output data structure, the `sigma_tau` key returns a `np.nan` in the case that subset pairs are trimmed (0.5 <= ALPHA < 1.0).
+`sigma_tau` is only calculated when ordinary least squares (`ALPHA=1.0`) is used. The ability to plot one or the other was intended as a safeguard against potentially conflicting processing assumptions. To maintain a consistent output data structure, the `sigma_tau` key returns a `np.nan` in the case that subset pairs are trimmed (0.5 <= `ALPHA` < 1.0).
 
 If `ALPHA = 1.0`, the dropped stations are not plotted since least trimmed squares is not used, and `sigma_tau` may be plotted if specified. If ALPHA < 1.0, then `sigma_tau` is not plotted or calculated.
 
