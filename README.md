@@ -50,7 +50,10 @@ conda env create -f environment.yml
 This creates a new conda environment named `uafinfra` and installs
 _array_processing_ and all of its dependencies there.
 
-The final command in the `environment.yml` file installs _array_processing_ in "editable" mode, which means that you can update it with a simple `git pull` in your local repository. We recommend you do this often, since this code is still under rapid development.
+The final line in the `environment.yml` file installs _array_processing_ in "editable" mode, which
+means that you can update it with a simple `git pull` in your local repository.
+We recommend you do this often, since this code is still under rapid
+development.
 
 <details>
 <summary>
