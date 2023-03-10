@@ -3,6 +3,7 @@ channels:
   - conda-forge
   - defaults
 dependencies:
+  - python<3.11  # Temporary fix (see https://github.com/numba/numba/issues/8304)
   - fastkml
   - ipython
   - obspy
