@@ -398,10 +398,10 @@ def quadraticEqn(a, b, c):
         # note np.sqrt(-1) = nan, so force complex argument
         if b:
             # std. sub-branch
-            q = -0.5*(b + np.sign(b) * np.sqrt(np.complex(b * b - 4 * a * c)))
+            q = -0.5*(b + np.sign(b) * np.sqrt(complex(b * b - 4 * a * c)))
         else:
             # b = 0 sub-branch
-            q = -np.sqrt(np.complex(-a * c))
+            q = -np.sqrt(complex(-a * c))
     # complex coefficient branch
     else:
         if np.real(np.conj(b) * np.sqrt(b * b - 4 * a * c)) >= 0:
