@@ -27,28 +27,39 @@ def array_thresh(mcthresh, az_volc, az_diff, mdccm, az, vel):
     # Use numpy to find where thresholds are exceeded
     mc_good = np.where(mdccm > mcthresh)[0]
     az_good = np.where((az >= az_volc - az_diff) & (az <= az_volc + az_diff))[0]
-    vel_good = np.where((vel >= .25) & (vel <= .45))[0]
+    vel_good = np.where((vel >= 0.25) & (vel <= 0.45))[0]
     igood = reduce(np.intersect1d, (mc_good, az_good, vel_good))
 
     # Find find number of consecutive values exceeded.
     ranges = []
     nconsec = []
-    for k, g in groupby(enumerate(igood), lambda x: x[0]-x[1]):
+    for k, g in groupby(enumerate(igood), lambda x: x[0] - x[1]):
         group = list(map(itemgetter(1), g))
         ranges.append((group[0], group[-1]))
-        nconsec.append(group[-1]-group[0]+1)
+        nconsec.append(group[-1] - group[0] + 1)
 
     if len(nconsec) > 0:
         consecmax = max(nconsec)
     else:
         consecmax = 0
-    print('%d above trheshold, %d consecutive\n' % (len(igood), consecmax))
+    print("%d above trheshold, %d consecutive\n" % (len(igood), consecmax))
 
     return igood
 
 
-def beamForm(data, rij, Hz, azPhi, vel=0.340, r=None, wgt=None, refTrace=None,
-             M=None, Moffset=None):
+def beamForm(
+    data,
+    rij,
+    Hz,
+    azPhi,
+    vel=0.340,
+    r=None,
+    wgt=None,
+    refTrace=None,
+    M=None,
+    Moffset=None,
+    minimizeRMS=False,
+):
     r"""
     Form a "best beam" from the traces of an array.
 
@@ -101,24 +112,23 @@ def beamForm(data, rij, Hz, azPhi, vel=0.340, r=None, wgt=None, refTrace=None,
     else:
         if len(wgt) != nTraces:
             # catch dimension mismatch between tau & wgt
-            raise IndexError('len(wgt) != ' + str(nTraces))
-    wgt = np.array(wgt)    # require array form here for later operations
+            raise IndexError("len(wgt) != " + str(nTraces))
+    wgt = np.array(wgt)  # require array form here for later operations
     # default refTrace is first non-zero wgt
     if refTrace is None:
-        refTrace = np.min(np.where(wgt != 0)) # requires array wgt
+        refTrace = np.min(np.where(wgt != 0))  # requires array wgt
     # default Moffset is zero for all traces
     if Moffset is None:
         Moffset = [0 for i in range(nTraces)]
     else:
         if len(Moffset) != nTraces:
             # catch dimension mismatch between tau & Moffset
-            raise IndexError('len(Moffset) != ' + str(nTraces))
+            raise IndexError("len(Moffset) != " + str(nTraces))
     # -- end default parsing & error checking -------------------------------
     # planar (far-field) or spherical (near-field) arrival?
     if r is None:
         tau = tauCalcPW(vel, azPhi, rij)
     else:
-
 
         # need to unpack & repack azPhi with care
         if np.isscalar(azPhi):
@@ -129,8 +139,12 @@ def beamForm(data, rij, Hz, azPhi, vel=0.340, r=None, wgt=None, refTrace=None,
     beam_delays = phaseAlignIdx(tau, Hz, wgt, refTrace)
     # apply shifts, resulting in a zero-padded array
     beamMatrix = phaseAlignData(data, beam_delays, wgt, refTrace, M, Moffset)
+    # if minimizing RMS between beam and constituent traces
+    if minimizeRMS:
+        # return beam with traces shifted to minimize RMS error
+        return alignTracesMinRMS(beamMatrix, wgt)
     # linear algrebra to perform sum & then normalize by weights
-    return beamMatrix@wgt / wgt.sum()
+    return beamMatrix @ wgt / wgt.sum()
 
 
 def phaseAlignData(data, delays, wgt, refTrace, M, Moffset, plotFlag=False):
@@ -185,30 +199,34 @@ def phaseAlignData(data, delays, wgt, refTrace, M, Moffset, plotFlag=False):
     # embed shifted traces in array
     for k in range(nTraces):
         if wgt[k]:
-            data_align[delays[k]:delays[k]+m, k] = data[:, k] * wgt[k]
+            data_align[delays[k] : delays[k] + m, k] = data[:, k] * wgt[k]
     # truncate|| pad data_align if M >< m, centered on refTrace
     mp = data_align.shape[0]  # new value for m
     if M is not None and M is not mp:
-        alignBounds = [delays[refTrace] + m//2 - M//2,
-                       delays[refTrace] + m//2 + M//2]
+        alignBounds = [
+            delays[refTrace] + m // 2 - M // 2,
+            delays[refTrace] + m // 2 + M // 2,
+        ]
         # trap round-off errors and force (M, nTraces) data_align
-        if alignBounds[1]-alignBounds[0] != M:
+        if alignBounds[1] - alignBounds[0] != M:
             alignBounds[1] += 1
-            if not (alignBounds[1]-alignBounds[0])%2:
+            if not (alignBounds[1] - alignBounds[0]) % 2:
                 alignBounds[0] -= 1
         #  -- LHS (graphically, but actually topside in array-land!)
         if alignBounds[0] < 0:
             # pad LHS of traces w zeros or np.nans
-            data_align = np.vstack((np.zeros((-alignBounds[0], nTraces)) * nanOrOne,
-                                    data_align))
+            data_align = np.vstack(
+                (np.zeros((-alignBounds[0], nTraces)) * nanOrOne, data_align)
+            )
         elif alignBounds[0] > 0:
-            data_align = data_align[alignBounds[0]:]
+            data_align = data_align[alignBounds[0] :]
         #  -- RHS (graphically, but actually bottom in array-land!)
         if alignBounds[1] > mp:
             # pad RHS of traces w zeros or np.nans
 
-            data_align = np.vstack((data_align, np.zeros((alignBounds[1] - mp,
-                                                          nTraces)) * nanOrOne))
+            data_align = np.vstack(
+                (data_align, np.zeros((alignBounds[1] - mp, nTraces)) * nanOrOne)
+            )
         elif alignBounds[1] < mp:
             data_align = data_align[:M]
     return data_align
@@ -240,11 +258,13 @@ def phaseAlignIdx(tau, Hz, wgt, refTrace):
     nTraces = int(1 + np.sqrt(1 + 8 * len(tau))) // 2
     # calculate delays (samples) relative to refTrace for each trace
     #   -- first pass grabs delays starting with refTrace as i in ij
-    delayIdx = (nTraces*refTrace - refTrace*(refTrace+1)//2,
-                nTraces*(refTrace+1) - (refTrace+1)*(refTrace+2)//2)
+    delayIdx = (
+        nTraces * refTrace - refTrace * (refTrace + 1) // 2,
+        nTraces * (refTrace + 1) - (refTrace + 1) * (refTrace + 2) // 2,
+    )
     delays = np.hstack((0, (tau[range(delayIdx[0], delayIdx[1])] * Hz))).astype(int)
     # the std. rij list comprehension for unique inter-trace pairs
-    tau_ij = [(i, j) for i in range(nTraces) for j in range(i+1, nTraces)]
+    tau_ij = [(i, j) for i in range(nTraces) for j in range(i + 1, nTraces)]
     #  -- second pass grabs delays with refTrace as j in ij
     preRefTau_idx = [k for k in range(len(tau)) if tau_ij[k][1] == refTrace]
     delays = np.hstack((-tau[preRefTau_idx] * Hz, delays)).astype(int)
@@ -276,8 +296,7 @@ def tauCalcPW(vel, azPhi, rij):
     dim, nTraces = rij.shape
     if dim == 2:
         rij = np.vstack((rij, np.zeros((1, nTraces))))
-    idx = [(i, j) for i in range(rij.shape[1]-1)
-           for j in range(i+1, rij.shape[1])]
+    idx = [(i, j) for i in range(rij.shape[1] - 1) for j in range(i + 1, rij.shape[1])]
     X = rij[:, [i[0] for i in idx]] - rij[:, [j[1] for j in idx]]
     if np.isscalar(azPhi):
         phi = 0
@@ -289,7 +308,7 @@ def tauCalcPW(vel, azPhi, rij):
     s = np.array([np.cos(az), np.sin(az), np.sin(phi)])
     s[:-1] *= np.cos(phi)
 
-    return X.T@(s/vel)
+    return X.T @ (s / vel)
 
 
 def tauCalcSW(vel, rAzPhi, rij):
@@ -318,16 +337,17 @@ def tauCalcSW(vel, rAzPhi, rij):
         phi = rAzPhi[2] / 180 * np.pi
     else:
         phi = 0
-    idx = [(i, j) for i in range(rij.shape[1]-1)
-           for j in range(i+1, rij.shape[1])]
+    idx = [(i, j) for i in range(rij.shape[1] - 1) for j in range(i + 1, rij.shape[1])]
     # aw, this is so convolutedly elegant that it must be saved in a
     # comment for posterity!, but the line below it is "simpler"
     # az = -( (rAzPhi[1]/180*pi - 2*pi)%(2*pi) - pi/2  )%(2*pi)
     az = np.pi * (-rAzPhi[1] / 180 + 0.5)
     source = rAzPhi[0] * np.array([np.cos(az), np.sin(az), np.sin(phi)])
     source[:-1] *= np.cos(phi)
-    tau2sensor = np.linalg.norm(rij - np.tile(source, nTraces).reshape(nTraces, 3).T,
-                                2, axis=0)/vel
+    tau2sensor = (
+        np.linalg.norm(rij - np.tile(source, nTraces).reshape(nTraces, 3).T, 2, axis=0)
+        / vel
+    )
 
     return tau2sensor[[j[1] for j in idx]] - tau2sensor[[i[0] for i in idx]]
 
@@ -359,10 +379,11 @@ def tauCalcSWxy(vel, xy, rij):
     else:
         xy0 = []
     source = np.hstack((xy, xy0))
-    idx = [(i, j) for i in range(rij.shape[1]-1)
-           for j in range(i+1, rij.shape[1])]
-    tau2sensor = np.linalg.norm(rij - np.tile(source, nTraces).reshape(nTraces, 3).T,
-                                2, axis=0)/vel
+    idx = [(i, j) for i in range(rij.shape[1] - 1) for j in range(i + 1, rij.shape[1])]
+    tau2sensor = (
+        np.linalg.norm(rij - np.tile(source, nTraces).reshape(nTraces, 3).T, 2, axis=0)
+        / vel
+    )
 
     return tau2sensor[[j[1] for j in idx]] - tau2sensor[[i[0] for i in idx]]
 
@@ -398,36 +419,37 @@ def randc(N, beta=0.0):
         c0 = np.inf
     # catch the case of a 1D array in python, so dimensions act like a matrix
     if len(N) == 1:
-        M = (N[0], 1) # use M[1] any time # of columns is called for
+        M = (N[0], 1)  # use M[1] any time # of columns is called for
     else:
         M = N
     # phase array with size (# of unique complex Fourier components,
     # columns of original data)
-    n = int(np.floor((N[0] - 1) / 2)) # works for odd/even cases
+    n = int(np.floor((N[0] - 1) / 2))  # works for odd/even cases
     cPhase = np.random.random_sample((n, M[1])) * 2 * np.pi
     # Nyquist placeholders
-    if N[0]%2:
+    if N[0] % 2:
         # odd case: Nyquist is 1/2 freq step between highest components
         # so it is empty
         cFiller = np.empty((0,))
         pFiller = np.empty((0, M[1]))
     else:
         # even case: we have a Nyquist component
-        cFiller = N[0]/2
+        cFiller = N[0] / 2
         pFiller = np.zeros((1, M[1]))
     # noise amplitudes are just indices (unit-offset!!) to be normalized
     # later, phases are arranged as Fourier conjugates
     r = np.hstack((c0, np.arange(1, n + 1), cFiller, np.arange(n, 0, -1)))
-    phasor = np.exp(np.vstack((np.zeros((1, M[1])), 1j * cPhase, pFiller,
-                               -1j * np.flipud(cPhase))))
+    phasor = np.exp(
+        np.vstack((np.zeros((1, M[1])), 1j * cPhase, pFiller, -1j * np.flipud(cPhase)))
+    )
     # this is like my cols.m function in MATLAB
     r = np.tile(r, M[1]).reshape(M[1], N[0]).T ** (-beta / 2)
     # catch beta = 0 case here to ensure zero DC component
     if not beta:
         r[0] = 0
     # inverse transform to get time series as columns, ensuring real output
-    X = r*phasor
-    r = np.real(np.fft.ifft(X, axis=0)*X.shape[0])
+    X = r * phasor
+    r = np.real(np.fft.ifft(X, axis=0) * X.shape[0])
 
     # renormalize r such that mean = 0 & std = 1 (MATLAB dof default used)
     # and return it in its original shape (i.e., a 1D vector, if req'd)
@@ -513,9 +535,11 @@ def psf(x, p=2.0, w=3, n=3.0, window=None):
         for k in range(n):
             # f@#$ing MATLAB treats odd/even differently with mode='full'
             # but the behavior below now matches conv2 exactly
-            S = convolve2d(S, window(w).reshape(-1, 1),
-                           mode='full')[w//2:-w//2+1, :]
+            S = convolve2d(S, window(w).reshape(-1, 1), mode="full")[
+                w // 2 : -w // 2 + 1, :
+            ]
         return S
+
     def triang(N):
         # for historical reasons, the default window shape
         return np.bartlett(N + 2)[1:-1]
@@ -525,8 +549,8 @@ def psf(x, p=2.0, w=3, n=3.0, window=None):
     # Fourier transform of data matrix by time series columns, retain only
     # the diagonal & above (unique spectral components)
     Nx = x.shape
-    X = np.fft.fft(x, axis=0)/Nx[0]
-    X = X[:N//2+1, :]
+    X = np.fft.fft(x, axis=0) / Nx[0]
+    X = X[: N // 2 + 1, :]
     # form spectral matrix stack in reduced vector form (**significant**
     # speed improvement due to memory problem swith 3D tensor format -- what
     # was too slow in 1995 is still too slow in 2017!)
@@ -548,20 +572,20 @@ def psf(x, p=2.0, w=3, n=3.0, window=None):
     #  -- diagonal elements
     didx = [i for i in range(len(Sidx)) if Sidx[i][0] == Sidx[i][1]]
     #  -- traceS**2 of each flapjack (really a vector here)
-    trS = sum(S[:, didx].real.T)**2
+    trS = sum(S[:, didx].real.T) ** 2
     #  -- trace of each flapjack (ditto, vector), here we recognize that
     #     trace(S@S.T) is just sum square magnitudes of all the
     #     non-redundant components of S, doubling squares of the non-diagonal
     #     elements
-    S = (S*(S.conj())*2).real
+    S = (S * (S.conj()) * 2).real
     S[:, didx] /= 2
     trS2 = sum(S.T)
     # estimate samson-esque polarization estimate (if d==2, same as fowler)
-    P = (d*trS2 - trS)/((d-1)*trS)
+    P = (d * trS2 - trS) / ((d - 1) * trS)
     # a litle trick here to handle odd/even number of samples and zero-out
     # both the DC & Nyquist (they're both complex-contaminated due to Ssmooth)
     P[0] = 0
-    if N%2:
+    if N % 2:
         # odd case: Nyquist is 1/2 freq step between highest components
         fudgeIdx = 0
     else:
@@ -569,10 +593,89 @@ def psf(x, p=2.0, w=3, n=3.0, window=None):
         fudgeIdx = 1
         P[-1] = 0
     # apply P as contrast agent to frequency series
-    X *= np.tile(P ** p, d).reshape(X.shape[::-1]).T
+    X *= np.tile(P**p, d).reshape(X.shape[::-1]).T
     # inverse transform X and ensure real output
-    XX = np.vstack((X[list(range(N // 2 + 1))],
-                    X[list(range(N//2-fudgeIdx, 0, -1))].conj()))
-    x_psf = np.real(np.fft.ifft(XX, axis=0)*XX.shape[0])
+    XX = np.vstack(
+        (X[list(range(N // 2 + 1))], X[list(range(N // 2 - fudgeIdx, 0, -1))].conj())
+    )
+    x_psf = np.real(np.fft.ifft(XX, axis=0) * XX.shape[0])
 
     return x_psf, P
+
+
+def alignTracesMinRMS(beamMatrix, wgt, lagMag=10):
+    r"""
+    Align traces to minimize RMS error with the beam. This function aligns traces with the estimated beam to minimize the root mean square (RMS) error between the beam and each trace. The traces are shifted by a number of samples within a specified range to minimize the RMS error. The function returns the beam formed from the adjusted traces.
+
+    Args:
+        beamMatrix: ``(m, n)`` array; time series with ``m`` samples from ``n`` traces as columns
+        wgt: Vector of relative weights of length ``n`` (0 == exclude trace)
+        lagMag (int): Maximum lag value for trace adjustment
+
+    Returns:
+        ``(m, )`` array of summed and weighted shifted traces to form a best beam
+    """
+
+    # calculate beam
+    beam = beamMatrix @ wgt / wgt.sum()
+    # compute RMS error between the beam and each trace
+    rmsErrors = np.array(
+        [
+            (
+                np.sqrt(np.nanmean((beam - beamMatrix[:, i]) ** 2))
+                if not np.isnan(beamMatrix[:, i]).any()
+                else np.nan
+            )
+            for i in range(beamMatrix.shape[1])
+        ]
+    )
+    # sort the indices of traces based on RMS errors in ascending order (samllest error first)
+    sortedIndices = np.argsort(rmsErrors)
+    sortedBeamMatrix = beamMatrix[:, sortedIndices]
+    # set lag values for adjusted RMS calculation
+    lags = np.arange(-lagMag, lagMag + 1)
+    bestLags = []
+
+    def shiftTrace(trace, lag):
+        """Shift array without wrap-around, filling shifted-in positions with NaN"""
+        results = np.empty_like(trace)
+        if lag > 0:
+            results[:lag] = np.nan
+            results[lag:] = trace[:-lag]
+        elif lag < 0:
+            results[lag:] = np.nan
+            results[:lag] = trace[-lag:]
+        else:
+            results = trace.copy()
+        return results
+
+    # adjust traces based on minimizing RMS error with the beam
+    for i in range(sortedBeamMatrix.shape[1]):
+        trace = sortedBeamMatrix[:, i]
+        # compute rms errors at different lags by shifting the traces
+        rmsErrorsLags = []
+        for lag in lags:
+            shiftedTrace = shiftTrace(trace, lag)
+            if np.isnan(shiftedTrace).all():
+                rmsError = np.nan
+            else:
+                rmsError = np.sqrt(np.nanmean((beam - shiftedTrace) ** 2))
+            rmsErrorsLags.append(rmsError)
+        rmsErrorsLags = np.array(rmsErrorsLags)
+        minRmsError = np.nanmin(rmsErrorsLags)
+        bestLagValue = lags[np.nanargmin(rmsErrorsLags)]
+        bestLags.append(bestLagValue)
+
+    # shift traces based on best lag values
+    numSamples = beamMatrix.shape[0]
+    rmsShiftedBeamMatrix = np.empty((numSamples, sortedBeamMatrix.shape[1]))
+    for i in range(sortedBeamMatrix.shape[1]):
+        trace = sortedBeamMatrix[:, i]
+        lag = bestLags[i]
+        shiftedTrace = shiftTrace(trace, lag)
+        rmsShiftedBeamMatrix[:, i] = shiftedTrace
+
+    # calculate beam from adjusted traces
+    beam = np.nanmean(rmsShiftedBeamMatrix, axis=1)
+
+    return beam
