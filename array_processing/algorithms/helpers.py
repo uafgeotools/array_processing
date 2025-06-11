@@ -72,7 +72,7 @@ def compass2rij(distances, azimuths):
     if distances.size != azimuths.size:
         raise ValueError('There must be the same number of distances and azimuths')
     assert (distances >= 0).all(), 'Distances cannot be negative'
-    assert ((azimuths >= 0) & (azimuths < 360)).all(), 'Azimuths must be 0–360°'
+    assert ((azimuths >= 0) & (azimuths < 360)).all(), 'Azimuths must be 0–359°'
 
     # Convert distances and azimuths to Cartesian coordinates in units of km
     x = distances * np.sin(np.deg2rad(azimuths)) / _M_PER_KM
