@@ -484,12 +484,10 @@ def read_kml(kml_file):
     """
 
     # Read in KML file
-    k = kml.KML()
-    with open(kml_file, mode='rb') as f:
-        k.from_string(f.read())
+    k = kml.KML.parse(kml_file, validate=False)
 
     # Extract coordinates
-    elements = list(list(list(k.features())[0].features())[0].features())
+    elements = k.features[0].features[0].features
     lonlist = [element.geometry.x for element in elements]
     latlist = [element.geometry.y for element in elements]
 
