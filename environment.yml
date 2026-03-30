@@ -1,10 +1,9 @@
 name: uafinfra
 channels:
   - conda-forge
-  - defaults
 dependencies:
-  - python<3.11  # Temporary fix (see https://github.com/numba/numba/issues/8304)
-  - fastkml<1
+  - python<3.11  # This is required to avoid "setting array with sequence error"
+  - fastkml
   - ipython
   - obspy
   - numba
