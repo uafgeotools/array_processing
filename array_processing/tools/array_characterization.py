@@ -84,7 +84,7 @@ def arraySig(rij, kmax, sigLevel, p=0.9, velLims=(0.27, 0.36), NgridV=100,
             # fix up angle calcs
             sigTh[n, m] = np.abs(np.diff(
                 (np.arctan2(eVec[2:, 1], eVec[2:, 0]) * 180 / np.pi - 360)
-                % 360))
+                % 360)).item()
             if sigTh[n, m] > 180:
                 sigTh[n, m] = np.abs(sigTh[n, m] - 360)
             sigV[n, m] = np.abs(np.diff(1 / eExtrm[:2]))
