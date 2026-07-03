@@ -87,7 +87,7 @@ def arraySig(rij, kmax, sigLevel, p=0.9, velLims=(0.27, 0.36), NgridV=100,
                 % 360)).item()
             if sigTh[n, m] > 180:
                 sigTh[n, m] = np.abs(sigTh[n, m] - 360)
-            sigV[n, m] = np.abs(np.diff(1 / eExtrm[:2]))
+            sigV[n, m] = np.abs(np.diff(1 / eExtrm[:2])).item()
 
     # prepare impulse response
     impResp, kvec = impulseResp(dij, kmax, NgridK)
