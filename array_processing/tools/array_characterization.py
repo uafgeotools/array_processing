@@ -84,10 +84,10 @@ def arraySig(rij, kmax, sigLevel, p=0.9, velLims=(0.27, 0.36), NgridV=100,
             # fix up angle calcs
             sigTh[n, m] = np.abs(np.diff(
                 (np.arctan2(eVec[2:, 1], eVec[2:, 0]) * 180 / np.pi - 360)
-                % 360))
+                % 360)).item()
             if sigTh[n, m] > 180:
                 sigTh[n, m] = np.abs(sigTh[n, m] - 360)
-            sigV[n, m] = np.abs(np.diff(1 / eExtrm[:2]))
+            sigV[n, m] = np.abs(np.diff(1 / eExtrm[:2])).item()
 
     # prepare impulse response
     impResp, kvec = impulseResp(dij, kmax, NgridK)
@@ -484,12 +484,10 @@ def read_kml(kml_file):
     """
 
     # Read in KML file
-    k = kml.KML()
-    with open(kml_file, mode='rb') as f:
-        k.from_string(f.read())
+    k = kml.KML.parse(kml_file, validate=False)
 
     # Extract coordinates
-    elements = list(list(list(k.features())[0].features())[0].features())
+    elements = k.features[0].features[0].features
     lonlist = [element.geometry.x for element in elements]
     latlist = [element.geometry.y for element in elements]
 
